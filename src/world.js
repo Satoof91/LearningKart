@@ -433,7 +433,8 @@ export function makeBoostPad() {
   return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: PAD_TEX, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
 }
 let GLOW = null;
-export function glowTex() { if (!GLOW) GLOW = canvasTexture(128, 128, (g) => { const r = g.createRadialGradient(64, 64, 6, 64, 64, 62); r.addColorStop(0, 'rgba(255,250,200,1)'); r.addColorStop(0.4, 'rgba(255,220,90,.55)'); r.addColorStop(1, 'rgba(255,200,0,0)'); g.fillStyle = r; g.fillRect(0, 0, 128, 128); }); return GLOW; }
+// help halo: a ring with a hollow centre, drawn behind the bubble, so it never washes out the letter
+export function glowTex() { if (!GLOW) GLOW = canvasTexture(128, 128, (g) => { const r = g.createRadialGradient(64, 64, 30, 64, 64, 63); r.addColorStop(0, 'rgba(255,214,10,0)'); r.addColorStop(0.35, 'rgba(255,214,10,.95)'); r.addColorStop(0.6, 'rgba(255,190,0,.5)'); r.addColorStop(1, 'rgba(255,170,0,0)'); g.fillStyle = r; g.fillRect(0, 0, 128, 128); }); return GLOW; }
 
 // ---------- confetti ----------
 export class Confetti {
@@ -467,8 +468,9 @@ export class Confetti {
 // ---------- apple table for the number levels: n apples, each with its count bubble ----------
 export function makeAppleTable(n) {
   const g = new THREE.Group();
-  const cols = Math.max(1, n), rows = 1, sp = n > 5 ? 1.8 : 2.3, as = n > 5 ? 0.9 : 1.15;
-  const W = Math.max(cols * sp + 1.8, 6), D = rows * sp + 1.8, top = 1.9;
+  // more than 6 apples: two rows, so the whole count stays in view next to the card
+  const rows = n > 6 ? 2 : 1, cols = Math.max(1, Math.ceil(n / rows)), sp = n > 5 ? 1.9 : 2.3, as = n > 5 ? 0.9 : 1.15;
+  const W = Math.max(cols * sp + 1.8, 6), D = rows * sp * 1.25 + 1.8, top = 1.9;
   const b = new Batch(true);
   b.add(G.box, 0xc68b59, 0, top, 0, 0, 0, 0, W, 0.45, D);
   b.add(G.box, 0xfff3e0, 0, top + 0.24, 0, 0, 0, 0, W - 0.5, 0.05, D - 0.5);
@@ -484,11 +486,11 @@ export function makeAppleTable(n) {
   for (let i = 0; i < n; i++) {
     const r = Math.floor(i / cols), c = i % cols, inRow = Math.min(cols, n - r * cols);
     // count from right to left (Arabic reading order)
-    const x = ((inRow - 1) / 2 - c) * sp, z = rows === 1 ? 0 : (r === 0 ? sp / 2 : -sp / 2);
+    const x = ((inRow - 1) / 2 - c) * sp, z = rows === 1 ? 0 : (r === 0 ? sp * 0.62 : -sp * 0.62);
     const root = new THREE.Group(); root.position.set(x, top + 0.3 + as, z);
     const a = makeApple(); a.scale.setScalar(as); root.add(a);
     const mat = new THREE.SpriteMaterial({ map: bubbleTexture(arDigits(i + 1), 0xff922b) });
-    const tag = new THREE.Sprite(mat); tag.scale.set(1.45 * as / 1.15 + 0.2, 1.45 * as / 1.15 + 0.2, 1); tag.position.y = 2.1 * as / 1.15 + 0.1; root.add(tag);
+    const tag = new THREE.Sprite(mat); tag.scale.set(1.45 * as / 1.15 + 0.2, 1.45 * as / 1.15 + 0.2, 1); tag.position.y = 2.1 * as / 1.15 + 0.1 + (r > 0 ? 1.5 : 0); root.add(tag); // back-row tags float higher so no number hides another
     root.visible = false; root.scale.setScalar(0.01);
     g.add(root);
     apples.push({ root, apple: a, baseScale: 1, ph: i * 0.7 });

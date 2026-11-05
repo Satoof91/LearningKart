@@ -18,10 +18,15 @@ export const Sound = {
     } catch (e) { this.ctx = null; }
   },
   suspend() { try { if (this.ctx && this.ctx.state === 'running') this.ctx.suspend(); } catch (e) { /* ignore */ } },
-  resume() { try { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); } catch (e) { /* ignore */ } },
+  // also recovers iOS's 'interrupted' state (after a call / Siri)
+  resume() { try { if (this.ctx && this.ctx.state !== 'running' && this.ctx.state !== 'closed') this.ctx.resume().catch(() => {}); } catch (e) { /* ignore */ } },
   setSfx(on) { this.sfxOn = on; if (this.sfxBus) this.sfxBus.gain.value = on ? 1 : 0; },
   setMusic(on) { this.musicOn = on; this._musicLevel(); },
-  setDuck(on) { this.duck = on ? 0.3 : 1; this._musicLevel(); },
+  setDuck(on) {
+    this.duck = on ? 0.3 : 1; this._musicLevel();
+    // effects step back a little too while someone is speaking, so words stay clear
+    if (this.ctx && this.sfxOn) this.sfxBus.gain.setTargetAtTime(on ? 0.55 : 1, this.ctx.currentTime, 0.08);
+  },
   _musicLevel() { if (!this.ctx) return; this.musicBus.gain.setTargetAtTime(this.musicOn && this.musicPlaying ? 0.16 * this.duck : 0, this.ctx.currentTime, 0.15); },
 
   tone(freq, dur, { type = 'sine', vol = 0.15, at = 0, slide = 0, bus } = {}) {
@@ -44,7 +49,8 @@ export const Sound = {
   pop() { this.tone(500, 0.12, { type: 'sine', vol: 0.2, slide: 2.2 }); this.noiseHit(0.06, { vol: 0.12, freq: 2500 }); },
   collect(n = 0) { const base = [523, 587, 659, 784, 880, 988, 1047, 1175, 1319, 1397][n % 10]; [1, 1.25, 1.5, 2].forEach((m, i) => this.tone(base * m, 0.22, { type: 'triangle', vol: 0.12, at: i * 0.055 })); this.noiseHit(0.15, { vol: 0.05, freq: 7000, at: 0.05 }); },
   star() { this.tone(1568, 0.15, { type: 'sine', vol: 0.09 }); this.tone(2093, 0.22, { type: 'sine', vol: 0.08, at: 0.06 }); },
-  wrong() { this.tone(320, 0.35, { type: 'sine', vol: 0.18, slide: 0.45 }); this.tone(240, 0.3, { type: 'triangle', vol: 0.08, at: 0.08, slide: 0.6 }); },
+  // soft, neutral "boop-boop" (not a sad falling tone: a wrong pick is a chance to learn, not a failure)
+  wrong() { this.tone(440, 0.12, { type: 'sine', vol: 0.1 }); this.tone(523, 0.16, { type: 'sine', vol: 0.08, at: 0.11 }); },
   boost() { this.noiseHit(0.5, { vol: 0.22, freq: 900, q: 0.5 }); this.tone(220, 0.5, { type: 'sawtooth', vol: 0.05, slide: 3 }); },
   bump() { this.tone(110, 0.15, { type: 'triangle', vol: 0.15 }); },
   whoosh() { this.noiseHit(0.6, { vol: 0.15, freq: 1200, q: 0.4 }); },

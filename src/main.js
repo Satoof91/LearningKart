@@ -2,6 +2,14 @@
 import * as THREE from 'three';
 import { initPlatform, haptic, Tilt, setHaptics, isNative as isNativeApp } from './platform.js';
 import { LETTERS, NUMBERS, PRAISE, PRAISE_SHOW, LINES, distractorPool, arDigits } from './data.js';
+// How a letter level teaches (ages 3-6):
+//  - every pair: the right letter on one side, a different letter on the other; the first pairs use a
+//    clearly different shape, later pairs a look-alike that differs only by its dots
+//  - correct pick: the letter SOUND with its word («بَ، بَ، بَطَّة») or its name + praise
+//  - wrong pick: name the letter that was picked, then ask again for the right one («أَيْنَ حَرْفُ بَاء؟»)
+//  - from the 3rd letter on, the HUD hides the glyph: the child hears the name and has to find the shape (recall)
+//  - one "review pair" per level brings back an earlier letter the child found hard (spaced review)
+//  - help (glow, then the letter straight ahead) only appears after mistakes; stars count every miss
 import { makeAnimal } from './animals.js';
 import { buildTrack, buildZoo, makeHabitat, makeAppleTable, makeKart, makeArch, makeApple, makeStar, makeBoostPad, glowTex, blobTex, Confetti, FENCE, LANE } from './world.js';
 import { loadFonts, bubbleTexture, drawWord, FONT, roundRect } from './text.js';
@@ -75,9 +83,17 @@ addEventListener('keydown', e => {
   if (k === 'escape' && ['drive', 'intro', 'arrive'].includes(S.mode)) setPaused(!S.paused);
 });
 addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
-addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+const zonePtrs = [];
+function releaseTouch() {
+  // forget every finger: a lost pointerup (app switch with a finger down) must not leave a side "held"
+  for (const z of zonePtrs) z.clear();
+  touch.left = touch.right = false;
+  document.querySelectorAll('.zone.down').forEach(e => e.classList.remove('down'));
+  for (const k in keys) keys[k] = false;
+}
+addEventListener('blur', releaseTouch);
 for (const [id, side] of [['zl', 'left'], ['zr', 'right']]) {
-  const el = $(id); const ptrs = new Set();
+  const el = $(id); const ptrs = new Set(); zonePtrs.push(ptrs);
   const upd = () => { touch[side] = ptrs.size > 0; el.classList.toggle('down', touch[side]); };
   el.addEventListener('pointerdown', e => { e.preventDefault(); ptrs.add(e.pointerId); try { el.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ } upd(); });
   for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) el.addEventListener(ev, e => { ptrs.delete(e.pointerId); upd(); });
@@ -162,11 +178,12 @@ function startLevel(kind, index) {
   populateZoo(kind === 'letter' ? index : -1);
   S.u = T.L - 34; S.d = 0; S.vd = 0; S.speed = 0; S.boostT = 0; S.camH = T.heading(S.u);
   S.collected = 0; S.wrong = 0; S.coins = 0; S.spawned = 0; S.need = kind === 'letter' ? 5 : C.n;
-  S.nextU = S.u + 85; S.announced = new Set(); S.missStreak = 0; S.countQ = null;
+  S.nextU = S.u + 85; S.missStreak = 0; S.countQ = null;
+  S.misses = 0; S.assisted = 0; S.reviewDone = false; S.recentWrong = false; S.recall = false; S.lastPraise = -1;
+  S.lvl = (S.lvl || 0) + 1;
   // HUD
   const glyph = kind === 'letter' ? C.ch : C.digit;
-  $('tglyph').textContent = glyph;
-  $('tglyph').style.background = kind === 'letter' ? 'var(--pink)' : 'var(--org)';
+  setChip(glyph, kind === 'letter' ? 'var(--pink)' : 'var(--org)');
   const slots = $('slots'); slots.innerHTML = '';
   for (let i = 0; i < S.need; i++) { const d = document.createElement('div'); d.className = 'slot' + (kind === 'number' ? ' apple' : ''); slots.appendChild(d); }
   slots.style.display = S.need ? 'flex' : 'none';
@@ -177,41 +194,80 @@ function startLevel(kind, index) {
   $('introglyph').textContent = glyph;
   $('introglyph').style.color = kind === 'letter' ? 'var(--pink)' : 'var(--org)';
   $('introtext').textContent = kind === 'letter' ? `اجمع حرف ${C.ch}` : (C.n ? `اجمع ${glyph} تفاحات` : 'صفر = لا شيء');
+  // show the animal from the start: letter -> sound -> animal is the memory hook
+  const img = $('introimg');
+  if (kind === 'letter') { img.src = thumb(C.animal); img.classList.remove('hidden'); } else img.classList.add('hidden');
   $('intro').classList.remove('hidden', 'out');
   S.mode = 'intro'; S.modeT = 0; S.introDone = false;
   Sound.whoosh();
-  Voice.say(kind === 'letter' ? [C.name, LINES.letterIntro(C)] : [C.say, LINES.numberIntro(C)]).then(() => { S.introDone = true; });
+  sayIntro();
   syncKart(0);
 }
+function sayIntro() {
+  const C = cur(), lvl = S.lvl;
+  const lines = S.kind === 'letter' ? [C.name, LINES.sound(C), LINES.letterIntro(C)] : [C.say, LINES.numberIntro(C)];
+  // only this level's intro may end the intro (a stopped older promise must not skip the new one)
+  Voice.say(lines, { gap: 350 }).then(() => { if (S.lvl === lvl && !S.paused) S.introDone = true; });
+}
+// HUD target chip: the letter to find (or "؟" in recall rounds, where the child listens and finds the shape)
+function setChip(text, bg) {
+  $('tglyph').textContent = text;
+  if (bg) $('tglyph').style.background = bg;
+}
+function chipShowsTarget() {
+  const C = cur();
+  if (S.kind !== 'letter') return setChip(C.digit, 'var(--org)');
+  setChip(S.recall ? '؟' : C.ch, S.recall ? 'var(--purple)' : 'var(--pink)');
+}
+function pingChip() { $('target').classList.remove('ping'); void $('target').offsetWidth; $('target').classList.add('ping'); }
 
 // ---------- pickups ----------
 function addPickup(p) { scene.add(p.obj); S.pickups.push(p); return p; }
 function removePickup(p) { scene.remove(p.obj); if (p.mat) p.mat.dispose(); if (p.glowMat) p.glowMat.dispose(); }
-function bubble(u, d, text, isTarget, color) {
+// one shared shadow for every bubble (was a new geometry + material per bubble, never freed)
+let SHADOW_GEO = null, SHADOW_MAT = null;
+function bubble(u, d, L, isTarget, color) {
   const g = new THREE.Group();
   const pos = T.pos(u, d); g.position.copy(pos);
-  const mat = new THREE.SpriteMaterial({ map: bubbleTexture(text, color) });
-  const spr = new THREE.Sprite(mat); spr.scale.set(4.6, 4.6, 1); spr.position.y = 3; g.add(spr);
+  const mat = new THREE.SpriteMaterial({ map: bubbleTexture(L.ch, color) });
+  const spr = new THREE.Sprite(mat); spr.scale.set(4.6, 4.6, 1); spr.position.y = 3; spr.renderOrder = 2; g.add(spr);
   let glow = null, glowMat = null;
-  if (isTarget && set().hint) { glowMat = new THREE.SpriteMaterial({ map: glowTex(), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.85 }); glow = new THREE.Sprite(glowMat); glow.scale.set(8, 8, 1); glow.position.y = 3; g.add(glow); }
-  const sh = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4), new THREE.MeshBasicMaterial({ map: blobTex(), transparent: true, depthWrite: false }));
+  if (isTarget) {
+    // help halo, hidden until the child has made a mistake; drawn behind the bubble with normal blending
+    glowMat = new THREE.SpriteMaterial({ map: glowTex(), depthWrite: false, transparent: true, opacity: 0.9 });
+    glow = new THREE.Sprite(glowMat); glow.scale.set(7, 7, 1); glow.position.y = 3; glow.renderOrder = 1; glow.visible = false; g.add(glow);
+  }
+  if (!SHADOW_GEO) { SHADOW_GEO = new THREE.PlaneGeometry(3.4, 3.4); SHADOW_MAT = new THREE.MeshBasicMaterial({ map: blobTex(), transparent: true, depthWrite: false }); }
+  const sh = new THREE.Mesh(SHADOW_GEO, SHADOW_MAT);
   sh.rotation.x = -Math.PI / 2; sh.position.y = 0.13; g.add(sh);
-  return { obj: g, spr, glow, mat, glowMat, u, d, kind: isTarget ? 'target' : 'wrong', text, ph: Math.random() * 6, alive: true, r: 2.9 };
+  return { obj: g, spr, glow, mat, glowMat, u, d, kind: isTarget ? 'target' : 'wrong', letter: L, ph: Math.random() * 6, alive: true, r: 2.9, base: 4.6 };
+}
+// the earlier letter the child found hardest (most misses, fewest stars), for the review pair
+function weakestLearned() {
+  let best = -1, score = -Infinity;
+  for (let i = 0; i < S.index; i++) {
+    if (!Store.data.letters[i]) continue;
+    const sc = (Store.data.miss[i] || 0) * 2 - Store.data.letters[i] + Math.random();
+    if (sc > score) { score = sc; best = i; }
+  }
+  return best < 0 ? null : LETTERS[best];
 }
 function spawnAhead() {
   const C = cur();
   if (S.kind === 'letter') {
-    // a pair: the right letter on one side, a different letter on the other
     const side = Math.random() < 0.5 ? 1 : -1;
     const colA = pick(BUBBLE_COLORS); let colB = pick(BUBBLE_COLORS); if (colB === colA) colB = BUBBLE_COLORS[(BUBBLE_COLORS.indexOf(colA) + 2) % BUBBLE_COLORS.length];
-    const W = pick(distractorPool(S.index));
-    if (S.missStreak >= 2) {
-      // the child seems to need help: put the right letter straight ahead, alone
-      addPickup(bubble(S.nextU, 0, C.ch, true, colA)); S.missStreak = 0;
-    } else {
-      addPickup(bubble(S.nextU, side * 4.4, C.ch, true, colA));
-      const wp = addPickup(bubble(S.nextU, -side * 4.4, W.ch, false, colB)); wp.letter = W;
-    }
+    // spaced review: the 3rd pair of a level asks for an earlier letter (bonus, does not count toward the 5)
+    const R = S.index >= 2 && S.spawned === 2 && !S.reviewDone ? weakestLearned() : null;
+    const target = R || C;
+    // difficulty ladder: a clearly different shape first; a dotted look-alike only once the child is doing well
+    const hard = !R && S.collected >= 2 && S.missStreak === 0 && !S.recentWrong;
+    let pool = distractorPool(LETTERS.indexOf(target), hard).filter(L => L !== C && L !== target);
+    if (!pool.length) pool = distractorPool(LETTERS.indexOf(target), false).filter(L => L !== C && L !== target);
+    const W = pick(pool);
+    const tp = addPickup(bubble(S.nextU, side * 4.4, target, true, colA));
+    const wp = addPickup(bubble(S.nextU, -side * 4.4, W, false, colB));
+    tp.pair = wp; wp.pair = tp; tp.review = !!R; if (R) S.reviewDone = true;
     S.spawned++;
     if (S.spawned % 3 === 0) { const pad = makeBoostPad(); const at = S.nextU + 34; pad.position.copy(T.pos(at, 0)); pad.position.y = 0.1; pad.rotation.y = T.heading(at); addPickup({ obj: pad, u: at, d: 0, kind: 'boost', alive: true, r: 2.6 }); }
     for (let k = 1; k <= 3; k++) spawnCoin(S.nextU + 14 + k * 9, (S.spawned % 2 ? 1 : -1) * (k - 2) * 2.4);
@@ -239,8 +295,11 @@ function flyToSlot(worldPos, html, slotIdx, cls) {
   requestAnimationFrame(() => requestAnimationFrame(() => { f.style.left = (r.left + r.width / 2) + 'px'; f.style.top = (r.top + r.height / 2) + 'px'; f.style.transform = 'scale(.55)'; }));
   setTimeout(() => { f.remove(); slot.classList.add('on'); slot.innerHTML = html; }, 720);
 }
+// shows a praise word and returns the SAME word for the voice (never the same one twice in a row)
 function praise() {
-  const i = (Math.random() * PRAISE_SHOW.length) | 0;
+  let i = (Math.random() * PRAISE_SHOW.length) | 0;
+  if (i === S.lastPraise) i = (i + 1) % PRAISE_SHOW.length;
+  S.lastPraise = i;
   const el = $('praise'); el.textContent = PRAISE_SHOW[i]; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
   return PRAISE[i];
 }
@@ -248,26 +307,43 @@ function hitPickup(p) {
   p.alive = false;
   const wp = p.obj.position.clone(); wp.y += 2.5;
   const C = cur();
-  if (p.kind === 'target') {
-    const n = S.collected++; S.missStreak = 0;
+  if (p.kind === 'target' && p.review) {
+    // review pair: an earlier letter found again, bonus stars, no slot
+    S.coins += 3; $('hstars').textContent = S.coins; Sound.collect(4); Sound.star(); haptic('tick');
+    confetti.burst(wp, 26, 7, [0x3da5ff, 0xffd60a, 0xffffff], 0.45);
+    Voice.say([p.letter.name, praise()], { gap: 300 });
+    chipShowsTarget();
+    p.pop = 0;
+  } else if (p.kind === 'target') {
+    const n = S.collected++; S.missStreak = 0; S.recentWrong = false;
     Sound.collect(n); haptic('tick'); confetti.burst(wp, 22, 6, null, 0.45);
     flyToSlot(wp, C.ch, n);
-    $('target').classList.remove('ping'); void $('target').offsetWidth; $('target').classList.add('ping');
-    if (S.collected >= S.need) { praise(); Voice.say([pick(PRAISE), LINES.gate], { gap: 350 }); }
-    else { if (S.collected === 2 || S.collected === 4) praise(); if (!Voice.busy) Voice.say(pick(PRAISE)); }
+    pingChip();
+    if (S.collected >= S.need) Voice.say([praise(), LINES.gate], { gap: 350 });
+    // odd pickups: the letter's SOUND with its word; even ones: the letter's name + praise
+    else if (S.collected % 2 === 1) Voice.say(LINES.sound(C));
+    else Voice.say([C.name, praise()], { gap: 250 });
+    // after 2 letters: recall rounds, the chip hides the glyph and the voice asks for it
+    if (S.collected === 2 && S.need > 3) { S.recall = true; setTimeout(() => { if (S.mode === 'drive' && S.recall) chipShowsTarget(); }, 900); }
     p.pop = 0;
   } else if (p.kind === 'wrong') {
-    S.wrong++; S.wobble = 0.6;
+    S.wrong++; S.wobble = 0.6; S.recentWrong = true;
+    const T0 = p.pair && p.pair.letter ? p.pair.letter : C;
+    if (!(p.pair && p.pair.review)) Store.addMiss(S.index);
     Sound.wrong(); haptic('bump');
     p.mat.color.setHex(0x9aa5b1);
-    Voice.say(LINES.wrong(p.letter));
+    // name what was picked, then ask again for the right one, and show it on the chip for a moment
+    Voice.say([LINES.wrong(p.letter), LINES.find(T0)], { gap: 300 });
+    setChip(T0.ch, p.pair && p.pair.review ? 'var(--blue)' : 'var(--pink)'); pingChip();
+    setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2600);
     p.pop = 0;
   } else if (p.kind === 'apple') {
     const n = S.collected++;
     Sound.collect(n); haptic('tick'); confetti.burst(wp, 20, 6, [0xff3b3b, 0xffd60a, 0x51cf66, 0xffffff], 0.45);
     flyToSlot(wp, `<span style="font-size:.8em">${arDigits(n + 1)}</span>`, n, '#ff4d4d');
-    Voice.say(NUMBERS[n + 1] ? NUMBERS[n + 1].say : '');
-    if (S.collected >= S.need) { praise(); setTimeout(() => Voice.say(LINES.gate, { interrupt: false }), 900); }
+    const num = NUMBERS[n + 1] ? NUMBERS[n + 1].say : '';
+    if (S.collected >= S.need) { praise(); Voice.say([num, LINES.gate], { gap: 500 }); }
+    else Voice.say(num);
     p.pop = 0;
   } else if (p.kind === 'coin') {
     S.coins++; $('hstars').textContent = S.coins; Sound.star(); confetti.burst(wp, 6, 4, [0xffd60a, 0xfff3bf], 0.35);
@@ -276,20 +352,41 @@ function hitPickup(p) {
     S.boostT = 1.6; Sound.boost(); haptic('boost'); p.alive = true; p.used = true;
   }
 }
+// a pair comes into view: ask for the letter when the child needs to listen, and give help after mistakes
+function announcePair(p) {
+  p.announced = true;
+  const C = cur();
+  if (p.review) {
+    setChip(p.letter.ch, 'var(--blue)'); pingChip();
+    Voice.say(LINES.find(p.letter), { interrupt: false });
+    return;
+  }
+  if (S.missStreak >= 3) {
+    // the child is not steering at all: bring the letter straight ahead (counted as helped)
+    p.d = 0; p.obj.position.copy(T.pos(p.u, 0)); p.assist = true;
+    if (p.pair) { p.pair.used = true; p.pair.mat.color.setHex(0x9aa5b1); p.pair.mat.opacity = 0.5; p.pair.mat.transparent = true; }
+  }
+  if (p.glow && set().hint && (S.missStreak >= 1 || S.recentWrong)) p.glow.visible = true;
+  if (S.recall || S.missStreak >= 1 || S.recentWrong) Voice.say(LINES.find(C), { interrupt: false });
+}
 function updatePickups(dt) {
   const t = S.t;
   for (const p of S.pickups) {
     if (p.spr) {
+      // bubbles far away are drawn bigger, so the letter is readable early enough to choose a side
+      const du0 = T.delta(S.u, p.u);
+      if (p.alive) p.base = clamp(4.6 + (du0 - 22) * 0.04, 4.6, 8);
       const bob = Math.sin(t * 3 + p.ph) * 0.35;
-      p.spr.position.y = 3 + bob; if (p.glow) { p.glow.position.y = p.spr.position.y; const s = 7.5 + Math.sin(t * 6 + p.ph) * 0.9; p.glow.scale.set(s, s, 1); }
-      if (p.kind === 'target' && p.alive) { const s = 4.6 + Math.sin(t * 5 + p.ph) * 0.25; p.spr.scale.set(s, s, 1); }
+      p.spr.position.y = 3 + bob + (p.base - 4.6) * 0.3;
+      if (p.glow) { p.glow.position.y = p.spr.position.y; const s = p.base * 1.55 + Math.sin(t * 6 + p.ph) * 0.4; p.glow.scale.set(s, s, 1); }
+      if (p.alive) { const s = p.base + (p.kind === 'target' ? Math.sin(t * 5 + p.ph) * 0.2 : 0); p.spr.scale.set(s, s, 1); }
     } else if (p.kind === 'apple' || p.kind === 'coin') {
       p.obj.rotation.y += dt * 2.5; if (p.alive) p.obj.position.y = (p.kind === 'apple' ? 2 : 1.8) + Math.sin(t * 3 + p.ph) * 0.3;
     }
     if (p.pop != null) {
       p.pop += dt;
       const k = p.pop / 0.35;
-      if (p.spr) { const s = 4.6 * (1 - k * 0.7); p.spr.scale.set(s, s, 1); p.spr.position.y += k * 3; p.mat.opacity = 1 - k; p.mat.transparent = true; if (p.glow) p.glow.visible = false; }
+      if (p.spr) { const s = p.base * (1 - k * 0.7); p.spr.scale.set(s, s, 1); p.spr.position.y += k * 3; p.mat.opacity = 1 - k; p.mat.transparent = true; if (p.glow) p.glow.visible = false; }
       else { p.obj.scale.setScalar((p.kind === 'apple' ? 1.35 : 1) * Math.max(0.05, 1 - k)); p.obj.position.y += dt * 10; }
       if (k >= 1) { p.dead = true; }
     }
@@ -297,8 +394,13 @@ function updatePickups(dt) {
   // collisions + cleanup
   for (const p of S.pickups) {
     const du = T.delta(S.u, p.u);
-    if (p.alive && !p.used && du < 1.8 && du > -1.8 - S.speed * dt && Math.abs(S.d - p.d) < p.r) hitPickup(p);
-    if (p.kind === 'target' && p.alive && !p.missed && du < -3) { p.missed = true; S.missStreak++; }
+    if (p.kind === 'target' && p.alive && !p.announced && du < 95) announcePair(p);
+    if (p.alive && !p.used && du < 1.8 && du > -1.8 - S.speed * dt && Math.abs(S.d - p.d) < p.r) { if (p.assist) S.assisted++; hitPickup(p); }
+    if (p.kind === 'target' && p.alive && !p.missed && du < -3) {
+      p.missed = true;
+      if (p.review) chipShowsTarget();
+      else { S.missStreak++; S.misses++; Store.addMiss(S.index); }
+    }
     if (du < -4.5 && p.pop == null) p.dead = true;
     else if (du < -10) p.dead = true;
   }
@@ -417,7 +519,10 @@ function drawCard() {
 function celebrate() {
   const C = cur();
   S.mode = 'celebrate'; S.modeT = 0; S.countQ = null;
-  const stars = S.kind === 'letter' ? (S.wrong <= 1 ? 3 : S.wrong <= 3 ? 2 : 1) : 3;
+  // honest stars: wrong picks AND missed letters count; a level the game had to steer for is at most 2 stars
+  const errs = S.wrong + S.misses;
+  let stars = S.kind === 'letter' ? (errs <= 1 ? 3 : errs <= 3 ? 2 : 1) : 3;
+  if (S.assisted > 0) stars = Math.min(stars, S.assisted > 2 ? 1 : 2);
   const first = Store.complete(S.kind, S.index, stars);
   Store.data.totalStars += S.coins; Store.save();
   drawCard();
@@ -435,7 +540,7 @@ function celebrate() {
 function sayCelebration(first) {
   const C = cur();
   if (S.kind === 'letter') {
-    Voice.say([C.name, C.say, pick(PRAISE)].concat(first ? [LINES.newFriend] : []), { gap: 450 });
+    Voice.say([C.name, LINES.sound(C), praise()].concat(first ? [LINES.newFriend] : []), { gap: 450 });
   } else if (C.n === 0) {
     Voice.say([C.say, LINES.numberIntro(C), pick(PRAISE)]);
   } else {
@@ -566,8 +671,9 @@ function renderMap() {
     el.style.left = pts[i].x + 'px'; el.style.top = pts[i].y + 'px';
     if (done) {
       const img = document.createElement('img'); img.alt = ''; el.appendChild(img);
-      if (!(mapTab === 'number' && item.n === 0)) setTimeout(() => { img.src = thumb(item.animal); }, 10 + i * 25);
-      else el.insertAdjacentHTML('beforeend', `<span class="glyph">${glyph}</span>`);
+      // numbers have no animal: show the glyph (thumb(undefined) used to throw and leave the tile blank)
+      if (mapTab === 'letter') setTimeout(() => { img.src = thumb(item.animal); }, 10 + i * 25);
+      else { img.remove(); el.insertAdjacentHTML('beforeend', `<span class="glyph">${glyph}</span>`); }
       el.insertAdjacentHTML('beforeend', `<span class="badge">${glyph}</span><div class="stars">${[0, 1, 2].map(k => (k < arr[i] ? ICON.star : ICON.starOff)).join('')}</div>`);
     } else {
       el.insertAdjacentHTML('beforeend', `<span class="glyph">${glyph}</span>`);
@@ -606,13 +712,19 @@ $('play').addEventListener('click', async () => {
 });
 
 // ---------- HUD buttons ----------
-$('target').addEventListener('pointerdown', e => { e.stopPropagation(); const C = cur(); Voice.say(S.kind === 'letter' ? C.name : C.say); $('target').classList.remove('ping'); void $('target').offsetWidth; $('target').classList.add('ping'); });
+$('target').addEventListener('pointerdown', e => {
+  e.stopPropagation(); const C = cur();
+  Voice.say(S.kind === 'letter' ? [C.name, LINES.sound(C)] : C.say);
+  // in recall rounds a tap shows the letter again for a moment
+  if (S.kind === 'letter' && S.recall) { setChip(C.ch, 'var(--pink)'); setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }
+  pingChip();
+});
 $('pausebtn').addEventListener('click', () => setPaused(true));
 $('presume').addEventListener('click', () => { Sound.click(); setPaused(false); });
 $('prestart').addEventListener('click', () => { Sound.click(); S.paused = false; $('pause').classList.add('hidden'); Sound.resume(); startLevel(S.kind, S.index); });
 $('pmap').addEventListener('click', () => { Sound.click(); S.paused = false; Sound.resume(); toMap(); });
 $('chome').addEventListener('click', () => { Sound.click(); toMap(); });
-$('chear').addEventListener('click', () => { Sound.click(); S.happyT = 2.5; const C = cur(); Voice.say(S.kind === 'letter' ? [C.name, C.say] : [C.digit === '٠' ? C.say : C.say]); });
+$('chear').addEventListener('click', () => { Sound.click(); S.happyT = 2.5; const C = cur(); Voice.say(S.kind === 'letter' ? [C.name, LINES.sound(C)] : [C.say]); });
 $('cagain').addEventListener('click', () => { Sound.click(); startLevel(S.kind, S.index); });
 $('cnext').addEventListener('click', () => {
   Sound.click();
@@ -624,8 +736,20 @@ function setPaused(p) {
   if (p === S.paused) return;
   S.paused = p;
   $('pause').classList.toggle('hidden', !p);
-  if (p) { Voice.stop(); touch.left = touch.right = false; for (const k in keys) keys[k] = false; }
-  else { Sound.resume(); if (Tilt.enabled) Tilt.calibrate(); last = performance.now(); }
+  if (p) { Voice.stop(); releaseTouch(); }
+  else {
+    Sound.resume(); if (Tilt.enabled) Tilt.calibrate(); last = performance.now();
+    // the intro was cut by the pause: say it again so the child hears which letter to find
+    if (S.mode === 'intro' && !S.introDone) sayIntro();
+  }
+}
+// Android back button: pause a level instead of closing the app; step back from other screens
+function onBack() {
+  if (!$('pgate').classList.contains('hidden')) { $('pgate').classList.add('hidden'); return; }
+  if (!$('settings').classList.contains('hidden')) { $('settings').classList.add('hidden'); renderMap(); return; }
+  if (['drive', 'intro', 'arrive'].includes(S.mode)) { if (!S.paused) setPaused(true); return; }
+  if (S.mode === 'celebrate') { toMap(); return; }
+  if (S.mode === 'map') toTitle();
 }
 
 // ---------- parent settings (long-press the gear) ----------
@@ -634,14 +758,33 @@ function setPaused(p) {
   const cancel = () => { clearTimeout(timer); timer = null; gear.classList.remove('holding'); };
   gear.addEventListener('pointerdown', e => {
     e.preventDefault(); Sound.init(); gear.classList.add('holding', 'hint');
-    timer = setTimeout(() => { cancel(); gear.classList.remove('hint'); openSettings(); }, 1200);
+    timer = setTimeout(() => { cancel(); gear.classList.remove('hint'); openGate(); }, 1200);
     setTimeout(() => gear.classList.remove('hint'), 2200);
   });
   for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) gear.addEventListener(ev, cancel);
 }
+// parent gate: after the long press, tap two digits in the order written (a pre-reader cannot follow the sentence)
+function openGate() {
+  Sound.click();
+  const a = 1 + ((Math.random() * 9) | 0); let b = 1 + ((Math.random() * 9) | 0); if (b === a) b = (a % 9) + 1;
+  $('pgq').textContent = `للوالدين: اضغط ${arDigits(a)} ثم ${arDigits(b)}`;
+  const pad = $('pgpad'); pad.innerHTML = ''; let step = 0;
+  const order = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+  for (const n of order) {
+    const k = document.createElement('button'); k.className = 'cbtn blue pgk'; k.textContent = arDigits(n);
+    k.addEventListener('click', () => {
+      Sound.click();
+      if (n === (step === 0 ? a : b)) { step++; k.classList.add('ok'); if (step === 2) { $('pgate').classList.add('hidden'); openSettings(); } }
+      else { Sound.lock(); $('pgate').classList.add('hidden'); }
+    });
+    pad.appendChild(k);
+  }
+  $('pgate').classList.remove('hidden');
+}
+$('pgclose').addEventListener('click', () => { Sound.click(); $('pgate').classList.add('hidden'); });
 const OPTS = [
   ['sfx', 'المؤثرات الصوتية'], ['music', 'الموسيقى'], ['voice', 'نطق الحروف'], ['haptics', 'الاهتزاز'],
-  ['hint', 'توهج الحرف الصحيح'], ['tilt', 'القيادة بإمالة الجهاز'], ['flip', 'عكس اتجاه الإمالة'], ['speed', 'سرعة السيارة'],
+  ['hint', 'توهج المساعدة بعد الخطأ'], ['tilt', 'القيادة بإمالة الجهاز'], ['flip', 'عكس اتجاه الإمالة'], ['speed', 'سرعة السيارة'],
   ['voiceRate', 'سرعة النطق'], ['voiceName', 'صوت القارئ']
 ];
 function openSettings() {
@@ -693,8 +836,14 @@ $('vinstall').addEventListener('click', () => Voice.openInstall());
 $('sunlock').addEventListener('click', () => { Store.data.unlockAll = !Store.data.unlockAll; Store.save(); Sound.click(); $('sunlock').textContent = Store.data.unlockAll ? 'إغلاق المراحل' : 'فتح كل المراحل'; });
 $('sreset').addEventListener('click', () => {
   const b = $('sreset');
-  if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'اضغط مرة أخرى للتأكيد'; return; }
+  if (!b.dataset.armed) {
+    b.dataset.armed = '1'; b.textContent = 'اضغط مرة أخرى للتأكيد';
+    clearTimeout(b._t); b._t = setTimeout(() => { if (b.dataset.armed) { b.dataset.armed = ''; b.textContent = 'مسح التقدم'; } }, 3000);
+    return;
+  }
+  clearTimeout(b._t);
   Store.reset(); b.dataset.armed = ''; b.textContent = 'تم المسح ✓'; Sound.lock();
+  $('sunlock').textContent = Store.data.unlockAll ? 'إغلاق المراحل' : 'فتح كل المراحل';
 });
 
 // ---------- main loop ----------
@@ -800,8 +949,9 @@ async function boot() {
   applySettings();
   Voice.init(set().voiceName);
   initPlatform({
+    onBack,
     onBackground: () => {
-      Voice.stop();
+      Voice.stop(); releaseTouch();
       if (['drive', 'intro', 'arrive'].includes(S.mode)) setPaused(true);
       Sound.suspend();
     }
@@ -811,6 +961,6 @@ async function boot() {
   $('loading').classList.add('hidden');
   requestAnimationFrame(frame);
   // test hook (headless checks)
-  window.__lk = { keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings };
+  window.__lk = { keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, LINES };
 }
 boot();

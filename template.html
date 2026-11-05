@@ -123,6 +123,15 @@ svg{display:block}
 #intro .card{background:#fff;border-radius:40px;padding:2vh 6vh 3vh;display:flex;flex-direction:column;align-items:center;box-shadow:0 12px 0 rgba(43,27,107,.25),0 20px 40px rgba(0,0,0,.25);animation:zoomIn .6s cubic-bezier(.3,1.6,.5,1)}
 #introglyph{font-weight:800;font-size:clamp(90px,36vh,220px);line-height:1;color:var(--pink);margin-top:.12em}
 #introtext{font-weight:800;font-size:clamp(20px,6vh,38px);color:var(--ink)}
+#intro .irow{display:flex;align-items:center;gap:3vh}
+#introimg{width:clamp(90px,34vh,210px);height:clamp(90px,34vh,210px);object-fit:contain;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fffbe6,#ffe08a)}
+/* parent gate */
+#pgate .box{width:min(92vw,560px)}
+#pgq{font-size:clamp(20px,6vh,34px);text-align:center}
+#pgpad{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vh;direction:ltr}
+.pgk{width:clamp(54px,14vh,84px);height:clamp(54px,14vh,84px);padding:0;font-size:clamp(26px,8vh,46px);border-radius:22px}
+.pgk.ok{background:linear-gradient(#6ee787,#22a845)}
+#pgclose{position:absolute;top:calc(10px + var(--st));left:calc(10px + var(--sl))}
 #intro.out .card{transition:transform .5s ease-in,opacity .5s;transform:translate(-30vw,-30vh) scale(.2);opacity:0}
 @keyframes zoomIn{from{transform:scale(.2) rotate(-10deg);opacity:0}}
 
@@ -191,7 +200,7 @@ svg{display:block}
   <button id="pausebtn" class="cbtn round" data-icon="pause" aria-label="pause"></button>
 </div>
 <div id="praise"></div>
-<div id="intro" class="hidden"><div class="card"><div id="introglyph"></div><div id="introtext"></div></div></div>
+<div id="intro" class="hidden"><div class="card"><div class="irow"><div id="introglyph"></div><img id="introimg" class="hidden" alt=""></div><div id="introtext"></div></div></div>
 
 <div id="celebrate" class="hidden">
   <div class="card">
@@ -215,6 +224,14 @@ svg{display:block}
       <button id="prestart" class="cbtn blue round" data-icon="replay" aria-label="restart"></button>
       <button id="pmap" class="cbtn blue round" data-icon="home" aria-label="map"></button>
     </div>
+  </div>
+</div>
+
+<div id="pgate" class="overlay hidden">
+  <button id="pgclose" class="cbtn pink round" data-icon="close" aria-label="close"></button>
+  <div class="box">
+    <h2 id="pgq"></h2>
+    <div id="pgpad"></div>
   </div>
 </div>
 

@@ -51,9 +51,12 @@ export const Voice = {
     this.preferred = name;
     if (isNative) this._pickNative(); else webVoice = webVoices.find(v => v.name === name) || webVoices[0] || null;
   },
-  stop() {
+  // stop everything, including lines queued with interrupt:false
+  stop() { this.gen = (this.gen || 0) + 1; this._tail = null; this._halt(); },
+  _halt() {
     this.token++;
     try { if (this._audio) { this._audio.pause(); this._audio = null; } } catch (e) { /* ignore */ }
+    if (this._fin) { const f = this._fin; this._fin = null; f(); } // release whoever awaits the clip now, not after the 8 s timeout
     try { if (isNative) TextToSpeech.stop(); else if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* ignore */ }
     this._end();
   },
@@ -62,7 +65,8 @@ export const Voice = {
   _clip(src, my) {
     return new Promise(res => {
       const a = new Audio(src); this._audio = a;
-      let done = false; const fin = () => { if (!done) { done = true; res(); } };
+      let done = false; const fin = () => { if (!done) { done = true; if (this._fin === fin) this._fin = null; res(); } };
+      this._fin = fin;
       a.onended = fin; a.onerror = fin; setTimeout(fin, 8000);
       a.play().catch(fin);
       if (my !== this.token) fin();
@@ -89,11 +93,24 @@ export const Voice = {
       if (my !== this.token) fin();
     });
   },
-  // say one or several phrases in a row; a new call interrupts the previous one
-  async say(texts, { gap = 300, interrupt = true } = {}) {
-    if (!this.enabled) return;
+  // say one or several phrases in a row. A new call interrupts the previous one (and anything queued);
+  // with interrupt:false it waits for the current speech to finish instead, so voices never overlap.
+  say(texts, opts = {}) {
+    if (!this.enabled) return Promise.resolve();
+    if (opts.interrupt === false && this.busy && this._tail) {
+      const gen = this.gen;
+      const p = this._tail.then(() => (gen === this.gen && this.enabled ? this._say(texts, opts) : undefined));
+      this._tail = p;
+      return p;
+    }
+    this.gen = (this.gen || 0) + 1;
+    const p = this._say(texts, opts);
+    this._tail = p;
+    return p;
+  },
+  async _say(texts, { gap = 300 } = {}) {
     const list = (Array.isArray(texts) ? texts : [texts]).filter(Boolean);
-    if (interrupt) this.stop();
+    this._halt();
     const my = ++this.token;
     this._start();
     try {

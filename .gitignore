@@ -19,3 +19,4 @@ test/*.png
 *.jks
 .DS_Store
 tools/.make-voice.cjs
+test/shots/

@@ -3,34 +3,34 @@
 // `word` is what is shown on screen (no harakat, easier to read for small children).
 
 export const LETTERS = [
-  { ch: 'أ', name: 'أَلِف', word: 'أسد', say: 'أَسَد', animal: 'lion', biome: 'savanna' },
-  { ch: 'ب', name: 'بَاء', word: 'بطة', say: 'بَطَّة', animal: 'duck', biome: 'pond' },
-  { ch: 'ت', name: 'تَاء', word: 'تمساح', say: 'تِمْسَاح', animal: 'crocodile', biome: 'pond' },
-  { ch: 'ث', name: 'ثَاء', word: 'ثعلب', say: 'ثَعْلَب', animal: 'fox', biome: 'forest' },
-  { ch: 'ج', name: 'جِيم', word: 'جمل', say: 'جَمَل', animal: 'camel', biome: 'desert' },
-  { ch: 'ح', name: 'حَاء', word: 'حصان', say: 'حِصَان', animal: 'horse', biome: 'farm' },
-  { ch: 'خ', name: 'خَاء', word: 'خروف', say: 'خَرُوف', animal: 'sheep', biome: 'farm' },
-  { ch: 'د', name: 'دَال', word: 'دب', say: 'دُبّ', animal: 'bear', biome: 'forest' },
-  { ch: 'ذ', name: 'ذَال', word: 'ذئب', say: 'ذِئْب', animal: 'wolf', biome: 'forest' },
-  { ch: 'ر', name: 'رَاء', word: 'رنة', say: 'رَنَّة', animal: 'reindeer', biome: 'snow' },
-  { ch: 'ز', name: 'زَاي', word: 'زرافة', say: 'زَرَافَة', animal: 'giraffe', biome: 'savanna' },
-  { ch: 'س', name: 'سِين', word: 'سلحفاة', say: 'سُلَحْفَاة', animal: 'turtle', biome: 'pond' },
-  { ch: 'ش', name: 'شِين', word: 'شمبانزي', say: 'شِمْبَانْزِي', animal: 'chimp', biome: 'jungle' },
-  { ch: 'ص', name: 'صَاد', word: 'صقر', say: 'صَقْر', animal: 'falcon', biome: 'desert' },
-  { ch: 'ض', name: 'ضَاد', word: 'ضفدع', say: 'ضِفْدَع', animal: 'frog', biome: 'pond' },
-  { ch: 'ط', name: 'طَاء', word: 'طاووس', say: 'طَاوُوس', animal: 'peacock', biome: 'garden' },
-  { ch: 'ظ', name: 'ظَاء', word: 'ظبي', say: 'ظَبْي', animal: 'deer', biome: 'forest' },
-  { ch: 'ع', name: 'عَيْن', word: 'عصفور', say: 'عُصْفُور', animal: 'sparrow', biome: 'garden' },
-  { ch: 'غ', name: 'غَيْن', word: 'غزال', say: 'غَزَال', animal: 'gazelle', biome: 'savanna' },
-  { ch: 'ف', name: 'فَاء', word: 'فيل', say: 'فِيل', animal: 'elephant', biome: 'savanna' },
-  { ch: 'ق', name: 'قَاف', word: 'قرد', say: 'قِرْد', animal: 'monkey', biome: 'jungle' },
-  { ch: 'ك', name: 'كَاف', word: 'كنغر', say: 'كَنْغَر', animal: 'kangaroo', biome: 'desert' },
-  { ch: 'ل', name: 'لَام', word: 'لاما', say: 'لَامَا', animal: 'llama', biome: 'mountain' },
-  { ch: 'م', name: 'مِيم', word: 'ماعز', say: 'مَاعِز', animal: 'goat', biome: 'mountain' },
-  { ch: 'ن', name: 'نُون', word: 'نمر', say: 'نَمِر', animal: 'tiger', biome: 'jungle' },
-  { ch: 'ه', name: 'هَاء', word: 'هدهد', say: 'هُدْهُد', animal: 'hoopoe', biome: 'garden' },
-  { ch: 'و', name: 'وَاو', word: 'وحيد القرن', say: 'وَحِيدُ القَرْن', animal: 'rhino', biome: 'savanna' },
-  { ch: 'ي', name: 'يَاء', word: 'يمامة', say: 'يَمَامَة', animal: 'dove', biome: 'garden' }
+  { ch: 'أ', snd: 'أَ', name: 'أَلِف', word: 'أسد', say: 'أَسَد', animal: 'lion', biome: 'savanna' },
+  { ch: 'ب', snd: 'بَ', name: 'بَاء', word: 'بطة', say: 'بَطَّة', animal: 'duck', biome: 'pond' },
+  { ch: 'ت', snd: 'تِ', name: 'تَاء', word: 'تمساح', say: 'تِمْسَاح', animal: 'crocodile', biome: 'pond' },
+  { ch: 'ث', snd: 'ثَ', name: 'ثَاء', word: 'ثعلب', say: 'ثَعْلَب', animal: 'fox', biome: 'forest' },
+  { ch: 'ج', snd: 'جَ', name: 'جِيم', word: 'جمل', say: 'جَمَل', animal: 'camel', biome: 'desert' },
+  { ch: 'ح', snd: 'حِ', name: 'حَاء', word: 'حصان', say: 'حِصَان', animal: 'horse', biome: 'farm' },
+  { ch: 'خ', snd: 'خَ', name: 'خَاء', word: 'خروف', say: 'خَرُوف', animal: 'sheep', biome: 'farm' },
+  { ch: 'د', snd: 'دُ', name: 'دَال', word: 'دب', say: 'دُبّ', animal: 'bear', biome: 'forest' },
+  { ch: 'ذ', snd: 'ذِ', name: 'ذَال', word: 'ذئب', say: 'ذِئْب', animal: 'wolf', biome: 'forest' },
+  { ch: 'ر', snd: 'رَ', name: 'رَاء', word: 'رنة', say: 'رَنَّة', animal: 'reindeer', biome: 'snow' },
+  { ch: 'ز', snd: 'زَ', name: 'زَاي', word: 'زرافة', say: 'زَرَافَة', animal: 'giraffe', biome: 'savanna' },
+  { ch: 'س', snd: 'سُ', name: 'سِين', word: 'سلحفاة', say: 'سُلَحْفَاة', animal: 'turtle', biome: 'pond' },
+  { ch: 'ش', snd: 'شِ', name: 'شِين', word: 'شمبانزي', say: 'شِمْبَانْزِي', animal: 'chimp', biome: 'jungle' },
+  { ch: 'ص', snd: 'صَ', name: 'صَاد', word: 'صقر', say: 'صَقْر', animal: 'falcon', biome: 'desert' },
+  { ch: 'ض', snd: 'ضِ', name: 'ضَاد', word: 'ضفدع', say: 'ضِفْدَع', animal: 'frog', biome: 'pond' },
+  { ch: 'ط', snd: 'طَ', name: 'طَاء', word: 'طاووس', say: 'طَاوُوس', animal: 'peacock', biome: 'garden' },
+  { ch: 'ظ', snd: 'ظَ', name: 'ظَاء', word: 'ظبي', say: 'ظَبْي', animal: 'deer', biome: 'forest' },
+  { ch: 'ع', snd: 'عُ', name: 'عَيْن', word: 'عصفور', say: 'عُصْفُور', animal: 'sparrow', biome: 'garden' },
+  { ch: 'غ', snd: 'غَ', name: 'غَيْن', word: 'غزال', say: 'غَزَال', animal: 'gazelle', biome: 'savanna' },
+  { ch: 'ف', snd: 'فِ', name: 'فَاء', word: 'فيل', say: 'فِيل', animal: 'elephant', biome: 'savanna' },
+  { ch: 'ق', snd: 'قِ', name: 'قَاف', word: 'قرد', say: 'قِرْد', animal: 'monkey', biome: 'jungle' },
+  { ch: 'ك', snd: 'كَ', name: 'كَاف', word: 'كنغر', say: 'كَنْغَر', animal: 'kangaroo', biome: 'desert' },
+  { ch: 'ل', snd: 'لَ', name: 'لَام', word: 'لاما', say: 'لَامَا', animal: 'llama', biome: 'mountain' },
+  { ch: 'م', snd: 'مَ', name: 'مِيم', word: 'ماعز', say: 'مَاعِز', animal: 'goat', biome: 'mountain' },
+  { ch: 'ن', snd: 'نَ', name: 'نُون', word: 'نمر', say: 'نَمِر', animal: 'tiger', biome: 'jungle' },
+  { ch: 'ه', snd: 'هُ', name: 'هَاء', word: 'هدهد', say: 'هُدْهُد', animal: 'hoopoe', biome: 'garden' },
+  { ch: 'و', snd: 'وَ', name: 'وَاو', word: 'وحيد القرن', say: 'وَحِيدُ القَرْن', animal: 'rhino', biome: 'savanna' },
+  { ch: 'ي', snd: 'يَ', name: 'يَاء', word: 'يمامة', say: 'يَمَامَة', animal: 'dove', biome: 'garden' }
 ];
 
 const AR = '٠١٢٣٤٥٦٧٨٩';
@@ -39,7 +39,7 @@ export const arDigits = n => String(n).split('').map(d => AR[+d]).join('');
 export const NUMBERS = [
   { n: 0, word: 'صفر', say: 'صِفْر' },
   { n: 1, word: 'واحد', say: 'وَاحِد' },
-  { n: 2, word: 'اثنان', say: 'اثْنَان' },
+  { n: 2, word: 'اثنان', say: 'اثْنَان', to: 'اثْنَيْن' },
   { n: 3, word: 'ثلاثة', say: 'ثَلَاثَة' },
   { n: 4, word: 'أربعة', say: 'أَرْبَعَة' },
   { n: 5, word: 'خمسة', say: 'خَمْسَة' },
@@ -55,23 +55,30 @@ export const PRAISE_SHOW = ['أحسنت!', 'رائع!', 'ممتاز!', 'بطل!'
 
 export const LINES = {
   letterIntro: L => `هَيَّا نَجْمَعُ حَرْفَ ${L.name}`,
+  // letter SOUND (phonics) tied to the animal word: «بَ، بَ، بَطَّة»
+  sound: L => `${L.snd}، ${L.snd}، ${L.say}`,
+  find: L => `أَيْنَ حَرْفُ ${L.name}؟`,
   wrong: L => `هَذَا حَرْفُ ${L.name}`,
-  numberIntro: N => N.n === 0 ? 'صِفْر يَعْنِي لَا شَيْء' : `هَيَّا نَعُدُّ إِلَى ${N.say}`,
-  gate: 'رَائِع! اذْهَبْ إِلَى البَوَّابَة',
+  numberIntro: N => N.n === 0 ? 'صِفْر يَعْنِي لَا شَيْء' : `هَيَّا نَعُدُّ إِلَى ${N.to || N.say}`,
+  gate: 'هَيَّا إِلَى البَوَّابَة!',
   newFriend: 'صَدِيقٌ جَدِيدٌ فِي حَدِيقَتِك!'
 };
 
-// Letters the child sees as wrong choices: mostly letters already learned (review), plus near look-alikes.
-const LOOKALIKE = { 'ب': 'تث', 'ت': 'بث', 'ث': 'بت', 'ج': 'حخ', 'ح': 'جخ', 'خ': 'جح', 'د': 'ذ', 'ذ': 'د', 'ر': 'ز', 'ز': 'ر', 'س': 'ش', 'ش': 'س', 'ص': 'ض', 'ض': 'ص', 'ط': 'ظ', 'ظ': 'ط', 'ع': 'غ', 'غ': 'ع', 'ف': 'ق', 'ق': 'ف' };
-export function distractorPool(index) {
+// Wrong choices follow a ladder: first an easy, clearly different letter (preferably one already
+// learned, so it doubles as review), and only later in the level a look-alike that differs by dots.
+export const LOOKALIKE = { 'ب': 'تث', 'ت': 'بث', 'ث': 'بت', 'ج': 'حخ', 'ح': 'جخ', 'خ': 'جح', 'د': 'ذ', 'ذ': 'د', 'ر': 'ز', 'ز': 'ر', 'س': 'ش', 'ش': 'س', 'ص': 'ض', 'ض': 'ص', 'ط': 'ظ', 'ظ': 'ط', 'ع': 'غ', 'غ': 'ع', 'ف': 'ق', 'ق': 'ف' };
+const EASY = 'أمسلرهوكنعد';
+const byCh = c => LETTERS.find(x => x.ch === c);
+export function distractorPool(index, hard = false) {
   const L = LETTERS[index];
-  const pool = new Set();
-  for (const c of (LOOKALIKE[L.ch] || '')) pool.add(c);
-  for (let i = Math.max(0, index - 5); i < index; i++) pool.add(LETTERS[i].ch);
-  let k = index + 1;
-  while (pool.size < 3) { pool.add(LETTERS[k % LETTERS.length].ch); k++; }
-  pool.delete(L.ch);
-  return [...pool].map(c => LETTERS.find(x => x.ch === c));
+  const look = LOOKALIKE[L.ch] || '';
+  if (hard && look) return [...look].map(byCh);
+  // shapes that do not resemble the target: learned letters first, then a fixed set of distinct shapes
+  const similar = c => c === L.ch || look.includes(c) || (LOOKALIKE[c] || '').includes(L.ch);
+  const learned = [];
+  for (let i = Math.max(0, index - 6); i < index; i++) if (!similar(LETTERS[i].ch)) learned.push(LETTERS[i].ch);
+  const pool = learned.length >= 2 ? learned : learned.concat([...EASY].filter(c => !similar(c) && !learned.includes(c)));
+  return pool.map(byCh);
 }
 
 export const BIOMES = {
@@ -98,6 +105,8 @@ export function voiceLines() {
     out.push({ id: `${k}-word`, text: L.say, note: `الكلمة ${L.word}` });
     out.push({ id: `${k}-intro`, text: LINES.letterIntro(L), note: 'بداية المرحلة' });
     out.push({ id: `${k}-wrong`, text: LINES.wrong(L), note: 'عند اختيار هذا الحرف خطأ' });
+    out.push({ id: `${k}-sound`, text: LINES.sound(L), note: `صوت الحرف ${L.ch} مع الكلمة` });
+    out.push({ id: `${k}-find`, text: LINES.find(L), note: `البحث عن الحرف ${L.ch}` });
   });
   NUMBERS.forEach(N => {
     out.push({ id: `number-${p2(N.n)}`, text: N.say, note: `الرقم ${N.digit}` });

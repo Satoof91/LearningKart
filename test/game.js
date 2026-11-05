@@ -57,6 +57,13 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await wait(2500); await p.screenshot({ path: OUT + '/13-letter10-drive.png' });
   await p.click('#pausebtn', { force: true }); await wait(300); const paused = await p.evaluate(() => window.__lk.S.paused); await p.screenshot({ path: OUT + '/14-pause.png' });
   await p.evaluate(() => { window.__lk.toMap(); window.__lk.openSettings(); }); await wait(500); await p.screenshot({ path: OUT + '/15-settings.png' });
+  await p.evaluate(() => { document.getElementById('settings').classList.add('hidden'); window.__lk.openGate(); }); await wait(400); await p.screenshot({ path: OUT + '/16-parent-gate.png' });
+  await p.evaluate(() => document.getElementById('pgate').classList.add('hidden'));
+  // a child who never steers must not get 3 stars
+  await p.evaluate(() => { clearInterval(window.__ap); const L = window.__lk; for (const k in L.keys) L.keys[k] = false; L.startLevel('letter', 4); L.S.timeScale = 4; L.S.noAdapt = true; });
+  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 240000 });
+  const passive = await p.evaluate(() => ({ stars: window.__lk.Store.data.letters[4], misses: window.__lk.S.misses, assisted: window.__lk.S.assisted }));
+  console.log('passive child', JSON.stringify(passive), passive.stars <= 1 ? 'OK' : 'TOO MANY STARS');
   console.log('paused', paused);
   console.log('errors', errs.length ? errs : 'none');
   await b.close();

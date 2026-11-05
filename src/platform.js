@@ -26,8 +26,10 @@ export function haptic(kind) {
   } catch (e) { /* ignore */ }
 }
 
-export async function initPlatform({ onBackground }) {
+export async function initPlatform({ onBackground, onBack }) {
   if (isNative) {
+    // Android back button / back gesture: without a listener Capacitor closes the app mid-level
+    try { App.addListener('backButton', () => { if (onBack) onBack(); }); } catch (e) { /* ignore */ }
     try { await ScreenOrientation.lock({ orientation: 'landscape' }); } catch (e) { /* manifest/plist also lock it */ }
     try { await StatusBar.hide(); } catch (e) { /* not available */ }
     try { App.addListener('appStateChange', ({ isActive }) => { if (!isActive) onBackground(); }); } catch (e) { /* ignore */ }
@@ -53,7 +55,9 @@ const Tilt = {
     ang = ((ang % 360) + 360) % 360;
     let sx, sy; // up vector in screen coords (x right, y up)
     if (ang === 90) { sx = -uy; sy = ux; } else if (ang === 270) { sx = uy; sy = -ux; } else if (ang === 180) { sx = -ux; sy = -uy; } else { sx = ux; sy = uy; }
-    Tilt.roll = Math.atan2(sx, sy); // >0: phone turned clockwise-from-left... mapped below
+    // phone lying flat: gravity is (almost) perpendicular to the screen and the roll angle is pure noise
+    Tilt.flat = Math.hypot(sx, sy) < 0.35;
+    if (!Tilt.flat) Tilt.roll = Math.atan2(sx, sy);
   },
   async enable() {
     if (!this.supported) return false;
@@ -74,6 +78,7 @@ const Tilt = {
   // returns steering in [-1, 1]; positive = steer left (the game's convention)
   steer() {
     if (!this.enabled) return 0;
+    if (this.flat) { this.value *= 0.6; return this.value; }
     let r = (this.roll - this.neutral) * this.sign;
     r = Math.atan2(Math.sin(r), Math.cos(r));
     const dead = 3 * RAD, full = 24 * RAD;

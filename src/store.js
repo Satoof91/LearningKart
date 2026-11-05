@@ -4,30 +4,41 @@ import { isNative } from './platform.js';
 
 const KEY = 'learningkart_v1';
 const DEFAULT = () => ({
-  letters: Array(28).fill(0), numbers: Array(11).fill(0), totalStars: 0, kart: 1,
+  v: 2, letters: Array(28).fill(0), numbers: Array(11).fill(0), totalStars: 0, kart: 1,
+  // per letter: how often the child picked a wrong letter or missed it (drives the review pairs)
+  miss: Array(28).fill(0),
   settings: { sfx: true, music: true, voice: true, haptics: true, hint: true, tilt: false, flip: false, speed: 'normal', voiceName: '', voiceRate: 'normal' }
 });
+const int = (v, lo, hi, dflt) => { const x = Math.round(Number(v)); return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt; };
+const arr = (a, len, hi) => Array.from({ length: len }, (_, i) => int(Array.isArray(a) ? a[i] : 0, 0, hi, 0));
+// old or damaged saves never break the game: every field is coerced to a valid value
+function sanitize(d) {
+  const def = DEFAULT();
+  const out = Object.assign(def, d, { settings: Object.assign(def.settings, (d.settings && typeof d.settings === 'object') ? d.settings : {}) });
+  out.letters = arr(d.letters, 28, 3); out.numbers = arr(d.numbers, 11, 3); out.miss = arr(d.miss, 28, 999);
+  out.totalStars = int(d.totalStars, 0, 1e7, 0); out.kart = int(d.kart, 0, 4, 1); out.unlockAll = !!d.unlockAll; out.v = 2;
+  return out;
+}
 export const Store = {
   data: DEFAULT(),
   async load() {
-    let raw = null;
+    let raw = null, rawN = null;
     try { raw = localStorage.getItem(KEY); } catch (e) { /* ignore */ }
-    if (isNative) { try { const r = await Preferences.get({ key: KEY }); if (r && r.value) raw = r.value; } catch (e) { /* ignore */ } }
-    if (raw) {
-      try {
-        const d = JSON.parse(raw), def = DEFAULT();
-        this.data = Object.assign(def, d, { settings: Object.assign(def.settings, d.settings || {}) });
-        if (!Array.isArray(this.data.letters) || this.data.letters.length !== 28) this.data.letters = def.letters;
-        if (!Array.isArray(this.data.numbers) || this.data.numbers.length !== 11) this.data.numbers = def.numbers;
-      } catch (e) { this.data = DEFAULT(); }
-    }
+    if (isNative) { try { const r = await Preferences.get({ key: KEY }); if (r && r.value) rawN = r.value; } catch (e) { /* ignore */ } }
+    const parse = t => { try { return t ? JSON.parse(t) : null; } catch (e) { return null; } };
+    let d = parse(raw); const n = parse(rawN);
+    // use whichever copy was saved last (a native write can be lost when the app is killed)
+    if (n && (!d || (n.savedAt || 0) >= (d.savedAt || 0))) d = n;
+    if (d && typeof d === 'object') this.data = sanitize(d);
   },
   save() {
+    this.data.savedAt = Date.now();
     const s = JSON.stringify(this.data);
     try { localStorage.setItem(KEY, s); } catch (e) { /* ignore */ }
-    if (isNative) { try { Preferences.set({ key: KEY, value: s }); } catch (e) { /* ignore */ } }
+    if (isNative) { try { Preferences.set({ key: KEY, value: s }).catch(() => {}); } catch (e) { /* ignore */ } }
   },
   reset() { const k = this.data.kart, st = this.data.settings; this.data = DEFAULT(); this.data.kart = k; this.data.settings = st; this.save(); },
+  addMiss(i) { if (i >= 0 && i < 28) { this.data.miss[i] = Math.min(999, (this.data.miss[i] || 0) + 1); } },
   unlocked(kind, i) {
     const arr = kind === 'letter' ? this.data.letters : this.data.numbers;
     if (this.data.unlockAll) return true;

@@ -16,7 +16,16 @@ Built with Three.js and packaged for **Android** and **iOS** with [Capacitor 8](
 
 1. **Zoo map**: a winding path of letters (or numbers). Finished letters show their animal and 1–3 stars. The next letter has the kart on it; later ones are locked.
 2. **Level intro**: the letter appears big and is spoken: «أَلِف ... هَيَّا نَجْمَعُ حَرْفَ أَلِف».
-3. **Drive**: the kart drives itself (no gas or brake). The child only steers left or right. Letter bubbles come in pairs: the right letter on one side, another letter on the other. Collect the right letter **5 times**. A wrong letter is gently named («هَذَا حَرْفُ بَاء») with no penalty. If the child misses twice, the next letter is placed straight ahead. Stars and rainbow boost pads add fun.
+3. **Drive**: the kart drives itself (no gas or brake). The child only steers left or right. Letter bubbles come in pairs: the right letter on one side, another letter on the other. Collect the right letter **5 times**.
+   - A correct pick says the letter's **sound** with its word («بَ، بَ، بَطَّة») or its name plus praise.
+   - A wrong pick names that letter and asks again: «هَذَا حَرْفُ تَاء… أَيْنَ حَرْفُ بَاء؟».
+   - The first pairs use a clearly different shape; dotted look-alikes come once the child is doing well.
+   - After 2 pickups the chip shows «؟» and the child finds the letter by ear (recall).
+   - From letter 3 on, one pair brings back an earlier letter the child found hard (review, bonus stars).
+   - Help only comes after mistakes: a glow, then (after 3 misses) the letter straight ahead.
+   - Stars count wrong picks *and* misses.
+
+   See [docs/TEAM-REVIEW.md](docs/TEAM-REVIEW.md) for the reasoning and the backlog.
 4. **Gate**: a rainbow gate with the letter and word appears; drive through it.
 5. **Meet the animal**: the animal's habitat appears. The card shows the letter, the word with the first letter highlighted (أسد), and stars. The letter and word are spoken, the animal jumps, and tapping the animal says it again. The animal then lives in your zoo and appears in the enclosures along the road in later levels.
 6. **Numbers**: collect *n* apples (each one is counted aloud), then exactly *n* apples appear one by one on a table, each with its number (counted right to left). Zero shows an empty basket: «صفر يعني لا شيء».

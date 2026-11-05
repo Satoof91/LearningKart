@@ -32,8 +32,10 @@ export function drawWord(g, word, x, y, px, color, hiColor, stroke) {
   if (stroke) { g.lineJoin = 'round'; g.lineWidth = px * 0.12; g.strokeStyle = stroke; g.strokeText(word, right, y); }
   g.fillStyle = color; g.fillText(word, right, y);
   if (hiColor) {
-    const first = word[0];
-    const joins = word.length > 1 && !NON_JOIN.includes(first) && word[1] !== ' ';
+    // lam + alef is one ligature (لا): highlight both, otherwise a lone lam is drawn over the ligature
+    const lamAlef = word[0] === 'ل' && 'اأإآ'.includes(word[1] || '');
+    const first = lamAlef ? word.slice(0, 2) : word[0];
+    const joins = !lamAlef && word.length > 1 && !NON_JOIN.includes(first) && word[1] !== ' ';
     g.fillStyle = hiColor; g.fillText(joins ? first + '‍' : first, right, y);
   }
   g.restore();
@@ -60,10 +62,11 @@ export function bubbleTexture(text, colorHex) {
     g.fillStyle = grd; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
     g.lineWidth = 9; g.strokeStyle = 'rgba(255,255,255,.95)'; g.beginPath(); g.arc(cx, cy, r - 5, 0, Math.PI * 2); g.stroke();
     g.direction = 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    const px = text.length > 1 ? 120 : 165;
+    const px = text.length > 1 ? 120 : 178;
     g.font = `800 ${px}px ${FONT}, sans-serif`;
-    g.lineJoin = 'round'; g.lineWidth = 18; g.strokeStyle = shade(colorHex, 0.45); g.strokeText(text, cx, cy + 14);
-    g.fillStyle = '#ffffff'; g.fillText(text, cx, cy + 14);
+    // a thinner outline keeps the dots of ب ت ث / ج ح خ separate: they are what tells these letters apart
+    g.lineJoin = 'round'; g.lineWidth = 10; g.strokeStyle = shade(colorHex, 0.4); g.strokeText(text, cx, cy + 12);
+    g.fillStyle = '#ffffff'; g.fillText(text, cx, cy + 12);
     g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.ellipse(cx - 42, cy - 62, 34, 16, -0.5, 0, Math.PI * 2); g.fill();
   });
   bubbleCache.set(key, t);
