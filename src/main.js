@@ -180,6 +180,7 @@ function startLevel(kind, index) {
   S.collected = 0; S.wrong = 0; S.coins = 0; S.spawned = 0; S.need = kind === 'letter' ? 5 : C.n;
   S.nextU = S.u + 85; S.missStreak = 0; S.countQ = null;
   S.misses = 0; S.assisted = 0; S.reviewDone = false; S.recentWrong = false; S.recall = false; S.lastPraise = -1;
+  S.chipBusy = false; clearTimeout(S.chipT);
   S.lvl = (S.lvl || 0) + 1;
   // HUD
   const glyph = kind === 'letter' ? C.ch : C.digit;
@@ -311,20 +312,20 @@ function hitPickup(p) {
     // review pair: an earlier letter found again, bonus stars, no slot
     S.coins += 3; $('hstars').textContent = S.coins; Sound.collect(4); Sound.star(); haptic('tick');
     confetti.burst(wp, 26, 7, [0x3da5ff, 0xffd60a, 0xffffff], 0.45);
-    Voice.say([p.letter.name, praise()], { gap: 300 });
     chipShowsTarget();
+    Voice.say([p.letter.name, praise(), askNext(p)], { gap: 300 });
     p.pop = 0;
   } else if (p.kind === 'target') {
     const n = S.collected++; S.missStreak = 0; S.recentWrong = false;
     Sound.collect(n); haptic('tick'); confetti.burst(wp, 22, 6, null, 0.45);
     flyToSlot(wp, C.ch, n);
     pingChip();
-    if (S.collected >= S.need) Voice.say([praise(), LINES.gate], { gap: 350 });
-    // odd pickups: the letter's SOUND with its word; even ones: the letter's name + praise
-    else if (S.collected % 2 === 1) Voice.say(LINES.sound(C));
-    else Voice.say([C.name, praise()], { gap: 250 });
     // after 2 letters: recall rounds, the chip hides the glyph and the voice asks for it
-    if (S.collected === 2 && S.need > 3) { S.recall = true; setTimeout(() => { if (S.mode === 'drive' && S.recall) chipShowsTarget(); }, 900); }
+    if (S.collected === 2 && S.need > 3) { S.recall = true; setTimeout(() => { if (S.mode === 'drive' && S.recall && !S.chipBusy && !S.pickups.some(q => q.review && q.alive && q.asked)) chipShowsTarget(); }, 900); }
+    if (S.collected >= S.need) Voice.say([praise(), LINES.gate], { gap: 350 });
+    // odd pickups: the letter's SOUND with its word; even ones: the letter's name + praise; then the next question
+    else if (S.collected % 2 === 1) Voice.say([LINES.sound(C), askNext(p)], { gap: 400 });
+    else Voice.say([C.name, praise(), askNext(p)], { gap: 300 });
     p.pop = 0;
   } else if (p.kind === 'wrong') {
     S.wrong++; S.wobble = 0.6; S.recentWrong = true;
@@ -333,9 +334,12 @@ function hitPickup(p) {
     Sound.wrong(); haptic('bump');
     p.mat.color.setHex(0x9aa5b1);
     // name what was picked, then ask again for the right one, and show it on the chip for a moment
-    Voice.say([LINES.wrong(p.letter), LINES.find(T0)], { gap: 300 });
-    setChip(T0.ch, p.pair && p.pair.review ? 'var(--blue)' : 'var(--pink)'); pingChip();
-    setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2600);
+    const nx = nextTarget(p.pair) || p.pair;
+    const want = nx && nx.letter ? nx.letter : T0;
+    if (nx) nx.asked = true;
+    Voice.say([LINES.wrong(p.letter), LINES.find(want)], { gap: 300 });
+    setChip(want.ch, nx && nx.review ? 'var(--blue)' : 'var(--pink)'); pingChip(); S.chipBusy = true;
+    clearTimeout(S.chipT); S.chipT = setTimeout(() => { S.chipBusy = false; if (S.mode === 'drive') chipShowsTarget(); }, 2600);
     p.pop = 0;
   } else if (p.kind === 'apple') {
     const n = S.collected++;
@@ -352,22 +356,36 @@ function hitPickup(p) {
     S.boostT = 1.6; Sound.boost(); haptic('boost'); p.alive = true; p.used = true;
   }
 }
-// a pair comes into view: ask for the letter when the child needs to listen, and give help after mistakes
+// the next target bubble still ahead of the kart (skipping `not`)
+function nextTarget(not) {
+  let best = null, bd = 1e9;
+  for (const q of S.pickups) { if (q.kind !== 'target' || !q.alive || q === not) continue; const du = T.delta(S.u, q.u); if (du > 1 && du < bd) { bd = du; best = q; } }
+  return best;
+}
+// the question for the next pair, said right after the feedback for this one (never cut off by it):
+// in recall rounds, after a mistake, and always for the review pair
+function askNext(cur0) {
+  const nx = nextTarget(cur0);
+  if (!nx || nx.asked) return null;
+  if (!(nx.review || S.recall || S.missStreak >= 1 || S.recentWrong)) return null;
+  nx.asked = true;
+  if (nx.review) { setChip(nx.letter.ch, 'var(--blue)'); pingChip(); }
+  return LINES.find(nx.letter);
+}
+// the child is not steering at all: bring the letter straight ahead (counted as helped)
+function assistPair(p) {
+  if (!p || p.assist || p.review) return;
+  p.d = 0; p.obj.position.copy(T.pos(p.u, 0)); p.assist = true;
+  if (p.pair) { p.pair.used = true; p.pair.mat.color.setHex(0x9aa5b1); p.pair.mat.opacity = 0.5; p.pair.mat.transparent = true; }
+}
+// a pair comes into view: chip for the review letter, help after mistakes; speaks only if nothing asked yet
 function announcePair(p) {
   p.announced = true;
-  const C = cur();
-  if (p.review) {
-    setChip(p.letter.ch, 'var(--blue)'); pingChip();
-    Voice.say(LINES.find(p.letter), { interrupt: false });
-    return;
-  }
-  if (S.missStreak >= 3) {
-    // the child is not steering at all: bring the letter straight ahead (counted as helped)
-    p.d = 0; p.obj.position.copy(T.pos(p.u, 0)); p.assist = true;
-    if (p.pair) { p.pair.used = true; p.pair.mat.color.setHex(0x9aa5b1); p.pair.mat.opacity = 0.5; p.pair.mat.transparent = true; }
-  }
-  if (p.glow && set().hint && (S.missStreak >= 1 || S.recentWrong)) p.glow.visible = true;
-  if (S.recall || S.missStreak >= 1 || S.recentWrong) Voice.say(LINES.find(C), { interrupt: false });
+  if (p.review && nextTarget(null) === p) { setChip(p.letter.ch, 'var(--blue)'); pingChip(); }
+  if (!p.review && S.missStreak >= 3) assistPair(p);
+  if (!p.review && p.glow && set().hint && (S.missStreak >= 1 || S.recentWrong)) p.glow.visible = true;
+  // fallback only for the nearest pair: a pair further back would be cut off by the feedback of the one in front
+  if (!p.asked && !Voice.busy && nextTarget(null) === p && (p.review || S.recall || S.missStreak >= 1 || S.recentWrong)) { p.asked = true; Voice.say(LINES.find(p.letter)); }
 }
 function updatePickups(dt) {
   const t = S.t;
@@ -400,6 +418,13 @@ function updatePickups(dt) {
       p.missed = true;
       if (p.review) chipShowsTarget();
       else { S.missStreak++; S.misses++; Store.addMiss(S.index); }
+      const nx = nextTarget(p);
+      if (nx && !nx.review) {
+        if (S.missStreak >= 3) assistPair(nx);
+        if (nx.glow && set().hint) nx.glow.visible = true;
+      }
+      const q = askNext(p);
+      if (q) Voice.say(q, { interrupt: false });
     }
     if (du < -4.5 && p.pop == null) p.dead = true;
     else if (du < -10) p.dead = true;
