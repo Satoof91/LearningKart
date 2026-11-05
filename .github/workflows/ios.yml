@@ -1,0 +1,44 @@
+name: iOS build check
+
+# Compiles the iOS app for the simulator (no Apple account needed) to catch build errors early.
+# A build for a real iPhone / TestFlight needs Apple signing: see README.md > iOS.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ios-simulator:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: |
+          npm run build
+          npx cap sync ios
+
+      - name: Build for iOS Simulator (unsigned)
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Zip the simulator app
+        run: cd build/Build/Products/Debug-iphonesimulator && zip -qr "$GITHUB_WORKSPACE/LearningKart-simulator.zip" App.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LearningKart-ios-simulator
+          path: LearningKart-simulator.zip

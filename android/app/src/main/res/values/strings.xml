@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LearningKart</string>
+    <string name="title_activity_main">LearningKart</string>
+    <string name="package_name">com.example.learningkart</string>
+    <string name="custom_url_scheme">com.example.learningkart</string>
+</resources>

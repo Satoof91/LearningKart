@@ -1,0 +1,19 @@
+{
+  "appId": "com.example.learningkart",
+  "appName": "LearningKart",
+  "webDir": "www",
+  "backgroundColor": "#8fd3ff",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#8fd3ff"
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#8fd3ff",
+    "preferredContentMode": "mobile"
+  },
+  "plugins": {
+    "StatusBar": { "overlaysWebView": true },
+    "ScreenOrientation": {}
+  }
+}
