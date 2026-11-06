@@ -64,6 +64,23 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 240000 });
   const passive = await p.evaluate(() => ({ stars: window.__lk.Store.data.letters[4], misses: window.__lk.S.misses, assisted: window.__lk.S.assisted }));
   console.log('passive child', JSON.stringify(passive), passive.stars <= 1 ? 'OK' : 'TOO MANY STARS');
+  // English track: letter A, number 3, and the ABC map with every animal (shows all new animals)
+  await p.evaluate(() => { window.__lk.startLevel('letter', 0, 'en'); }); await auto();
+  await wait(1200); await p.screenshot({ path: OUT + '/17-en-intro.png' });
+  await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 90000 });
+  await wait(800); await p.screenshot({ path: OUT + '/18-en-drive.png' });
+  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 120000 });
+  await wait(2500); await p.screenshot({ path: OUT + '/19-en-celebrate.png' });
+  const enProg = await p.evaluate(() => window.__lk.Store.prog('letter', 'en').slice(0, 2));
+  console.log('english progress', JSON.stringify(enProg));
+  await p.evaluate(() => window.__lk.startLevel('number', 3, 'en')); await auto();
+  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 120000 });
+  await wait(4500); await p.screenshot({ path: OUT + '/20-en-number.png' });
+  await p.evaluate(() => { clearInterval(window.__ap); const L = window.__lk; L.Store.prog('letter', 'en').fill(3); L.toMap('enletter'); });
+  for (const [i, x] of [[0, 0], [1, 0.5], [2, 1]]) {
+    await p.evaluate(x => { const el = document.getElementById('path'); el.scrollLeft = (el.scrollWidth - el.clientWidth) * x; }, x);
+    await wait(2500); await p.screenshot({ path: OUT + `/21-en-map-${i}.png` });
+  }
   console.log('paused', paused);
   console.log('errors', errs.length ? errs : 'none');
   await b.close();

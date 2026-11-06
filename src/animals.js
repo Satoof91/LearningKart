@@ -548,10 +548,74 @@ const BUILDERS = {
     mesh(a.head, cone(0.18, 0.5, 8), 0xf1ece2, 0, 0.35, 0.95, 0.2);
     return a;
   },
-  dove: () => bird('dove', { color: 0xf1f3f5, belly: 0xffffff, wing: 0xdee2e6, wingStripe: 0xadb5bd, headColor: 0xe9ecef, beak: 0xff8787, beakL: 0.45, bodyR: 0.9, bodyY: 1.25, legColor: 0xff8787 })
+  dove: () => bird('dove', { color: 0xf1f3f5, belly: 0xffffff, wing: 0xdee2e6, wingStripe: 0xadb5bd, headColor: 0xe9ecef, beak: 0xff8787, beakL: 0.45, bodyR: 0.9, bodyY: 1.25, legColor: 0xff8787 }),
+  // ---- animals for the English alphabet ----
+  iguana: () => lizard('iguana', { color: 0x52b788, belly: 0xb7e4c7, dark: 0x2d6a4f, spikes: true, dewlap: 0xf4a261 }),
+  newt: () => lizard('newt', { color: 0xff8c42, belly: 0xffd166, dark: 0x9d4400, map: spots(0xff8c42, 0x6a2c00, 26, 6, 21) }),
+  jaguar: () => quad('jaguar', { color: 0xf4a261, map: spots(0xf4a261, 0x3d2b1f, 60, 8, 5), belly: 0xfff3e0, bodyR: 1.05, bodyL: 1.7, bodyY: 1.9, legR: 0.28, foot: 0xfff3e0, neckL: 0.25, headR: 0.9, headColor: 0xf4a261, snoutL: 0.35, snoutColor: 0xfff3e0, ears: 'round', earInner: 0x3d2b1f, tail: 'thin', tailL: 1.8, tailUp: -0.2, tailColor: 0xe76f51 }),
+  zebra: () => {
+    const st = stripes(0xffffff, 0x1b1b1b, 18);
+    return quad('zebra', { color: 0xffffff, map: st, neckMap: st, belly: null, bodyR: 1.0, bodyL: 1.65, bodyY: 2.6, legR: 0.22, foot: 0x1b1b1b, neckL: 1.1, neckTilt: 0.45, neckR: 0.4, headR: 0.6, snoutL: 0.85, snoutR: 0.36, snoutColor: 0x343a40, nose: 0x111111, ears: 'pointy', earInner: 0x1b1b1b, tail: 'tuft', tailL: 1.4, tailUp: -1.1, tailColor: 0xffffff, tuftColor: 0x1b1b1b, mane: 'strip', maneColor: 0x1b1b1b });
+  },
+  unicorn: () => {
+    const a = quad('unicorn', { color: 0xfdf6ff, belly: 0xffffff, bodyR: 1.0, bodyL: 1.7, bodyY: 2.7, legR: 0.23, foot: 0xffd166, neckL: 1.15, neckTilt: 0.45, neckR: 0.41, headR: 0.62, snoutL: 0.85, snoutR: 0.37, snoutColor: 0xffe5ec, ears: 'pointy', earInner: 0xffafcc, tail: 'hair', tailL: 1.9, tailUp: -1.0, tailColor: 0xc77dff, mane: 'strip', maneColor: 0xff70a6 });
+    const horn = group(a.head, 0, 0.55, 0.3); horn.rotation.x = 0.45;
+    mesh(horn, cone(0.13, 0.95, 10), 0xffd166, 0, 0.45, 0);
+    for (let k = 0; k < 3; k++) mesh(horn, cyl(0.1 - k * 0.025, 0.11 - k * 0.025, 0.05, 10), 0xfff3b0, 0, 0.15 + k * 0.25, 0);
+    return a;
+  },
+  ox: () => {
+    const a = quad('ox', { color: 0x8d5524, belly: 0xc68b59, bodyR: 1.3, bodyL: 1.8, bodyY: 2.1, legR: 0.34, foot: 0x3b2416, neckL: 0.2, neckTilt: 0.9, headR: 0.85, snoutL: 0.4, snoutR: 0.45, snoutColor: 0xe6ccb2, nose: 0x5c3b2a, ears: 'side', earInner: 0xd4a373, tail: 'tuft', tailL: 1.3, tailUp: -1.2, tuftColor: 0x3b2416 });
+    for (const s of [1, -1]) {
+      const h = group(a.head, s * 0.55, 0.45, -0.05); h.rotation.z = -s * 1.25;
+      mesh(h, cyl(0.07, 0.14, 0.7, 8), 0xf1e3c8, 0, 0.35, 0);
+      const t = group(h, 0, 0.7, 0); t.rotation.z = s * 1.1; mesh(t, cone(0.07, 0.4, 8), 0xf1e3c8, 0, 0.2, 0);
+    }
+    return a;
+  },
+  yak: () => {
+    const a = quad('yak', { color: 0x3d2b1f, belly: 0x5c4033, bodyR: 1.35, bodyL: 1.6, bodyY: 2.0, legR: 0.33, legColor: 0x2b1d14, foot: 0x1b1b1b, neckL: 0.15, neckTilt: 0.9, headR: 0.8, snoutL: 0.35, snoutR: 0.4, snoutColor: 0x6f4e37, ears: 'side', earInner: 0x6f4e37, tail: 'hair', tailL: 1.3, tailUp: -1.2, tailColor: 0x2b1d14 });
+    // long shaggy coat hanging down
+    for (let k = 0; k < 16; k++) { const t = k / 16 * TAU; sph(a.body, 0x4a3426, 0.42, Math.cos(t) * 1.15, -0.9, Math.sin(t) * 1.45, 0.9, 1.5, 0.9, null, true); }
+    sph(a.head, 0x4a3426, 0.55, 0, 0.55, -0.1, 1.3, 0.6, 1);
+    for (const s of [1, -1]) {
+      const h = group(a.head, s * 0.5, 0.5, -0.05); h.rotation.z = -s * 1.0;
+      mesh(h, cyl(0.06, 0.12, 0.6, 8), 0xf1e3c8, 0, 0.3, 0);
+      const t = group(h, 0, 0.6, 0); t.rotation.z = s * 1.3; mesh(t, cone(0.06, 0.45, 8), 0xf1e3c8, 0, 0.22, 0);
+    }
+    return a;
+  },
+  owl: () => {
+    const a = bird('owl', { color: 0x8d6e63, belly: 0xefebe9, wing: 0x6d4c41, wingStripe: 0xd7ccc8, headColor: 0x8d6e63, face: 0xf5e6d3, beak: 0xf9a825, hook: true, beakL: 0.4, bodyR: 1.0, bodyY: 1.3, headR: 0.85, neckUp: 0.55, tailColor: 0x6d4c41 });
+    const H = a.head, hr = 0.85;
+    for (const s of [1, -1]) {
+      sph(H, 0xffb703, hr * 0.42, s * hr * 0.45, hr * 0.2, hr * 0.6, 1, 1, 0.35);   // big round eye rings
+      const t = group(H, s * hr * 0.55, hr * 0.8, 0); t.rotation.z = -s * 0.35; mesh(t, cone(hr * 0.17, hr * 0.55, 6), 0x6d4c41, 0, hr * 0.2, 0);
+    }
+    return a;
+  },
+  quail: () => {
+    const a = bird('quail', { color: 0xa47148, belly: 0xe6ccb2, wing: 0x7f5539, wingStripe: 0xfff1e6, headColor: 0x7f5539, face: 0xffffff, beak: 0x343a40, beakL: 0.4, bodyR: 0.85, bodyY: 1.0 });
+    const plume = group(a.head, 0, 0.55, 0.15); plume.rotation.x = 0.6;
+    sph(plume, 0x1b1b1b, 0.13, 0, 0.25, 0, 0.8, 2.0, 0.8);
+    return a;
+  },
+  vulture: () => {
+    const a = bird('vulture', { color: 0x3e3e3e, belly: 0x5a5a5a, wing: 0x2b2b2b, wingStripe: 0x8a8a8a, headColor: 0xf4a3a3, beak: 0xf1e3c8, hook: true, beakL: 0.65, bodyR: 1.1, bodyY: 1.6, neckUp: 1.3, tailColor: 0x2b2b2b });
+    sph(a.body, 0xf5f5f5, 0.6, 0, 0.75, 0.6, 1.25, 0.6, 1.0, null, true); // white ruff collar
+    return a;
+  }
 };
 
-const SCALE = { crocodile: 1.3, turtle: 1.25, frog: 1.15, sparrow: 1.25, dove: 1.15, duck: 1.1, hoopoe: 1.15, monkey: 1.1 };
+// low, long-tailed reptiles (iguana, newt)
+function lizard(id, o) {
+  const a = quad(id, { color: o.color, map: o.map, belly: o.belly, bodyR: 0.6, bodySy: 0.65, bodyL: 1.35, bodyY: 0.8, legR: 0.15, foot: o.dark, neckL: 0.15, neckTilt: 1.1, headR: 0.5, headSy: 0.75, snoutL: 0.45, snoutR: 0.3, snoutColor: o.color, nose: o.dark, ears: 'none', tail: 'thin', tailL: 2.6, tailUp: -0.12, tailColor: o.color });
+  if (o.spikes) for (let k = 0; k < 7; k++) mesh(a.body, cone(0.07, 0.32, 5), o.dark, 0, 0.42, 1.0 - k * 0.32);
+  if (o.dewlap) sph(a.head, o.dewlap, 0.22, 0, -0.4, 0.25, 0.6, 1.2, 1);
+  return a;
+}
+
+const SCALE = { iguana: 1.5, newt: 1.4, quail: 1.25, owl: 1.1, crocodile: 1.3, turtle: 1.25, frog: 1.15, sparrow: 1.25, dove: 1.15, duck: 1.1, hoopoe: 1.15, monkey: 1.1 };
 export const ANIMAL_IDS = Object.keys(BUILDERS);
 export function makeAnimal(id) {
   const b = BUILDERS[id];

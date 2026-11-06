@@ -4,8 +4,8 @@
 Run this on a normal PC (it needs internet access to Microsoft's speech service):
 
     pip install edge-tts
-    python tools/make-voice-edge.py            # Saudi female voice (Zariyah)
-    python tools/make-voice-edge.py --voice ar-SA-HamedNeural   # Saudi male voice
+    python tools/make-voice-edge.py            # Saudi male voice (Hamed) + US English (Jenny)
+    python tools/make-voice-edge.py --voice ar-SA-ZariyahNeural   # Saudi female voice
 
 Clips are written to assets/voice/<id>.mp3 next to lines.json. Existing clips are
 kept unless you pass --force. Afterwards run `npm run build` (or `npm test`) and
@@ -22,7 +22,9 @@ OUT = os.path.join(HERE, '..', 'assets', 'voice')
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--voice', default='ar-SA-ZariyahNeural')
+    ap.add_argument('--voice', default='ar-SA-HamedNeural', help='Arabic voice')
+    ap.add_argument('--voice-en', default='en-US-JennyNeural', help='English voice (English track lines)')
+    ap.add_argument('--rate-en', default='-8%')
     ap.add_argument('--rate', default='-10%', help='speech speed, e.g. -10% (slower is better for small children)')
     ap.add_argument('--pitch', default='+5Hz')
     ap.add_argument('--force', action='store_true', help='regenerate clips that already exist')
@@ -42,7 +44,8 @@ def main():
             if os.path.exists(path) and not a.force:
                 skipped += 1; continue
             try:
-                tts = edge_tts.Communicate(L['text'], a.voice, rate=a.rate, pitch=a.pitch)
+                en = L.get('lang') == 'en'
+                tts = edge_tts.Communicate(L['text'], a.voice_en if en else a.voice, rate=a.rate_en if en else a.rate, pitch='+0Hz' if en else a.pitch)
                 await tts.save(path)
                 done += 1
                 print(f"ok   {L['id']}  {L['text']}")

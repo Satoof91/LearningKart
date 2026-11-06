@@ -988,5 +988,1121 @@
     "id": "praise-6",
     "text": "عَظِيم!",
     "note": "تشجيع"
+  },
+  {
+    "id": "en-letter-01-name",
+    "text": "Letter A",
+    "note": "letter A",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-01-word",
+    "text": "alligator",
+    "note": "Alligator",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-01-intro",
+    "text": "Let's find the letter A!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-01-wrong",
+    "text": "That is the letter A.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-01-sound",
+    "text": "A is for alligator.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-01-find",
+    "text": "Where is the letter A?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-02-name",
+    "text": "Letter B",
+    "note": "letter B",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-02-word",
+    "text": "bear",
+    "note": "Bear",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-02-intro",
+    "text": "Let's find the letter B!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-02-wrong",
+    "text": "That is the letter B.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-02-sound",
+    "text": "B is for bear.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-02-find",
+    "text": "Where is the letter B?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-03-name",
+    "text": "Letter C",
+    "note": "letter C",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-03-word",
+    "text": "camel",
+    "note": "Camel",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-03-intro",
+    "text": "Let's find the letter C!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-03-wrong",
+    "text": "That is the letter C.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-03-sound",
+    "text": "C is for camel.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-03-find",
+    "text": "Where is the letter C?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-04-name",
+    "text": "Letter D",
+    "note": "letter D",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-04-word",
+    "text": "duck",
+    "note": "Duck",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-04-intro",
+    "text": "Let's find the letter D!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-04-wrong",
+    "text": "That is the letter D.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-04-sound",
+    "text": "D is for duck.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-04-find",
+    "text": "Where is the letter D?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-05-name",
+    "text": "Letter E",
+    "note": "letter E",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-05-word",
+    "text": "elephant",
+    "note": "Elephant",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-05-intro",
+    "text": "Let's find the letter E!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-05-wrong",
+    "text": "That is the letter E.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-05-sound",
+    "text": "E is for elephant.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-05-find",
+    "text": "Where is the letter E?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-06-name",
+    "text": "Letter F",
+    "note": "letter F",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-06-word",
+    "text": "fox",
+    "note": "Fox",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-06-intro",
+    "text": "Let's find the letter F!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-06-wrong",
+    "text": "That is the letter F.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-06-sound",
+    "text": "F is for fox.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-06-find",
+    "text": "Where is the letter F?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-07-name",
+    "text": "Letter G",
+    "note": "letter G",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-07-word",
+    "text": "giraffe",
+    "note": "Giraffe",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-07-intro",
+    "text": "Let's find the letter G!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-07-wrong",
+    "text": "That is the letter G.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-07-sound",
+    "text": "G is for giraffe.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-07-find",
+    "text": "Where is the letter G?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-08-name",
+    "text": "Letter H",
+    "note": "letter H",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-08-word",
+    "text": "horse",
+    "note": "Horse",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-08-intro",
+    "text": "Let's find the letter H!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-08-wrong",
+    "text": "That is the letter H.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-08-sound",
+    "text": "H is for horse.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-08-find",
+    "text": "Where is the letter H?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-09-name",
+    "text": "Letter I",
+    "note": "letter I",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-09-word",
+    "text": "iguana",
+    "note": "Iguana",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-09-intro",
+    "text": "Let's find the letter I!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-09-wrong",
+    "text": "That is the letter I.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-09-sound",
+    "text": "I is for iguana.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-09-find",
+    "text": "Where is the letter I?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-10-name",
+    "text": "Letter J",
+    "note": "letter J",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-10-word",
+    "text": "jaguar",
+    "note": "Jaguar",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-10-intro",
+    "text": "Let's find the letter J!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-10-wrong",
+    "text": "That is the letter J.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-10-sound",
+    "text": "J is for jaguar.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-10-find",
+    "text": "Where is the letter J?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-11-name",
+    "text": "Letter K",
+    "note": "letter K",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-11-word",
+    "text": "kangaroo",
+    "note": "Kangaroo",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-11-intro",
+    "text": "Let's find the letter K!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-11-wrong",
+    "text": "That is the letter K.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-11-sound",
+    "text": "K is for kangaroo.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-11-find",
+    "text": "Where is the letter K?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-12-name",
+    "text": "Letter L",
+    "note": "letter L",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-12-word",
+    "text": "lion",
+    "note": "Lion",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-12-intro",
+    "text": "Let's find the letter L!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-12-wrong",
+    "text": "That is the letter L.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-12-sound",
+    "text": "L is for lion.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-12-find",
+    "text": "Where is the letter L?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-13-name",
+    "text": "Letter M",
+    "note": "letter M",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-13-word",
+    "text": "monkey",
+    "note": "Monkey",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-13-intro",
+    "text": "Let's find the letter M!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-13-wrong",
+    "text": "That is the letter M.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-13-sound",
+    "text": "M is for monkey.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-13-find",
+    "text": "Where is the letter M?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-14-name",
+    "text": "Letter N",
+    "note": "letter N",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-14-word",
+    "text": "newt",
+    "note": "Newt",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-14-intro",
+    "text": "Let's find the letter N!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-14-wrong",
+    "text": "That is the letter N.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-14-sound",
+    "text": "N is for newt.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-14-find",
+    "text": "Where is the letter N?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-15-name",
+    "text": "Letter O",
+    "note": "letter O",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-15-word",
+    "text": "owl",
+    "note": "Owl",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-15-intro",
+    "text": "Let's find the letter O!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-15-wrong",
+    "text": "That is the letter O.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-15-sound",
+    "text": "O is for owl.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-15-find",
+    "text": "Where is the letter O?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-16-name",
+    "text": "Letter P",
+    "note": "letter P",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-16-word",
+    "text": "peacock",
+    "note": "Peacock",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-16-intro",
+    "text": "Let's find the letter P!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-16-wrong",
+    "text": "That is the letter P.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-16-sound",
+    "text": "P is for peacock.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-16-find",
+    "text": "Where is the letter P?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-17-name",
+    "text": "Letter Q",
+    "note": "letter Q",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-17-word",
+    "text": "quail",
+    "note": "Quail",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-17-intro",
+    "text": "Let's find the letter Q!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-17-wrong",
+    "text": "That is the letter Q.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-17-sound",
+    "text": "Q is for quail.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-17-find",
+    "text": "Where is the letter Q?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-18-name",
+    "text": "Letter R",
+    "note": "letter R",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-18-word",
+    "text": "rhino",
+    "note": "Rhino",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-18-intro",
+    "text": "Let's find the letter R!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-18-wrong",
+    "text": "That is the letter R.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-18-sound",
+    "text": "R is for rhino.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-18-find",
+    "text": "Where is the letter R?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-19-name",
+    "text": "Letter S",
+    "note": "letter S",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-19-word",
+    "text": "sheep",
+    "note": "Sheep",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-19-intro",
+    "text": "Let's find the letter S!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-19-wrong",
+    "text": "That is the letter S.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-19-sound",
+    "text": "S is for sheep.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-19-find",
+    "text": "Where is the letter S?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-20-name",
+    "text": "Letter T",
+    "note": "letter T",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-20-word",
+    "text": "tiger",
+    "note": "Tiger",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-20-intro",
+    "text": "Let's find the letter T!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-20-wrong",
+    "text": "That is the letter T.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-20-sound",
+    "text": "T is for tiger.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-20-find",
+    "text": "Where is the letter T?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-21-name",
+    "text": "Letter U",
+    "note": "letter U",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-21-word",
+    "text": "unicorn",
+    "note": "Unicorn",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-21-intro",
+    "text": "Let's find the letter U!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-21-wrong",
+    "text": "That is the letter U.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-21-sound",
+    "text": "U is for unicorn.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-21-find",
+    "text": "Where is the letter U?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-22-name",
+    "text": "Letter V",
+    "note": "letter V",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-22-word",
+    "text": "vulture",
+    "note": "Vulture",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-22-intro",
+    "text": "Let's find the letter V!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-22-wrong",
+    "text": "That is the letter V.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-22-sound",
+    "text": "V is for vulture.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-22-find",
+    "text": "Where is the letter V?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-23-name",
+    "text": "Letter W",
+    "note": "letter W",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-23-word",
+    "text": "wolf",
+    "note": "Wolf",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-23-intro",
+    "text": "Let's find the letter W!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-23-wrong",
+    "text": "That is the letter W.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-23-sound",
+    "text": "W is for wolf.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-23-find",
+    "text": "Where is the letter W?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-24-name",
+    "text": "Letter X",
+    "note": "letter X",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-24-word",
+    "text": "ox",
+    "note": "Ox",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-24-intro",
+    "text": "Let's find the letter X!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-24-wrong",
+    "text": "That is the letter X.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-24-sound",
+    "text": "X is for ox.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-24-find",
+    "text": "Where is the letter X?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-25-name",
+    "text": "Letter Y",
+    "note": "letter Y",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-25-word",
+    "text": "yak",
+    "note": "Yak",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-25-intro",
+    "text": "Let's find the letter Y!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-25-wrong",
+    "text": "That is the letter Y.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-25-sound",
+    "text": "Y is for yak.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-25-find",
+    "text": "Where is the letter Y?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-26-name",
+    "text": "Letter Z",
+    "note": "letter Z",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-26-word",
+    "text": "zebra",
+    "note": "Zebra",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-26-intro",
+    "text": "Let's find the letter Z!",
+    "note": "level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-26-wrong",
+    "text": "That is the letter Z.",
+    "note": "picked by mistake",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-26-sound",
+    "text": "Z is for zebra.",
+    "note": "letter + word",
+    "lang": "en"
+  },
+  {
+    "id": "en-letter-26-find",
+    "text": "Where is the letter Z?",
+    "note": "question",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-00",
+    "text": "zero",
+    "note": "number 0",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-00-intro",
+    "text": "Zero means nothing.",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-01",
+    "text": "one",
+    "note": "number 1",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-01-intro",
+    "text": "Let's count to one!",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-02",
+    "text": "two",
+    "note": "number 2",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-02-intro",
+    "text": "Let's count to two!",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-03",
+    "text": "three",
+    "note": "number 3",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-03-intro",
+    "text": "Let's count to three!",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-04",
+    "text": "four",
+    "note": "number 4",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-04-intro",
+    "text": "Let's count to four!",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-05",
+    "text": "five",
+    "note": "number 5",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-05-intro",
+    "text": "Let's count to five!",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-06",
+    "text": "six",
+    "note": "number 6",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-06-intro",
+    "text": "Let's count to six!",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-07",
+    "text": "seven",
+    "note": "number 7",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-07-intro",
+    "text": "Let's count to seven!",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-08",
+    "text": "eight",
+    "note": "number 8",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-08-intro",
+    "text": "Let's count to eight!",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-09",
+    "text": "nine",
+    "note": "number 9",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-09-intro",
+    "text": "Let's count to nine!",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-10",
+    "text": "ten",
+    "note": "number 10",
+    "lang": "en"
+  },
+  {
+    "id": "en-number-10-intro",
+    "text": "Let's count to ten!",
+    "note": "number level start",
+    "lang": "en"
+  },
+  {
+    "id": "en-gate",
+    "text": "Go to the gate!",
+    "note": "after collecting",
+    "lang": "en"
+  },
+  {
+    "id": "en-new-friend",
+    "text": "A new friend in your zoo!",
+    "note": "new animal",
+    "lang": "en"
+  },
+  {
+    "id": "en-praise-1",
+    "text": "Great job!",
+    "note": "praise",
+    "lang": "en"
+  },
+  {
+    "id": "en-praise-2",
+    "text": "Awesome!",
+    "note": "praise",
+    "lang": "en"
+  },
+  {
+    "id": "en-praise-3",
+    "text": "Well done!",
+    "note": "praise",
+    "lang": "en"
+  },
+  {
+    "id": "en-praise-4",
+    "text": "Super!",
+    "note": "praise",
+    "lang": "en"
+  },
+  {
+    "id": "en-praise-5",
+    "text": "You did it!",
+    "note": "praise",
+    "lang": "en"
+  },
+  {
+    "id": "en-praise-6",
+    "text": "Fantastic!",
+    "note": "praise",
+    "lang": "en"
   }
 ]

@@ -75,17 +75,22 @@ export const Voice = {
   async _speak(text, my) {
     const clip = BY_TEXT.get(text);
     if (clip) return this._clip(clip, my);
-    if (this.available === false) return; // no Arabic voice: stay silent rather than mispronounce
+    // English lines (English track) use the device's English voice; Arabic ones never fall back to a non-Arabic voice
+    const en = !/[؀-ۿ]/.test(text);
+    if (!en && this.available === false) return; // no Arabic voice: stay silent rather than mispronounce
     if (isNative) {
-      const opt = { text, lang: 'ar-SA', rate: this.rate, pitch: this.pitch, volume: 1.0, category: 'ambient', queueStrategy: 0 };
-      if (nativeVoiceIdx >= 0) opt.voice = nativeVoiceIdx;
+      const opt = { text, lang: en ? 'en-US' : 'ar-SA', rate: this.rate, pitch: this.pitch, volume: 1.0, category: 'ambient', queueStrategy: 0 };
+      if (!en && nativeVoiceIdx >= 0) opt.voice = nativeVoiceIdx;
       await TextToSpeech.speak(opt);
       return;
     }
-    if (!('speechSynthesis' in window) || (!webVoice && this.available !== null)) return;
+    if (!('speechSynthesis' in window) || (!en && !webVoice && this.available !== null)) return;
+    const enVoice = en ? speechSynthesis.getVoices().find(v => /^en[-_]US/i.test(v.lang)) || speechSynthesis.getVoices().find(v => /^en/i.test(v.lang)) : null;
+    if (en && !enVoice && speechSynthesis.getVoices().length) return;
     await new Promise(res => {
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = webVoice ? webVoice.lang : 'ar-SA'; if (webVoice) u.voice = webVoice; u.rate = this.rate; u.pitch = this.pitch;
+      const v = en ? enVoice : webVoice;
+      u.lang = v ? v.lang : (en ? 'en-US' : 'ar-SA'); if (v) u.voice = v; u.rate = this.rate; u.pitch = this.pitch;
       let done = false; const fin = () => { if (!done) { done = true; res(); } };
       u.onend = fin; u.onerror = fin;
       setTimeout(fin, 1800 + text.length * 160); // some browsers never fire onend

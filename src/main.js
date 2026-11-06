@@ -1,7 +1,9 @@
 // LearningKart — Arabic letters & numbers zoo kart game for ages 3-6.
 import * as THREE from 'three';
 import { initPlatform, haptic, Tilt, setHaptics, isNative as isNativeApp } from './platform.js';
-import { LETTERS, NUMBERS, PRAISE, PRAISE_SHOW, LINES, distractorPool, arDigits } from './data.js';
+import { TRACKS, arDigits } from './data.js';
+// current language track (Arabic or English): letters, numbers, spoken lines, praise, digits
+let TR = TRACKS.ar;
 // How a letter level teaches (ages 3-6):
 //  - every pair: the right letter on one side, a different letter on the other; the first pairs use a
 //    clearly different shape, later pairs a look-alike that differs only by its dots
@@ -123,11 +125,11 @@ Voice.onEnd = () => Sound.setDuck(false);
 function slotPlan(excludeIdx) {
   // animals already met go into the enclosures (most recent first), the rest show a mystery "؟"
   const met = [];
-  Store.data.letters.forEach((st, i) => { if (st > 0 && i !== excludeIdx) met.push(i); });
+  Store.prog('letter', TR.lang).forEach((st, i) => { if (st > 0 && i !== excludeIdx) met.push(i); });
   met.reverse();
   const plan = [];
   const upcoming = [];
-  for (let i = 0; i < LETTERS.length; i++) if (!Store.data.letters[i] && i !== excludeIdx) upcoming.push(i);
+  for (let i = 0; i < TR.letters.length; i++) if (!Store.prog('letter', TR.lang)[i] && i !== excludeIdx) upcoming.push(i);
   for (let k = 0; k < ZOO.slots.length; k++) {
     if (k < met.length) plan.push({ i: met[k], known: true });
     else { const i = upcoming[(k - met.length) % Math.max(1, upcoming.length)]; plan.push(i == null ? null : { i, known: false }); }
@@ -147,7 +149,7 @@ function populateZoo(excludeIdx = -1, showcase = false) {
     if (h && h.key === key) { h.group.visible = true; return; }
     if (h) { scene.remove(h.group); disposeOwned(h.group); }
     if (!p) { S.slotHabs[k] = null; return; }
-    const L = LETTERS[p.i];
+    const L = TR.letters[p.i];
     const hab = makeHabitat(L.biome, p.known ? [L.animal] : [], p.known ? { big: L.ch, word: L.word } : { big: '؟', word: '' }, { seed: k * 13 + 1 });
     hab.group.position.set(slot.x, 0, slot.z); hab.group.rotation.y = slot.face;
     hab.key = key; scene.add(hab.group); S.slotHabs[k] = hab;
@@ -163,7 +165,7 @@ function disposeOwned(obj) {
 }
 
 // ---------- level setup ----------
-const cur = () => (S.kind === 'letter' ? LETTERS[S.index] : NUMBERS[S.index]);
+const cur = () => (S.kind === 'letter' ? TR.letters[S.index] : TR.numbers[S.index]);
 function clearLevel() {
   for (const p of S.pickups) removePickup(p);
   S.pickups = [];
@@ -171,8 +173,10 @@ function clearLevel() {
   if (S.stage) { scene.remove(S.stage.group); disposeOwned(S.stage.group); S.stage = null; }
   Voice.stop();
 }
-function startLevel(kind, index) {
+function startLevel(kind, index, lang) {
   clearLevel();
+  if (lang) TR = TRACKS[lang];
+  S.lang = TR.lang;
   S.kind = kind; S.index = index; S.paused = false;
   const C = cur();
   populateZoo(kind === 'letter' ? index : -1);
@@ -192,9 +196,10 @@ function startLevel(kind, index) {
   showScreen('hud');
   $('celebrate').classList.add('hidden'); $('pause').classList.add('hidden');
   // intro card
-  $('introglyph').textContent = glyph;
+  $('introglyph').textContent = kind === 'letter' && C.card ? C.card : glyph;
   $('introglyph').style.color = kind === 'letter' ? 'var(--pink)' : 'var(--org)';
-  $('introtext').textContent = kind === 'letter' ? `اجمع حرف ${C.ch}` : (C.n ? `اجمع ${glyph} تفاحات` : 'صفر = لا شيء');
+  $('introtext').textContent = kind === 'letter' ? TR.ui.collect(C) : (C.n ? TR.ui.apples(glyph) : TR.ui.zero);
+  $('introtext').dir = TR.lang === 'en' ? 'ltr' : 'rtl';
   // show the animal from the start: letter -> sound -> animal is the memory hook
   const img = $('introimg');
   if (kind === 'letter') { img.src = thumb(C.animal); img.classList.remove('hidden'); } else img.classList.add('hidden');
@@ -206,7 +211,7 @@ function startLevel(kind, index) {
 }
 function sayIntro() {
   const C = cur(), lvl = S.lvl;
-  const lines = S.kind === 'letter' ? [C.name, LINES.sound(C), LINES.letterIntro(C)] : [C.say, LINES.numberIntro(C)];
+  const lines = S.kind === 'letter' ? [C.name, TR.lines.sound(C), TR.lines.letterIntro(C)] : [C.say, TR.lines.numberIntro(C)];
   // only this level's intro may end the intro (a stopped older promise must not skip the new one)
   Voice.say(lines, { gap: 350 }).then(() => { if (S.lvl === lvl && !S.paused) S.introDone = true; });
 }
@@ -218,7 +223,7 @@ function setChip(text, bg) {
 function chipShowsTarget() {
   const C = cur();
   if (S.kind !== 'letter') return setChip(C.digit, 'var(--org)');
-  setChip(S.recall ? '؟' : C.ch, S.recall ? 'var(--purple)' : 'var(--pink)');
+  setChip(S.recall ? (TR.lang === 'en' ? '?' : '؟') : C.ch, S.recall ? 'var(--purple)' : 'var(--pink)');
 }
 function pingChip() { $('target').classList.remove('ping'); void $('target').offsetWidth; $('target').classList.add('ping'); }
 
@@ -247,11 +252,11 @@ function bubble(u, d, L, isTarget, color) {
 function weakestLearned() {
   let best = -1, score = -Infinity;
   for (let i = 0; i < S.index; i++) {
-    if (!Store.data.letters[i]) continue;
-    const sc = (Store.data.miss[i] || 0) * 2 - Store.data.letters[i] + Math.random();
+    if (!Store.prog('letter', TR.lang)[i]) continue;
+    const sc = (Store.missArr(TR.lang)[i] || 0) * 2 - Store.prog('letter', TR.lang)[i] + Math.random();
     if (sc > score) { score = sc; best = i; }
   }
-  return best < 0 ? null : LETTERS[best];
+  return best < 0 ? null : TR.letters[best];
 }
 function spawnAhead() {
   const C = cur();
@@ -263,8 +268,8 @@ function spawnAhead() {
     const target = R || C;
     // difficulty ladder: a clearly different shape first; a dotted look-alike only once the child is doing well
     const hard = !R && S.collected >= 2 && S.missStreak === 0 && !S.recentWrong;
-    let pool = distractorPool(LETTERS.indexOf(target), hard).filter(L => L !== C && L !== target);
-    if (!pool.length) pool = distractorPool(LETTERS.indexOf(target), false).filter(L => L !== C && L !== target);
+    let pool = TR.distractors(TR.letters.indexOf(target), hard).filter(L => L !== C && L !== target);
+    if (!pool.length) pool = TR.distractors(TR.letters.indexOf(target), false).filter(L => L !== C && L !== target);
     const W = pick(pool);
     const tp = addPickup(bubble(S.nextU, side * 4.4, target, true, colA));
     const wp = addPickup(bubble(S.nextU, -side * 4.4, W, false, colB));
@@ -298,11 +303,11 @@ function flyToSlot(worldPos, html, slotIdx, cls) {
 }
 // shows a praise word and returns the SAME word for the voice (never the same one twice in a row)
 function praise() {
-  let i = (Math.random() * PRAISE_SHOW.length) | 0;
-  if (i === S.lastPraise) i = (i + 1) % PRAISE_SHOW.length;
+  let i = (Math.random() * TR.praiseShow.length) | 0;
+  if (i === S.lastPraise) i = (i + 1) % TR.praiseShow.length;
   S.lastPraise = i;
-  const el = $('praise'); el.textContent = PRAISE_SHOW[i]; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-  return PRAISE[i];
+  const el = $('praise'); el.textContent = TR.praiseShow[i]; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  return TR.praise[i];
 }
 function hitPickup(p) {
   p.alive = false;
@@ -322,31 +327,31 @@ function hitPickup(p) {
     pingChip();
     // after 2 letters: recall rounds, the chip hides the glyph and the voice asks for it
     if (S.collected === 2 && S.need > 3) { S.recall = true; setTimeout(() => { if (S.mode === 'drive' && S.recall && !S.chipBusy && !S.pickups.some(q => q.review && q.alive && q.asked)) chipShowsTarget(); }, 900); }
-    if (S.collected >= S.need) Voice.say([praise(), LINES.gate], { gap: 350 });
+    if (S.collected >= S.need) Voice.say([praise(), TR.lines.gate], { gap: 350 });
     // odd pickups: the letter's SOUND with its word; even ones: the letter's name + praise; then the next question
-    else if (S.collected % 2 === 1) Voice.say([LINES.sound(C), askNext(p)], { gap: 400 });
+    else if (S.collected % 2 === 1) Voice.say([TR.lines.sound(C), askNext(p)], { gap: 400 });
     else Voice.say([C.name, praise(), askNext(p)], { gap: 300 });
     p.pop = 0;
   } else if (p.kind === 'wrong') {
     S.wrong++; S.wobble = 0.6; S.recentWrong = true;
     const T0 = p.pair && p.pair.letter ? p.pair.letter : C;
-    if (!(p.pair && p.pair.review)) Store.addMiss(S.index);
+    if (!(p.pair && p.pair.review)) Store.addMiss(S.index, TR.lang);
     Sound.wrong(); haptic('bump');
     p.mat.color.setHex(0x9aa5b1);
     // name what was picked, then ask again for the right one, and show it on the chip for a moment
     const nx = nextTarget(p.pair) || p.pair;
     const want = nx && nx.letter ? nx.letter : T0;
     if (nx) nx.asked = true;
-    Voice.say([LINES.wrong(p.letter), LINES.find(want)], { gap: 300 });
+    Voice.say([TR.lines.wrong(p.letter), TR.lines.find(want)], { gap: 300 });
     setChip(want.ch, nx && nx.review ? 'var(--blue)' : 'var(--pink)'); pingChip(); S.chipBusy = true;
     clearTimeout(S.chipT); S.chipT = setTimeout(() => { S.chipBusy = false; if (S.mode === 'drive') chipShowsTarget(); }, 2600);
     p.pop = 0;
   } else if (p.kind === 'apple') {
     const n = S.collected++;
     Sound.collect(n); haptic('tick'); confetti.burst(wp, 20, 6, [0xff3b3b, 0xffd60a, 0x51cf66, 0xffffff], 0.45);
-    flyToSlot(wp, `<span style="font-size:.8em">${arDigits(n + 1)}</span>`, n, '#ff4d4d');
-    const num = NUMBERS[n + 1] ? NUMBERS[n + 1].say : '';
-    if (S.collected >= S.need) { praise(); Voice.say([num, LINES.gate], { gap: 500 }); }
+    flyToSlot(wp, `<span style="font-size:.8em">${TR.digits(n + 1)}</span>`, n, '#ff4d4d');
+    const num = TR.numbers[n + 1] ? TR.numbers[n + 1].say : '';
+    if (S.collected >= S.need) { praise(); Voice.say([num, TR.lines.gate], { gap: 500 }); }
     else Voice.say(num);
     p.pop = 0;
   } else if (p.kind === 'coin') {
@@ -370,7 +375,7 @@ function askNext(cur0) {
   if (!(nx.review || S.recall || S.missStreak >= 1 || S.recentWrong)) return null;
   nx.asked = true;
   if (nx.review) { setChip(nx.letter.ch, 'var(--blue)'); pingChip(); }
-  return LINES.find(nx.letter);
+  return TR.lines.find(nx.letter);
 }
 // the child is not steering at all: bring the letter straight ahead (counted as helped)
 function assistPair(p) {
@@ -385,7 +390,7 @@ function announcePair(p) {
   if (!p.review && S.missStreak >= 3) assistPair(p);
   if (!p.review && p.glow && set().hint && (S.missStreak >= 1 || S.recentWrong)) p.glow.visible = true;
   // fallback only for the nearest pair: a pair further back would be cut off by the feedback of the one in front
-  if (!p.asked && !Voice.busy && nextTarget(null) === p && (p.review || S.recall || S.missStreak >= 1 || S.recentWrong)) { p.asked = true; Voice.say(LINES.find(p.letter)); }
+  if (!p.asked && !Voice.busy && nextTarget(null) === p && (p.review || S.recall || S.missStreak >= 1 || S.recentWrong)) { p.asked = true; Voice.say(TR.lines.find(p.letter)); }
 }
 function updatePickups(dt) {
   const t = S.t;
@@ -417,7 +422,7 @@ function updatePickups(dt) {
     if (p.kind === 'target' && p.alive && !p.missed && du < -3) {
       p.missed = true;
       if (p.review) chipShowsTarget();
-      else { S.missStreak++; S.misses++; Store.addMiss(S.index); }
+      else { S.missStreak++; S.misses++; Store.addMiss(S.index, TR.lang); }
       const nx = nextTarget(p);
       if (nx && !nx.review) {
         if (S.missStreak >= 3) assistPair(nx);
@@ -514,7 +519,7 @@ function buildStage() {
   hab.items = hab.animals.map(a => ({ root: a.root, baseScale: a.baseScale, animal: a }));
   if (S.kind === 'number') {
     // numbers: exactly n apples on a table, they appear one by one while counting
-    const table = makeAppleTable(C.n);
+    const table = makeAppleTable(C.n, TR.digits, TR.lang === 'en');
     table.group.position.set(0, 0.36, 1.5); hab.group.add(table.group);
     hab.items = table.apples;
   }
@@ -529,15 +534,17 @@ function drawCard() {
   if (S.kind === 'letter') {
     g.fillStyle = '#ff4d6d'; g.beginPath(); g.arc(cx, 140, 128, 0, TAU); g.fill();
     g.fillStyle = 'rgba(0,0,0,.12)'; g.beginPath(); g.arc(cx, 150, 128, 0, Math.PI); g.fill();
-    g.direction = 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 190px ${FONT}, sans-serif`;
-    g.fillStyle = '#fff'; g.fillText(C.ch, cx, 168);
-    drawWord(g, C.word, cx, 345, C.word.length > 6 ? 82 : 110, '#2b1b6b', '#ff4d6d');
+    // English: capital + small letter («Aa»), the word left-to-right with its letter highlighted
+    const en = TR.lang === 'en';
+    g.direction = en ? 'ltr' : 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${en ? 150 : 190}px ${FONT}, sans-serif`;
+    g.fillStyle = '#fff'; g.fillText(en ? C.card : C.ch, cx, en ? 158 : 168);
+    drawWord(g, C.word, cx, 345, C.word.length > 6 ? 82 : 110, '#2b1b6b', '#ff4d6d', null, C.hi || 0);
   } else {
     g.fillStyle = '#ff922b'; g.beginPath(); g.arc(cx - 70, 140, 128, 0, TAU); g.fill();
     g.direction = 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${C.n >= 10 ? 150 : 200}px ${FONT}, sans-serif`;
     g.fillStyle = '#fff'; g.fillText(C.digit, cx - 70, 170);
     g.fillStyle = '#ffd6a8'; g.beginPath(); g.arc(cx + 130, 175, 62, 0, TAU); g.fill();
-    g.font = `800 84px ${FONT}, sans-serif`; g.fillStyle = '#c2410c'; g.direction = 'ltr'; g.fillText(String(C.n), cx + 130, 186);
+    g.font = `800 84px ${FONT}, sans-serif`; g.fillStyle = '#c2410c'; g.direction = TR.lang === 'en' ? 'rtl' : 'ltr'; g.fillText(TR.lang === 'en' ? C.alt : String(C.n), cx + 130, TR.lang === 'en' ? 192 : 186); // the same number in the other script
     drawWord(g, C.word, cx, 350, 110, '#2b1b6b', null);
   }
 }
@@ -548,13 +555,14 @@ function celebrate() {
   const errs = S.wrong + S.misses;
   let stars = S.kind === 'letter' ? (errs <= 1 ? 3 : errs <= 3 ? 2 : 1) : 3;
   if (S.assisted > 0) stars = Math.min(stars, S.assisted > 2 ? 1 : 2);
-  const first = Store.complete(S.kind, S.index, stars);
+  const first = Store.complete(S.kind, S.index, stars, TR.lang);
   Store.data.totalStars += S.coins; Store.save();
   drawCard();
   const cs = $('cstars'); cs.innerHTML = '';
   for (let i = 0; i < 3; i++) { cs.insertAdjacentHTML('beforeend', ICON.star); }
   [...cs.children].forEach((el, i) => { if (i < stars) setTimeout(() => { el.classList.add('on'); Sound.star(); }, 500 + i * 300); });
-  $('friend').textContent = first && S.kind === 'letter' ? 'صديق جديد في حديقتك!' : '';
+  $('friend').textContent = first && S.kind === 'letter' ? TR.ui.friend : '';
+  $('friend').dir = TR.lang === 'en' ? 'ltr' : 'rtl';
   $('celebrate').classList.remove('hidden');
   $('hud').classList.add('hidden');
   Sound.fanfare(); haptic('win');
@@ -565,9 +573,9 @@ function celebrate() {
 function sayCelebration(first) {
   const C = cur();
   if (S.kind === 'letter') {
-    Voice.say([C.name, LINES.sound(C), praise()].concat(first ? [LINES.newFriend] : []), { gap: 450 });
+    Voice.say([C.name, TR.lines.sound(C), praise()].concat(first ? [TR.lines.newFriend] : []), { gap: 450 });
   } else if (C.n === 0) {
-    Voice.say([C.say, LINES.numberIntro(C), pick(PRAISE)]);
+    Voice.say([C.say, TR.lines.numberIntro(C), pick(TR.praise)]);
   } else {
     // animals appear one by one while counting
     S.countQ = []; let t = 0.6;
@@ -583,11 +591,11 @@ function updateCounting(dt) {
       q.done = true;
       const a = S.stage.items[q.i]; a.root.visible = true; a.popT = 0;
       Sound.count(q.i); confetti.burst(a.root.getWorldPosition(new THREE.Vector3()).setY(4), 14, 7);
-      Voice.say(NUMBERS[q.i + 1].say);
+      Voice.say(TR.numbers[q.i + 1].say);
     }
   }
   for (const a of S.stage.items) if (a.popT != null && a.popT < 1) { a.popT = Math.min(1, a.popT + dt * 3.5); const k = a.popT; const e = 1 + Math.sin(k * Math.PI) * 0.35; a.root.scale.setScalar(a.baseScale * k * e); }
-  if (!S.countSaid && S.modeT > S.countEnd + 0.4) { S.countSaid = true; const C = cur(); Voice.say([C.say, pick(PRAISE)], { gap: 400 }); S.happyT = 3; }
+  if (!S.countSaid && S.modeT > S.countEnd + 0.4) { S.countSaid = true; const C = cur(); Voice.say([C.say, pick(TR.praise)], { gap: 400 }); S.happyT = 3; }
 }
 function celebrateCamera(dt) {
   const c = S.stageC, road = T.pos(S.stageU, 0);
@@ -632,7 +640,10 @@ function toTitle() {
   showScreen('title');
 }
 let mapTab = 'letter';
+// map tab -> track: 'letter' | 'number' (Arabic), 'enletter' | 'ennumber' (English)
+const tabInfo = t => ({ kind: t.replace(/^en/, ''), lang: t.startsWith('en') ? 'en' : 'ar' });
 function toMap(tab) {
+  if (!tab && S.lang) mapTab = (S.lang === 'en' ? 'en' : '') + S.kind;
   clearLevel(); Voice.stop(); Sound.engineHum(0, false);
   if (tab) mapTab = tab;
   S.mode = 'map'; S.paused = false;
@@ -661,15 +672,17 @@ function thumb(id) {
 function renderMap() {
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === mapTab));
   $('totstars').textContent = Store.data.totalStars;
-  const list = mapTab === 'letter' ? LETTERS : NUMBERS;
-  const arr = mapTab === 'letter' ? Store.data.letters : Store.data.numbers;
+  const { kind: tKind, lang: tLang } = tabInfo(mapTab), track = TRACKS[tLang];
+  const list = tKind === 'letter' ? track.letters : track.numbers;
+  const arr = Store.prog(tKind, tLang);
   const world = $('world'), path = $('path');
   const H = path.clientHeight || innerHeight * 0.85;
   const gap = Math.max(118, H * 0.42), pad = gap * 0.9;
   const W = pad * 2 + gap * (list.length - 1);
   world.style.width = W + 'px';
   [...world.querySelectorAll('.node,.deco')].forEach(e => e.remove());
-  const pts = list.map((_, i) => ({ x: W - pad - i * gap, y: H * (0.5 + Math.sin(i * 1.15) * 0.22) }));
+  // Arabic path runs right-to-left, English left-to-right (reading direction)
+  const pts = list.map((_, i) => ({ x: tLang === 'en' ? pad + i * gap : W - pad - i * gap, y: H * (0.5 + Math.sin(i * 1.15) * 0.22) }));
   // trail
   let dstr = `M ${pts[0].x} ${pts[0].y}`;
   for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], b = pts[i], mx = (a.x + b.x) / 2; dstr += ` C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`; }
@@ -689,15 +702,15 @@ function renderMap() {
   let currentEl = null;
   list.forEach((item, i) => {
     const el = document.createElement('div');
-    const unlocked = Store.unlocked(mapTab, i);
+    const unlocked = Store.unlocked(tKind, i, tLang);
     const done = arr[i] > 0;
-    const glyph = mapTab === 'letter' ? item.ch : item.digit;
+    const glyph = tKind === 'letter' ? item.ch : item.digit;
     el.className = 'node ' + (done ? 'done' : unlocked ? 'current' : 'locked');
     el.style.left = pts[i].x + 'px'; el.style.top = pts[i].y + 'px';
     if (done) {
       const img = document.createElement('img'); img.alt = ''; el.appendChild(img);
       // numbers have no animal: show the glyph (thumb(undefined) used to throw and leave the tile blank)
-      if (mapTab === 'letter') setTimeout(() => { img.src = thumb(item.animal); }, 10 + i * 25);
+      if (tKind === 'letter') setTimeout(() => { img.src = thumb(item.animal); }, 10 + i * 25);
       else { img.remove(); el.insertAdjacentHTML('beforeend', `<span class="glyph">${glyph}</span>`); }
       el.insertAdjacentHTML('beforeend', `<span class="badge">${glyph}</span><div class="stars">${[0, 1, 2].map(k => (k < arr[i] ? ICON.star : ICON.starOff)).join('')}</div>`);
     } else {
@@ -709,7 +722,7 @@ function renderMap() {
       Sound.init();
       if (!unlocked && !done) { Sound.lock(); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); return; }
       Sound.click(); haptic('tick');
-      startLevel(mapTab, i);
+      startLevel(tKind, i, tLang);
     });
     world.appendChild(el);
   });
@@ -739,7 +752,7 @@ $('play').addEventListener('click', async () => {
 // ---------- HUD buttons ----------
 $('target').addEventListener('pointerdown', e => {
   e.stopPropagation(); const C = cur();
-  Voice.say(S.kind === 'letter' ? [C.name, LINES.sound(C)] : C.say);
+  Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : C.say);
   // in recall rounds a tap shows the letter again for a moment
   if (S.kind === 'letter' && S.recall) { setChip(C.ch, 'var(--pink)'); setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }
   pingChip();
@@ -749,11 +762,11 @@ $('presume').addEventListener('click', () => { Sound.click(); setPaused(false); 
 $('prestart').addEventListener('click', () => { Sound.click(); S.paused = false; $('pause').classList.add('hidden'); Sound.resume(); startLevel(S.kind, S.index); });
 $('pmap').addEventListener('click', () => { Sound.click(); S.paused = false; Sound.resume(); toMap(); });
 $('chome').addEventListener('click', () => { Sound.click(); toMap(); });
-$('chear').addEventListener('click', () => { Sound.click(); S.happyT = 2.5; const C = cur(); Voice.say(S.kind === 'letter' ? [C.name, LINES.sound(C)] : [C.say]); });
+$('chear').addEventListener('click', () => { Sound.click(); S.happyT = 2.5; const C = cur(); Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : [C.say]); });
 $('cagain').addEventListener('click', () => { Sound.click(); startLevel(S.kind, S.index); });
 $('cnext').addEventListener('click', () => {
   Sound.click();
-  const list = S.kind === 'letter' ? LETTERS : NUMBERS;
+  const list = S.kind === 'letter' ? TR.letters : TR.numbers;
   if (S.index + 1 < list.length) startLevel(S.kind, S.index + 1); else toMap();
 });
 function setPaused(p) {
@@ -986,6 +999,6 @@ async function boot() {
   $('loading').classList.add('hidden');
   requestAnimationFrame(frame);
   // test hook (headless checks)
-  window.__lk = { keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, LINES };
+  window.__lk = { keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, TRACKS, get TR() { return TR; } };
 }
 boot();

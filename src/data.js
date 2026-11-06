@@ -67,19 +67,21 @@ export const LINES = {
 // Wrong choices follow a ladder: first an easy, clearly different letter (preferably one already
 // learned, so it doubles as review), and only later in the level a look-alike that differs by dots.
 export const LOOKALIKE = { 'ب': 'تث', 'ت': 'بث', 'ث': 'بت', 'ج': 'حخ', 'ح': 'جخ', 'خ': 'جح', 'د': 'ذ', 'ذ': 'د', 'ر': 'ز', 'ز': 'ر', 'س': 'ش', 'ش': 'س', 'ص': 'ض', 'ض': 'ص', 'ط': 'ظ', 'ظ': 'ط', 'ع': 'غ', 'غ': 'ع', 'ف': 'ق', 'ق': 'ف' };
-const EASY = 'أمسلرهوكنعد';
-const byCh = c => LETTERS.find(x => x.ch === c);
-export function distractorPool(index, hard = false) {
-  const L = LETTERS[index];
-  const look = LOOKALIKE[L.ch] || '';
-  if (hard && look) return [...look].map(byCh);
-  // shapes that do not resemble the target: learned letters first, then a fixed set of distinct shapes
-  const similar = c => c === L.ch || look.includes(c) || (LOOKALIKE[c] || '').includes(L.ch);
-  const learned = [];
-  for (let i = Math.max(0, index - 6); i < index; i++) if (!similar(LETTERS[i].ch)) learned.push(LETTERS[i].ch);
-  const pool = learned.length >= 2 ? learned : learned.concat([...EASY].filter(c => !similar(c) && !learned.includes(c)));
-  return pool.map(byCh);
+function makeDistractors(list, LOOK, EASY) {
+  const byCh = c => list.find(x => x.ch === c);
+  return function (index, hard = false) {
+    const L = list[index];
+    const look = LOOK[L.ch] || '';
+    if (hard && look) return [...look].map(byCh).filter(Boolean);
+    // shapes that do not resemble the target: learned letters first, then a fixed set of distinct shapes
+    const similar = c => c === L.ch || look.includes(c) || (LOOK[c] || '').includes(L.ch);
+    const learned = [];
+    for (let i = Math.max(0, index - 6); i < index; i++) if (!similar(list[i].ch)) learned.push(list[i].ch);
+    const pool = learned.length >= 2 ? learned : learned.concat([...EASY].filter(c => !similar(c) && !learned.includes(c)));
+    return pool.map(byCh).filter(Boolean);
+  };
 }
+export const distractorPool = makeDistractors(LETTERS, LOOKALIKE, 'أمسلرهوكنعد');
 
 export const BIOMES = {
   savanna: { ground: 0xe9c46a, accent: 0xc9a227, props: ['acacia', 'rock', 'grass'] },
@@ -92,6 +94,52 @@ export const BIOMES = {
   garden: { ground: 0xa5e08b, accent: 0xff8fab, props: ['flower', 'round', 'birdhouse'] },
   mountain: { ground: 0xb7c4a0, accent: 0x8d99ae, props: ['rock', 'pine', 'grass'] },
   orchard: { ground: 0x9bd770, accent: 0xff6b6b, props: ['appletree', 'flower', 'hay'] }
+};
+
+// ---------------------------------------------------------------------------------------------
+// English track: A-Z (capital letter in the bubbles, "Aa" on the card) and numbers 0-10.
+// `word` is shown, `say` is spoken. `hi` marks which letter of the word is highlighted (Ox: the x).
+export const EN_LETTERS = [
+  ['A', 'Alligator', 'crocodile', 'pond'], ['B', 'Bear', 'bear', 'forest'], ['C', 'Camel', 'camel', 'desert'],
+  ['D', 'Duck', 'duck', 'pond'], ['E', 'Elephant', 'elephant', 'savanna'], ['F', 'Fox', 'fox', 'forest'],
+  ['G', 'Giraffe', 'giraffe', 'savanna'], ['H', 'Horse', 'horse', 'farm'], ['I', 'Iguana', 'iguana', 'desert'],
+  ['J', 'Jaguar', 'jaguar', 'jungle'], ['K', 'Kangaroo', 'kangaroo', 'desert'], ['L', 'Lion', 'lion', 'savanna'],
+  ['M', 'Monkey', 'monkey', 'jungle'], ['N', 'Newt', 'newt', 'pond'], ['O', 'Owl', 'owl', 'forest'],
+  ['P', 'Peacock', 'peacock', 'garden'], ['Q', 'Quail', 'quail', 'farm'], ['R', 'Rhino', 'rhino', 'savanna'],
+  ['S', 'Sheep', 'sheep', 'farm'], ['T', 'Tiger', 'tiger', 'jungle'], ['U', 'Unicorn', 'unicorn', 'garden'],
+  ['V', 'Vulture', 'vulture', 'desert'], ['W', 'Wolf', 'wolf', 'forest'], ['X', 'Ox', 'ox', 'farm', 1],
+  ['Y', 'Yak', 'yak', 'mountain'], ['Z', 'Zebra', 'zebra', 'savanna']
+].map(([ch, word, animal, biome, hi]) => ({ ch, card: ch + ch.toLowerCase(), word, say: word.toLowerCase(), name: `Letter ${ch}`, animal, biome, hi: hi || 0 }));
+
+const EN_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+export const EN_NUMBERS = EN_WORDS.map((w, n) => ({ n, word: w[0].toUpperCase() + w.slice(1), say: w, digit: String(n), alt: arDigits(n), biome: 'orchard' }));
+export const EN_PRAISE = ['Great job!', 'Awesome!', 'Well done!', 'Super!', 'You did it!', 'Fantastic!'];
+export const EN_LINES = {
+  letterIntro: L => `Let's find the letter ${L.ch}!`,
+  // the classic association line: «A is for alligator» (isolated letter sounds are unreliable in text-to-speech)
+  sound: L => `${L.ch} is for ${L.say}.`,
+  find: L => `Where is the letter ${L.ch}?`,
+  wrong: L => `That is the letter ${L.ch}.`,
+  numberIntro: N => N.n === 0 ? 'Zero means nothing.' : `Let's count to ${N.say}!`,
+  gate: 'Go to the gate!',
+  newFriend: 'A new friend in your zoo!'
+};
+// look-alike capitals, introduced only once the child is doing well
+const EN_LOOK = { B: 'PR', P: 'BR', R: 'PB', E: 'F', F: 'E', O: 'QC', Q: 'OG', C: 'GO', G: 'CO', M: 'NW', N: 'MH', H: 'N', W: 'MV', V: 'UW', U: 'V', I: 'LT', L: 'I', T: 'I', K: 'X', X: 'K' };
+export const enDistractorPool = makeDistractors(EN_LETTERS, EN_LOOK, 'AOSXHMTZ');
+
+// everything the game needs to teach one language
+export const TRACKS = {
+  ar: {
+    lang: 'ar', letters: LETTERS, numbers: NUMBERS, lines: LINES, praise: PRAISE, praiseShow: PRAISE_SHOW,
+    distractors: distractorPool, digits: arDigits,
+    ui: { collect: L => `اجمع حرف ${L.ch}`, apples: d => `اجمع ${d} تفاحات`, zero: 'صفر = لا شيء', friend: 'صديق جديد في حديقتك!' }
+  },
+  en: {
+    lang: 'en', letters: EN_LETTERS, numbers: EN_NUMBERS, lines: EN_LINES, praise: EN_PRAISE, praiseShow: EN_PRAISE,
+    distractors: enDistractorPool, digits: n => String(n),
+    ui: { collect: L => `Find the letter ${L.ch}`, apples: d => `Collect ${d} apples`, zero: '0 = nothing', friend: 'A new friend in your zoo!' }
+  }
 };
 
 // Every sentence the game speaks, with a stable file name. Recorded/generated clips go in
@@ -115,5 +163,21 @@ export function voiceLines() {
   out.push({ id: 'gate', text: LINES.gate, note: 'بعد جمع كل الحروف' });
   out.push({ id: 'new-friend', text: LINES.newFriend, note: 'حيوان جديد في الحديقة' });
   PRAISE.forEach((t, i) => out.push({ id: `praise-${i + 1}`, text: t, note: 'تشجيع' }));
+  EN_LETTERS.forEach((L, i) => {
+    const k = `en-letter-${p2(i + 1)}`;
+    out.push({ id: `${k}-name`, text: L.name, note: `letter ${L.ch}`, lang: 'en' });
+    out.push({ id: `${k}-word`, text: L.say, note: L.word, lang: 'en' });
+    out.push({ id: `${k}-intro`, text: EN_LINES.letterIntro(L), note: 'level start', lang: 'en' });
+    out.push({ id: `${k}-wrong`, text: EN_LINES.wrong(L), note: 'picked by mistake', lang: 'en' });
+    out.push({ id: `${k}-sound`, text: EN_LINES.sound(L), note: 'letter + word', lang: 'en' });
+    out.push({ id: `${k}-find`, text: EN_LINES.find(L), note: 'question', lang: 'en' });
+  });
+  EN_NUMBERS.forEach(N => {
+    out.push({ id: `en-number-${p2(N.n)}`, text: N.say, note: `number ${N.n}`, lang: 'en' });
+    out.push({ id: `en-number-${p2(N.n)}-intro`, text: EN_LINES.numberIntro(N), note: 'number level start', lang: 'en' });
+  });
+  out.push({ id: 'en-gate', text: EN_LINES.gate, note: 'after collecting', lang: 'en' });
+  out.push({ id: 'en-new-friend', text: EN_LINES.newFriend, note: 'new animal', lang: 'en' });
+  EN_PRAISE.forEach((t, i) => out.push({ id: `en-praise-${i + 1}`, text: t, note: 'praise', lang: 'en' }));
   return out;
 }

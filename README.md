@@ -1,13 +1,13 @@
 # LearningKart — حديقة الحروف والأرقام
 
-A kart game that teaches **Arabic letters (أ–ي) and numbers (٠–١٠)** to children aged 3–6, set in a zoo.
+A kart game that teaches **Arabic letters (أ–ي) and numbers (٠–١٠)** and **English letters (A–Z) and numbers (0–10)** to children aged 3–6, set in a zoo.
 Built with Three.js and packaged for **Android** and **iOS** with [Capacitor 8](https://capacitorjs.com). Landscape, full screen, works offline.
 
 | | |
 |---|---|
 | App name | LearningKart |
 | App ID (bundle ID) | `com.example.learningkart` &nbsp;← **change before publishing** (see below) |
-| Content | `src/data.js`: 28 letters with animal, word and pronunciation; numbers 0–10 |
+| Content | `src/data.js`: 28 Arabic letters and 26 English letters, each with an animal and a word; numbers 0–10 in both languages (`TRACKS`) |
 | Game | `src/main.js` (flow, levels, map, celebration), `src/world.js` (zoo, road, habitats, kart), `src/animals.js` (28 animals) |
 | Voice / sound | `src/voice.js` (Arabic text-to-speech), `src/audio.js` (synthesized effects + music) |
 | UI | `template.html` (Arabic, right-to-left) |
@@ -30,6 +30,11 @@ Built with Three.js and packaged for **Android** and **iOS** with [Capacitor 8](
 5. **Meet the animal**: the animal's habitat appears. The card shows the letter, the word with the first letter highlighted (أسد), and stars. The letter and word are spoken, the animal jumps, and tapping the animal says it again. The animal then lives in your zoo and appears in the enclosures along the road in later levels.
 6. **Numbers**: collect *n* apples (each one is counted aloud), then exactly *n* apples appear one by one on a table, each with its number (counted right to left). Zero shows an empty basket: «صفر يعني لا شيء».
 
+### English track (map tabs **ABC** and **123**)
+The same game in English, with its own saved progress. Capital letters are in the bubbles and «Aa» on the card. Lines are spoken by a US English neural voice: «Let's find the letter B!», «B is for bear.», «Where is the letter B?», «That is the letter D.». English numbers use the digits 1 2 3 and count left to right, and the card also shows the Arabic digit (٣).
+
+A Alligator · B Bear · C Camel · D Duck · E Elephant · F Fox · G Giraffe · H Horse · I Iguana · J Jaguar · K Kangaroo · L Lion · M Monkey · N Newt · O Owl · P Peacock · Q Quail · R Rhino · S Sheep · T Tiger · U Unicorn · V Vulture · W Wolf · X Ox (the x is highlighted) · Y Yak · Z Zebra.
+
 Letters and animals: أ أسد · ب بطة · ت تمساح · ث ثعلب · ج جمل · ح حصان · خ خروف · د دب · ذ ذئب · ر رنة · ز زرافة · س سلحفاة · ش شمبانزي · ص صقر · ض ضفدع · ط طاووس · ظ ظبي · ع عصفور · غ غزال · ف فيل · ق قرد · ك كنغر · ل لاما · م ماعز · ن نمر · ه هدهد · و وحيد القرن · ي يمامة.
 Wrong-letter choices come from letters already learned plus look-alikes (ب/ت/ث, ج/ح/خ, د/ذ, ر/ز, س/ش ...).
 
@@ -42,7 +47,7 @@ The game speaks in this order of preference:
 2. **The device's Arabic text-to-speech**: the best Arabic voice found is chosen automatically, and parents can pick another one and set the speed in settings. If a device has **no** Arabic voice, the game stays silent rather than reading Arabic with an English voice.
 
 **Making the voice pack**
-- `npm run voice` writes `assets/voice/lines.csv`: all 142 lines (letter names, words, intros, "this is letter …", numbers, praise) with their file names.
+- `npm run voice` writes `assets/voice/lines.csv`: all 384 lines (Arabic and English) (letter names, words, intros, "this is letter …", numbers, praise) with their file names.
 - **Option A, neural voice (Azure Speech, licensed for apps):** `AZURE_SPEECH_KEY=... AZURE_SPEECH_REGION=uaenorth npm run voice` generates every clip. Defaults: `ar-SA-ZariyahNeural`, slightly slower for children. Change it with `AZURE_VOICE=ar-SA-HamedNeural`, `VOICE_RATE=-15%`.
 - **Option B, a real voice:** record each line from `lines.csv` (e.g. with a phone) and save it as `assets/voice/<id>.mp3`. Missing clips fall back to text-to-speech, so you can record a few at a time.
 - Then run `npm run build` (or `npm run sync`). Parent settings show how many recorded clips are in use.
@@ -54,12 +59,12 @@ On a PC with internet access:
 
 ```
 pip install edge-tts
-python tools/make-voice-edge.py                 # Saudi female voice (Zariyah)
-python tools/make-voice-edge.py --voice ar-SA-HamedNeural   # Saudi male voice
+python tools/make-voice-edge.py                 # Arabic: Saudi male voice (Hamed); English: en-US-JennyNeural
+python tools/make-voice-edge.py --voice ar-SA-ZariyahNeural --voice-en en-US-AnaNeural --force   # other voices
 npm run build
 ```
 
-The 142 clips land in `assets/voice/` and are bundled into the game on the next build.
+The clips land in `assets/voice/` and are bundled into the game on the next build.
 
 ## What's in the mobile app
 

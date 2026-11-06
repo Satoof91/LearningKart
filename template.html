@@ -54,6 +54,8 @@ svg{display:block}
 .tabs{display:flex;gap:8px;margin-inline-start:auto;margin-inline-end:auto}
 .tab{font-weight:800;font-size:clamp(17px,4.6vh,28px);padding:.15em .9em .3em;border-radius:999px;background:rgba(255,255,255,.55);color:var(--ink);box-shadow:0 4px 0 rgba(0,0,0,.12)}
 .tab.on{background:#fff;color:var(--pink);box-shadow:0 4px 0 var(--pink)}
+.tab.en{font-family:LKFont,"Trebuchet MS",sans-serif;direction:ltr}
+.tab.en.on{color:var(--blue);box-shadow:0 4px 0 var(--blue)}
 .coins{display:flex;align-items:center;gap:6px;font-weight:800;font-size:clamp(18px,5vh,30px);background:rgba(43,27,107,.55);padding:.05em .7em .15em;border-radius:999px}
 .coins svg{width:1em;height:1em}
 #gear{position:relative;width:clamp(40px,9vh,56px);height:clamp(40px,9vh,56px);border-radius:50%;background:rgba(43,27,107,.55);padding:0}
@@ -185,7 +187,7 @@ svg{display:block}
 <div id="map" class="screen hidden">
   <header>
     <div class="brand">LearningKart</div>
-    <div class="tabs"><button class="tab on" data-tab="letter">الحروف</button><button class="tab" data-tab="number">الأرقام</button></div>
+    <div class="tabs"><button class="tab on" data-tab="letter">الحروف</button><button class="tab" data-tab="number">الأرقام</button><button class="tab en" data-tab="enletter">ABC</button><button class="tab en" data-tab="ennumber">123</button></div>
     <div class="coins" data-icon="star"><b id="totstars">0</b></div>
     <button id="gear" aria-label="settings"><svg class="ring" viewBox="0 0 60 60"><circle cx="30" cy="30" r="27"/></svg><span id="gearhint">اضغط مطولاً – للوالدين</span></button>
   </header>

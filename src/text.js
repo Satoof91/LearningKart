@@ -23,7 +23,24 @@ export async function loadFonts() {
 const NON_JOIN = 'اأإآدذرزوةء ';
 // Draw an Arabic word with its first letter in another color (keeps proper letter joining):
 // the whole word is drawn, then the first letter (+ zero-width joiner when it connects) is drawn on top.
-export function drawWord(g, word, x, y, px, color, hiColor, stroke) {
+const LATIN = /^[ -~]+$/; // printable ASCII only
+// Latin words (English track): left-to-right, the letter at hiIndex highlighted (Ox -> the x)
+function drawWordLtr(g, word, x, y, px, color, hiColor, stroke, hiIndex = 0) {
+  g.save();
+  g.direction = 'ltr'; g.textAlign = 'left'; g.textBaseline = 'middle';
+  g.font = `800 ${px}px ${FONT}, sans-serif`;
+  const w = g.measureText(word).width, left = x - w / 2;
+  if (stroke) { g.lineJoin = 'round'; g.lineWidth = px * 0.12; g.strokeStyle = stroke; g.strokeText(word, left, y); }
+  g.fillStyle = color; g.fillText(word, left, y);
+  if (hiColor) {
+    const i = Math.max(0, Math.min(word.length - 1, hiIndex));
+    g.fillStyle = hiColor; g.fillText(word[i], left + g.measureText(word.slice(0, i)).width, y);
+  }
+  g.restore();
+  return w;
+}
+export function drawWord(g, word, x, y, px, color, hiColor, stroke, hiIndex) {
+  if (LATIN.test(word)) return drawWordLtr(g, word, x, y, px, color, hiColor, stroke, hiIndex);
   g.save();
   g.direction = 'rtl'; g.textAlign = 'right'; g.textBaseline = 'middle';
   g.font = `800 ${px}px ${FONT}, sans-serif`;
@@ -81,7 +98,7 @@ export function signTexture(big, word, bg = '#ffffff', fg = '#3a2a7a', hi = '#ff
     g.direction = 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.font = `800 ${word ? 190 : 260}px ${FONT}, sans-serif`;
     g.fillStyle = hi; g.fillText(big, w / 2, word ? 150 : h / 2 + 18);
-    if (word) drawWord(g, word, w / 2, 300, word.length > 6 ? 70 : 92, fg, hi);
+    if (word) { const k = LATIN.test(word) ? Math.max(0, word.toUpperCase().indexOf(big)) : 0; drawWord(g, word, w / 2, 300, word.length > 6 ? 70 : 92, fg, hi, null, k); }
   });
 }
 

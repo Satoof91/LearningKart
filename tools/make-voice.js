@@ -23,7 +23,7 @@ if (!key || !region) {
   console.log(`${have}/${lines.length} clips present. Set AZURE_SPEECH_KEY and AZURE_SPEECH_REGION to generate the missing ones.`);
   process.exit(0);
 }
-const voice = process.env.AZURE_VOICE || 'ar-SA-ZariyahNeural';
+const voice = process.env.AZURE_VOICE || 'ar-SA-HamedNeural', voiceEn = process.env.AZURE_VOICE_EN || 'en-US-JennyNeural';
 const rate = process.env.VOICE_RATE || '-8%', pitch = process.env.VOICE_PITCH || '+4%';
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 (async () => {
@@ -31,7 +31,8 @@ const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&
   for (const l of lines) {
     const file = path.join(dir, l.id + '.mp3');
     if (fs.existsSync(file) && !process.env.FORCE) continue;
-    const ssml = `<speak version="1.0" xml:lang="ar-SA"><voice name="${voice}"><prosody rate="${rate}" pitch="${pitch}">${esc(l.text)}</prosody></voice></speak>`;
+    const en = l.lang === 'en';
+    const ssml = `<speak version="1.0" xml:lang="${en ? 'en-US' : 'ar-SA'}"><voice name="${en ? voiceEn : voice}"><prosody rate="${rate}" pitch="${pitch}">${esc(l.text)}</prosody></voice></speak>`;
     const res = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
       method: 'POST',
       headers: { 'Ocp-Apim-Subscription-Key': key, 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'audio-24khz-48kbitrate-mono-mp3', 'User-Agent': 'learningkart-voice' },

@@ -466,7 +466,8 @@ export class Confetti {
 }
 
 // ---------- apple table for the number levels: n apples, each with its count bubble ----------
-export function makeAppleTable(n) {
+// digits: how numbers are written on the tags; ltr: count left-to-right (English) instead of right-to-left (Arabic)
+export function makeAppleTable(n, digits = arDigits, ltr = false) {
   const g = new THREE.Group();
   // more than 6 apples: two rows, so the whole count stays in view next to the card
   const rows = n > 6 ? 2 : 1, cols = Math.max(1, Math.ceil(n / rows)), sp = n > 5 ? 1.9 : 2.3, as = n > 5 ? 0.9 : 1.15;
@@ -486,10 +487,10 @@ export function makeAppleTable(n) {
   for (let i = 0; i < n; i++) {
     const r = Math.floor(i / cols), c = i % cols, inRow = Math.min(cols, n - r * cols);
     // count from right to left (Arabic reading order)
-    const x = ((inRow - 1) / 2 - c) * sp, z = rows === 1 ? 0 : (r === 0 ? sp * 0.62 : -sp * 0.62);
+    const x = (ltr ? c - (inRow - 1) / 2 : (inRow - 1) / 2 - c) * sp, z = rows === 1 ? 0 : (r === 0 ? sp * 0.62 : -sp * 0.62);
     const root = new THREE.Group(); root.position.set(x, top + 0.3 + as, z);
     const a = makeApple(); a.scale.setScalar(as); root.add(a);
-    const mat = new THREE.SpriteMaterial({ map: bubbleTexture(arDigits(i + 1), 0xff922b) });
+    const mat = new THREE.SpriteMaterial({ map: bubbleTexture(digits(i + 1), 0xff922b) });
     const tag = new THREE.Sprite(mat); tag.scale.set(1.45 * as / 1.15 + 0.2, 1.45 * as / 1.15 + 0.2, 1); tag.position.y = 2.1 * as / 1.15 + 0.1 + (r > 0 ? 1.5 : 0); root.add(tag); // back-row tags float higher so no number hides another
     root.visible = false; root.scale.setScalar(0.01);
     g.add(root);
