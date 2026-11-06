@@ -121,7 +121,7 @@ function applyUiLang() {
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = u[el.dataset.i18n]; });
   document.querySelector('.tab[data-tab="letter"]').textContent = u.tabLetter;
   document.querySelector('.tab[data-tab="number"]').textContent = u.tabNumber;
-  document.querySelectorAll('.langbtn').forEach(b => { b.textContent = u.switchTo; b.setAttribute('aria-label', u.switchLabel); });
+  document.querySelectorAll('[data-lang]').forEach(b => { b.textContent = u.switchTo; b.setAttribute('aria-label', u.switchLabel); });
   if (ZOO) ZOO.setBanner(u.banner);
 }
 function toggleUiLang() {
@@ -132,7 +132,7 @@ function toggleUiLang() {
   mapTab = (set().uiLang === 'en' ? 'en' : '') + k;
   if (S.mode === 'map') renderMap();
 }
-document.querySelectorAll('.langbtn').forEach(b => b.addEventListener('click', toggleUiLang));
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', toggleUiLang));
 function applySettings() {
   const s = set();
   Sound.setSfx(s.sfx); Sound.setMusic(s.music); Voice.enabled = s.voice; setHaptics(s.haptics);
@@ -789,9 +789,9 @@ function renderMap() {
   let currentEl = null;
   list.forEach((item, i) => {
     const el = document.createElement('div');
-    // a word opens once all of its letters have been learned in that language
+    // a word opens like any level (the first is free, then after the one before), or early once all its letters are learned
     const lp = Store.prog('letter', tLang);
-    const unlocked = tKind === 'word' ? (Store.data.unlockAll || arr[i] > 0 || item.parts.every(ch => lp[track.letters.findIndex(x => x.ch === ch)] > 0)) : Store.unlocked(tKind, i, tLang);
+    const unlocked = tKind === 'word' ? (Store.data.unlockAll || i === 0 || arr[i] > 0 || arr[i - 1] > 0 || item.parts.every(ch => lp[track.letters.findIndex(x => x.ch === ch)] > 0)) : Store.unlocked(tKind, i, tLang);
     const done = arr[i] > 0;
     const glyph = tKind === 'letter' ? item.ch : tKind === 'word' ? item.word : item.digit;
     el.className = 'node ' + (done ? 'done' : unlocked ? 'current' : 'locked');
