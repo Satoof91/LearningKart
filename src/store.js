@@ -9,7 +9,7 @@ const DEFAULT = () => ({
   miss: Array(28).fill(0),
   // English track (A-Z, 0-10)
   enLetters: Array(26).fill(0), enNumbers: Array(11).fill(0), enMiss: Array(26).fill(0),
-  settings: { sfx: true, music: true, voice: true, haptics: true, hint: true, tilt: false, flip: false, speed: 'normal', voiceName: '', voiceRate: 'normal' }
+  settings: { sfx: true, music: true, voice: true, haptics: true, hint: true, tilt: false, flip: false, speed: 'normal', voiceName: '', voiceRate: 'normal', uiLang: 'ar' }
 });
 const int = (v, lo, hi, dflt) => { const x = Math.round(Number(v)); return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt; };
 const arr = (a, len, hi) => Array.from({ length: len }, (_, i) => int(Array.isArray(a) ? a[i] : 0, 0, hi, 0));
@@ -33,6 +33,8 @@ export const Store = {
     // use whichever copy was saved last (a native write can be lost when the app is killed)
     if (n && (!d || (n.savedAt || 0) >= (d.savedAt || 0))) d = n;
     if (d && typeof d === 'object') this.data = sanitize(d);
+    // first launch: interface in the device language (Arabic devices -> Arabic, everything else -> English)
+    else { try { this.data.settings.uiLang = /^ar/i.test(navigator.language || '') ? 'ar' : 'en'; } catch (e) { /* keep Arabic */ } }
   },
   save() {
     this.data.savedAt = Date.now();

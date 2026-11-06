@@ -1,7 +1,8 @@
 // LearningKart — Arabic letters & numbers zoo kart game for ages 3-6.
 import * as THREE from 'three';
 import { initPlatform, haptic, Tilt, setHaptics, isNative as isNativeApp } from './platform.js';
-import { TRACKS, arDigits } from './data.js';
+import { TRACKS } from './data.js';
+import { UI } from './i18n.js';
 // current language track (Arabic or English): letters, numbers, spoken lines, praise, digits
 let TR = TRACKS.ar;
 // How a letter level teaches (ages 3-6):
@@ -111,6 +112,27 @@ function steerInput() {
 
 // ---------- settings ----------
 const set = () => Store.data.settings;
+// interface language (menus, settings, instructions); the learning track is chosen on the map
+const ui = () => UI[set().uiLang === 'en' ? 'en' : 'ar'];
+const unlockText = () => (Store.data.unlockAll ? ui().lock : ui().unlock);
+function applyUiLang() {
+  const u = ui(), L = set().uiLang === 'en' ? 'en' : 'ar';
+  document.documentElement.lang = L; document.documentElement.dir = u.dir;
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = u[el.dataset.i18n]; });
+  document.querySelector('.tab[data-tab="letter"]').textContent = u.tabLetter;
+  document.querySelector('.tab[data-tab="number"]').textContent = u.tabNumber;
+  document.querySelectorAll('.langbtn').forEach(b => { b.textContent = u.switchTo; b.setAttribute('aria-label', u.switchLabel); });
+  if (ZOO) ZOO.setBanner(u.banner);
+}
+function toggleUiLang() {
+  Sound.init(); Sound.click();
+  set().uiLang = set().uiLang === 'en' ? 'ar' : 'en'; Store.save(); applyUiLang();
+  // the map follows: English interface opens the ABC track, Arabic the Arabic letters (same kind)
+  const k = mapTab.replace(/^en/, '');
+  mapTab = (set().uiLang === 'en' ? 'en' : '') + k;
+  if (S.mode === 'map') renderMap();
+}
+document.querySelectorAll('.langbtn').forEach(b => b.addEventListener('click', toggleUiLang));
 function applySettings() {
   const s = set();
   Sound.setSfx(s.sfx); Sound.setMusic(s.music); Voice.enabled = s.voice; setHaptics(s.haptics);
@@ -198,8 +220,8 @@ function startLevel(kind, index, lang) {
   // intro card
   $('introglyph').textContent = kind === 'letter' && C.card ? C.card : glyph;
   $('introglyph').style.color = kind === 'letter' ? 'var(--pink)' : 'var(--org)';
-  $('introtext').textContent = kind === 'letter' ? TR.ui.collect(C) : (C.n ? TR.ui.apples(glyph) : TR.ui.zero);
-  $('introtext').dir = TR.lang === 'en' ? 'ltr' : 'rtl';
+  $('introtext').textContent = kind === 'letter' ? ui().collect(C) : (C.n ? ui().apples(glyph) : ui().zero);
+  $('introtext').dir = ui().dir;
   // show the animal from the start: letter -> sound -> animal is the memory hook
   const img = $('introimg');
   if (kind === 'letter') { img.src = thumb(C.animal); img.classList.remove('hidden'); } else img.classList.add('hidden');
@@ -561,8 +583,8 @@ function celebrate() {
   const cs = $('cstars'); cs.innerHTML = '';
   for (let i = 0; i < 3; i++) { cs.insertAdjacentHTML('beforeend', ICON.star); }
   [...cs.children].forEach((el, i) => { if (i < stars) setTimeout(() => { el.classList.add('on'); Sound.star(); }, 500 + i * 300); });
-  $('friend').textContent = first && S.kind === 'letter' ? TR.ui.friend : '';
-  $('friend').dir = TR.lang === 'en' ? 'ltr' : 'rtl';
+  $('friend').textContent = first && S.kind === 'letter' ? ui().friend : '';
+  $('friend').dir = ui().dir;
   $('celebrate').classList.remove('hidden');
   $('hud').classList.add('hidden');
   Sound.fanfare(); haptic('win');
@@ -805,11 +827,11 @@ function onBack() {
 function openGate() {
   Sound.click();
   const a = 1 + ((Math.random() * 9) | 0); let b = 1 + ((Math.random() * 9) | 0); if (b === a) b = (a % 9) + 1;
-  $('pgq').textContent = `للوالدين: اضغط ${arDigits(a)} ثم ${arDigits(b)}`;
+  $('pgq').textContent = ui().gate(a, b);
   const pad = $('pgpad'); pad.innerHTML = ''; let step = 0;
   const order = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
   for (const n of order) {
-    const k = document.createElement('button'); k.className = 'cbtn blue pgk'; k.textContent = arDigits(n);
+    const k = document.createElement('button'); k.className = 'cbtn blue pgk'; k.textContent = ui().gateDigit(n);
     k.addEventListener('click', () => {
       Sound.click();
       if (n === (step === 0 ? a : b)) { step++; k.classList.add('ok'); if (step === 2) { $('pgate').classList.add('hidden'); openSettings(); } }
@@ -820,28 +842,27 @@ function openGate() {
   $('pgate').classList.remove('hidden');
 }
 $('pgclose').addEventListener('click', () => { Sound.click(); $('pgate').classList.add('hidden'); });
-const OPTS = [
-  ['sfx', 'المؤثرات الصوتية'], ['music', 'الموسيقى'], ['voice', 'نطق الحروف'], ['haptics', 'الاهتزاز'],
-  ['hint', 'توهج المساعدة بعد الخطأ'], ['tilt', 'القيادة بإمالة الجهاز'], ['flip', 'عكس اتجاه الإمالة'], ['speed', 'سرعة السيارة'],
-  ['voiceRate', 'سرعة النطق'], ['voiceName', 'صوت القارئ']
-];
+const OPTS = ['sfx', 'music', 'voice', 'haptics', 'hint', 'tilt', 'flip', 'speed', 'voiceRate', 'voiceName'];
+// a short sample in the track the child is learning
+const voiceSample = () => (TR.lang === 'en' ? ['Letter A', TR.lines.sound(TR.letters[0])] : ['أَلِف', 'أَسَد']);
 function openSettings() {
   Sound.click();
   const grid = $('sgrid'); grid.innerHTML = '';
-  for (const [k, label] of OPTS) {
+  for (const k of OPTS) {
+    const label = ui().opts[k];
     if ((k === 'tilt' || k === 'flip') && !Tilt.supported) continue;
     const row = document.createElement('div'); row.className = 'opt';
     row.innerHTML = `<span>${label}</span>`;
     if (k === 'speed' || k === 'voiceRate') {
       const seg = document.createElement('div'); seg.className = 'seg';
-      for (const [v, t] of [['slow', 'بطيئة'], ['normal', 'عادية']]) { const b = document.createElement('button'); b.textContent = t; b.classList.toggle('on', set()[k] === v); b.addEventListener('click', () => { set()[k] = v; Store.save(); applySettings(); [...seg.children].forEach(x => x.classList.toggle('on', x === b)); Sound.click(); if (k === 'voiceRate') Voice.say(['أَلِف', 'أَسَد']); }); seg.appendChild(b); }
+      for (const [v, t] of [['slow', ui().slow], ['normal', ui().normal]]) { const b = document.createElement('button'); b.textContent = t; b.classList.toggle('on', set()[k] === v); b.addEventListener('click', () => { set()[k] = v; Store.save(); applySettings(); [...seg.children].forEach(x => x.classList.toggle('on', x === b)); Sound.click(); if (k === 'voiceRate') Voice.say(voiceSample()); }); seg.appendChild(b); }
       row.appendChild(seg);
     } else if (k === 'voiceName') {
       const names = Voice.voices();
       if (Voice.clipCount > 0 || names.length < 2) continue;
       const sel = document.createElement('select'); sel.className = 'vsel';
       for (const n of names) { const o = document.createElement('option'); o.value = n; o.textContent = n.replace(/^Microsoft |^Google /, '').slice(0, 34); o.selected = n === Voice.current(); sel.appendChild(o); }
-      sel.addEventListener('change', () => { set().voiceName = sel.value; Store.save(); Voice.setVoice(sel.value); Voice.say(['أَلِف', 'أَسَد']); });
+      sel.addEventListener('change', () => { set().voiceName = sel.value; Store.save(); Voice.setVoice(sel.value); Voice.say(voiceSample()); });
       row.appendChild(sel); row.classList.add('wide');
     } else {
       const tg = document.createElement('div'); tg.className = 'tg' + (set()[k] ? ' on' : '');
@@ -856,32 +877,33 @@ function openSettings() {
     grid.appendChild(row);
   }
   voiceStatus();
-  $('sreset').textContent = 'مسح التقدم'; $('sreset').dataset.armed = '';
-  $('sunlock').textContent = Store.data.unlockAll ? 'إغلاق المراحل' : 'فتح كل المراحل';
+  $('sreset').textContent = ui().reset; $('sreset').dataset.armed = '';
+  $('sunlock').textContent = unlockText();
   $('settings').classList.remove('hidden');
 }
 function voiceStatus() {
   const v = Voice.available;
-  $('vstat').textContent = Voice.clipCount > 0 ? `يستخدم التطبيق تسجيلات صوتية جاهزة (${Voice.clipCount}) ✓`
-    : v === true ? `الصوت العربي متوفر: ${Voice.current() || ''} ✓`
-    : v === false ? (isNativeApp ? 'لا يوجد صوت عربي على هذا الجهاز. ثبّت اللغة العربية من إعدادات "تحويل النص إلى كلام" في الهاتف.' : 'هذا المتصفح لا يحتوي على صوت عربي. جرّب متصفح Edge أو Safari، أو ثبّت اللغة العربية في إعدادات الجهاز.')
-    : 'اضغط "تجربة الصوت" للتأكد من نطق الحروف.';
+  const u = ui();
+  $('vstat').textContent = Voice.clipCount > 0 ? u.vClips(Voice.clipCount)
+    : v === true ? u.vOk(Voice.current() || '')
+    : v === false ? (isNativeApp ? u.vNoneApp : u.vNoneWeb)
+    : u.vUnknown;
   $('vinstall').classList.toggle('hidden', !(v === false && /android/i.test(navigator.userAgent)));
 }
 $('sclose').addEventListener('click', () => { Sound.click(); $('settings').classList.add('hidden'); renderMap(); });
-$('vtest').addEventListener('click', () => { Voice.enabled = true; Voice.say(['أَلِف', 'أَسَد']).then(() => { Voice.enabled = set().voice; }); });
+$('vtest').addEventListener('click', () => { Voice.enabled = true; Voice.say(voiceSample()).then(() => { Voice.enabled = set().voice; }); });
 $('vinstall').addEventListener('click', () => Voice.openInstall());
-$('sunlock').addEventListener('click', () => { Store.data.unlockAll = !Store.data.unlockAll; Store.save(); Sound.click(); $('sunlock').textContent = Store.data.unlockAll ? 'إغلاق المراحل' : 'فتح كل المراحل'; });
+$('sunlock').addEventListener('click', () => { Store.data.unlockAll = !Store.data.unlockAll; Store.save(); Sound.click(); $('sunlock').textContent = unlockText(); });
 $('sreset').addEventListener('click', () => {
   const b = $('sreset');
   if (!b.dataset.armed) {
-    b.dataset.armed = '1'; b.textContent = 'اضغط مرة أخرى للتأكيد';
-    clearTimeout(b._t); b._t = setTimeout(() => { if (b.dataset.armed) { b.dataset.armed = ''; b.textContent = 'مسح التقدم'; } }, 3000);
+    b.dataset.armed = '1'; b.textContent = ui().resetConfirm;
+    clearTimeout(b._t); b._t = setTimeout(() => { if (b.dataset.armed) { b.dataset.armed = ''; b.textContent = ui().reset; } }, 3000);
     return;
   }
   clearTimeout(b._t);
-  Store.reset(); b.dataset.armed = ''; b.textContent = 'تم المسح ✓'; Sound.lock();
-  $('sunlock').textContent = Store.data.unlockAll ? 'إغلاق المراحل' : 'فتح كل المراحل';
+  Store.reset(); b.dataset.armed = ''; b.textContent = ui().resetDone; Sound.lock();
+  $('sunlock').textContent = unlockText();
 });
 
 // ---------- main loop ----------
@@ -985,6 +1007,8 @@ async function boot() {
   setKartColor(Store.data.kart);
   [...$('swatches').children].forEach((x, k) => x.classList.toggle('sel', k === Store.data.kart));
   applySettings();
+  applyUiLang();
+  if (set().uiLang === 'en') mapTab = 'enletter';
   Voice.init(set().voiceName);
   initPlatform({
     onBack,

@@ -1,0 +1,47 @@
+// Interface language (menus, settings, on-screen instructions). This is separate from the
+// learning track: an English-speaking family can learn Arabic letters with an English interface,
+// and an Arabic-speaking family can learn English letters with an Arabic interface.
+import { arDigits } from './data.js';
+
+export const UI = {
+  ar: {
+    dir: 'rtl', switchTo: 'EN', switchLabel: 'English',
+    sub: 'حديقة الحروف والأرقام', play: 'العب', gearhint: 'اضغط مطولاً – للوالدين', banner: 'حديقة الحروف',
+    tabLetter: 'الحروف', tabNumber: 'الأرقام',
+    pause: 'استراحة', settingsTitle: 'إعدادات الوالدين',
+    vtest: 'تجربة الصوت', vinstall: 'تثبيت الصوت العربي',
+    unlock: 'فتح كل المراحل', lock: 'إغلاق المراحل', reset: 'مسح التقدم', resetConfirm: 'اضغط مرة أخرى للتأكيد', resetDone: 'تم المسح ✓',
+    opts: {
+      sfx: 'المؤثرات الصوتية', music: 'الموسيقى', voice: 'نطق الحروف', haptics: 'الاهتزاز', hint: 'توهج المساعدة بعد الخطأ',
+      tilt: 'القيادة بإمالة الجهاز', flip: 'عكس اتجاه الإمالة', speed: 'سرعة السيارة', voiceRate: 'سرعة النطق', voiceName: 'صوت القارئ'
+    },
+    slow: 'بطيئة', normal: 'عادية',
+    vClips: n => `يستخدم التطبيق تسجيلات صوتية جاهزة (${n}) ✓`,
+    vOk: name => `الصوت العربي متوفر: ${name} ✓`,
+    vNoneApp: 'لا يوجد صوت عربي على هذا الجهاز. ثبّت اللغة العربية من إعدادات "تحويل النص إلى كلام" في الهاتف.',
+    vNoneWeb: 'هذا المتصفح لا يحتوي على صوت عربي. جرّب متصفح Edge أو Safari، أو ثبّت اللغة العربية في إعدادات الجهاز.',
+    vUnknown: 'اضغط "تجربة الصوت" للتأكد من نطق الحروف.',
+    gate: (a, b) => `للوالدين: اضغط ${arDigits(a)} ثم ${arDigits(b)}`, gateDigit: arDigits,
+    collect: L => `اجمع حرف ${L.ch}`, apples: d => `اجمع ${d} تفاحات`, zero: 'صفر = لا شيء', friend: 'صديق جديد في حديقتك!'
+  },
+  en: {
+    dir: 'ltr', switchTo: 'ع', switchLabel: 'العربية',
+    sub: 'Letters & Numbers Zoo', play: 'Play', gearhint: 'Hold – for parents', banner: 'Letter Zoo',
+    tabLetter: 'أ ب ت', tabNumber: '١٢٣',
+    pause: 'Paused', settingsTitle: 'Parent settings',
+    vtest: 'Test voice', vinstall: 'Install Arabic voice',
+    unlock: 'Unlock all levels', lock: 'Lock levels', reset: 'Reset progress', resetConfirm: 'Tap again to confirm', resetDone: 'Progress reset ✓',
+    opts: {
+      sfx: 'Sound effects', music: 'Music', voice: 'Spoken letters', haptics: 'Vibration', hint: 'Help glow after a mistake',
+      tilt: 'Tilt to steer', flip: 'Flip tilt direction', speed: 'Car speed', voiceRate: 'Speech speed', voiceName: 'Voice'
+    },
+    slow: 'Slow', normal: 'Normal',
+    vClips: n => `Using the built-in recorded voice (${n} clips) ✓`,
+    vOk: name => `Arabic voice available: ${name} ✓`,
+    vNoneApp: 'No Arabic voice on this device. Install Arabic in the phone\'s text-to-speech settings.',
+    vNoneWeb: 'This browser has no Arabic voice. Try Edge or Safari, or install Arabic in the device settings.',
+    vUnknown: 'Tap "Test voice" to check the letter voice.',
+    gate: (a, b) => `For parents: tap ${a} then ${b}`, gateDigit: n => String(n),
+    collect: L => `Find the letter ${L.ch}`, apples: d => `Collect ${d} apples`, zero: '0 = nothing', friend: 'A new friend in your zoo!'
+  }
+};

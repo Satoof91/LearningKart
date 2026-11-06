@@ -30,6 +30,9 @@ Built with Three.js and packaged for **Android** and **iOS** with [Capacitor 8](
 5. **Meet the animal**: the animal's habitat appears. The card shows the letter, the word with the first letter highlighted (أسد), and stars. The letter and word are spoken, the animal jumps, and tapping the animal says it again. The animal then lives in your zoo and appears in the enclosures along the road in later levels.
 6. **Numbers**: collect *n* apples (each one is counted aloud), then exactly *n* apples appear one by one on a table, each with its number (counted right to left). Zero shows an empty basket: «صفر يعني لا شيء».
 
+### Interface language (AR / EN)
+The round **EN / ع** button on the title screen and the map switches the whole interface: menus, pause, parent settings, parent gate, on-screen instructions and the zoo banner. The layout also flips between right-to-left and left-to-right. It is separate from what the child learns: an English-speaking family can study the Arabic letters with an English interface, and the other way round. On first launch the interface follows the device language. Strings are in `src/i18n.js`.
+
 ### English track (map tabs **ABC** and **123**)
 The same game in English, with its own saved progress. Capital letters are in the bubbles and «Aa» on the card. Lines are spoken by a US English neural voice: «Let's find the letter B!», «B is for bear.», «Where is the letter B?», «That is the letter D.». English numbers use the digits 1 2 3 and count left to right, and the card also shows the Arabic digit (٣).
 

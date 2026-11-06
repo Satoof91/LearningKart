@@ -147,6 +147,7 @@ function ribbon(scene, T, offA, offB, y, colorFn, skip, mat) {
 
 // ---------- the static zoo ----------
 export function buildZoo(scene, T) {
+  let setBanner = () => {};
   const R = rng(4242);
   const C = h => new THREE.Color(h);
   // sky dome
@@ -239,14 +240,18 @@ export function buildZoo(scene, T) {
       PROPS.balloons(b, s * (FENCE + 2.5), 2, 1.1);
     }
     b.build(arch);
-    const tex = canvasTexture(1024, 200, (g, w, h) => {
+    // the banner text follows the interface language (redrawn by setBanner)
+    const drawBanner = (g, w, h, text) => {
       const grd = g.createLinearGradient(0, 0, w, 0); ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'].forEach((c, i) => grd.addColorStop(i / 4, c));
       g.fillStyle = grd; g.fillRect(0, 0, w, h);
       g.fillStyle = 'rgba(255,255,255,.18)'; for (let i = 0; i < 30; i++) { g.beginPath(); g.arc(i * 37, (i % 3) * 70 + 20, 14, 0, TAU); g.fill(); }
-      g.direction = 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 120px ${FONT}, sans-serif`;
-      g.lineWidth = 16; g.lineJoin = 'round'; g.strokeStyle = '#3a0ca3'; g.strokeText('حديقة الحروف', w / 2, h / 2 + 12);
-      g.fillStyle = '#fff'; g.fillText('حديقة الحروف', w / 2, h / 2 + 12);
-    });
+      const ar = /[؀-ۿ]/.test(text);
+      g.direction = ar ? 'rtl' : 'ltr'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${ar ? 120 : 104}px ${FONT}, sans-serif`;
+      g.lineWidth = 16; g.lineJoin = 'round'; g.strokeStyle = '#3a0ca3'; g.strokeText(text, w / 2, h / 2 + (ar ? 12 : 8));
+      g.fillStyle = '#fff'; g.fillText(text, w / 2, h / 2 + (ar ? 12 : 8));
+    };
+    const tex = canvasTexture(1024, 200, (g, w, h) => drawBanner(g, w, h, 'حديقة الحروف'));
+    setBanner = text => { const c = tex.image; drawBanner(c.getContext('2d'), c.width, c.height, text); tex.needsUpdate = true; };
     const banner = new THREE.Mesh(new THREE.BoxGeometry(FENCE * 2 + 1, 3.6, 0.6), [lam(0x3a0ca3), lam(0x3a0ca3), lam(0x3a0ca3), lam(0x3a0ca3), new THREE.MeshLambertMaterial({ map: tex }), new THREE.MeshLambertMaterial({ map: tex })]);
     banner.position.y = 8.4; banner.castShadow = true; arch.add(banner);
     const p = T.pos(8, 0); arch.position.set(p.x, 0, p.z); arch.rotation.y = T.heading(8) + Math.PI;
@@ -266,7 +271,7 @@ export function buildZoo(scene, T) {
     for (let k = 0; k < n; k++) cb.add(G.ico, 0xffffff, Math.cos(a) * r + k * 13 - n * 6, y + R() * 4, Math.sin(a) * r + R() * 8, 0, 0, 0, 11 + R() * 7, 6 + R() * 3, 9 + R() * 4);
   }
   cb.build(clouds, { cast: false }); scene.add(clouds);
-  return { slots, clouds, arch };
+  return { slots, clouds, arch, setBanner };
 }
 
 // ---------- habitat (enclosure with animals + sign) ----------

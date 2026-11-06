@@ -56,6 +56,15 @@ svg{display:block}
 .tab.on{background:#fff;color:var(--pink);box-shadow:0 4px 0 var(--pink)}
 .tab.en{font-family:LKFont,"Trebuchet MS",sans-serif;direction:ltr}
 .tab.en.on{color:var(--blue);box-shadow:0 4px 0 var(--blue)}
+/* interface language switcher (title + map) */
+.langbtn{font-family:LKFont,"Trebuchet MS",sans-serif;font-weight:800;font-size:clamp(16px,4.4vh,24px);min-width:clamp(44px,10vh,60px);height:clamp(40px,9vh,56px);padding:0 .6em;border-radius:999px;background:#fff;color:var(--purple);box-shadow:0 4px 0 rgba(43,27,107,.25);flex:none}
+.langbtn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(43,27,107,.25)}
+#tlang{position:absolute;top:calc(12px + var(--st));right:calc(14px + var(--sr))}
+/* English interface: left-to-right details */
+[dir=ltr] .tab.en{order:-1}
+[dir=ltr] .tg::after{right:auto;left:3px;transition:left .2s}
+[dir=ltr] .tg.on::after{left:29px}
+[dir=ltr] #play svg,[dir=ltr] #cnext svg{transform:scaleX(-1)} /* "forward" points right in English */
 .coins{display:flex;align-items:center;gap:6px;font-weight:800;font-size:clamp(18px,5vh,30px);background:rgba(43,27,107,.55);padding:.05em .7em .15em;border-radius:999px}
 .coins svg{width:1em;height:1em}
 #gear{position:relative;width:clamp(40px,9vh,56px);height:clamp(40px,9vh,56px);border-radius:50%;background:rgba(43,27,107,.55);padding:0}
@@ -178,9 +187,10 @@ svg{display:block}
 <div id="loading"><div class="k">🏎️</div><b>LearningKart</b></div>
 
 <div id="title" class="screen hidden">
+  <button class="langbtn" id="tlang" aria-label="English">EN</button>
   <div class="logo">Learning<span>Kart</span></div>
-  <div class="sub">حديقة الحروف والأرقام</div>
-  <button id="play" class="cbtn green"><span>العب</span><svg viewBox="0 0 24 24"><path fill="#fff" d="M16 5 7 12l9 7z"/></svg></button>
+  <div class="sub" data-i18n="sub">حديقة الحروف والأرقام</div>
+  <button id="play" class="cbtn green"><span data-i18n="play">العب</span><svg viewBox="0 0 24 24"><path fill="#fff" d="M16 5 7 12l9 7z"/></svg></button>
   <div class="swatches" id="swatches"></div>
 </div>
 
@@ -189,7 +199,8 @@ svg{display:block}
     <div class="brand">LearningKart</div>
     <div class="tabs"><button class="tab on" data-tab="letter">الحروف</button><button class="tab" data-tab="number">الأرقام</button><button class="tab en" data-tab="enletter">ABC</button><button class="tab en" data-tab="ennumber">123</button></div>
     <div class="coins" data-icon="star"><b id="totstars">0</b></div>
-    <button id="gear" aria-label="settings"><svg class="ring" viewBox="0 0 60 60"><circle cx="30" cy="30" r="27"/></svg><span id="gearhint">اضغط مطولاً – للوالدين</span></button>
+    <button id="gear" aria-label="settings"><svg class="ring" viewBox="0 0 60 60"><circle cx="30" cy="30" r="27"/></svg><span id="gearhint" data-i18n="gearhint">اضغط مطولاً – للوالدين</span></button>
+    <button class="langbtn" aria-label="English">EN</button>
   </header>
   <div id="path"><div id="world"><svg id="trail"></svg></div></div>
 </div>
@@ -220,7 +231,7 @@ svg{display:block}
 
 <div id="pause" class="overlay hidden">
   <div class="box">
-    <h2>استراحة</h2>
+    <h2 data-i18n="pause">استراحة</h2>
     <div class="row">
       <button id="presume" class="cbtn green round" data-icon="play" aria-label="resume"></button>
       <button id="prestart" class="cbtn blue round" data-icon="replay" aria-label="restart"></button>
@@ -240,12 +251,12 @@ svg{display:block}
 <div id="settings" class="overlay hidden">
   <button id="sclose" class="cbtn pink round" data-icon="close" aria-label="close"></button>
   <div class="box">
-    <h2>إعدادات الوالدين</h2>
+    <h2 data-i18n="settingsTitle">إعدادات الوالدين</h2>
     <div class="grid" id="sgrid"></div>
     <div id="vstat"></div>
     <div class="srow">
-      <button id="vtest" class="cbtn blue">تجربة الصوت</button>
-      <button id="vinstall" class="cbtn blue hidden">تثبيت الصوت العربي</button>
+      <button id="vtest" class="cbtn blue" data-i18n="vtest">تجربة الصوت</button>
+      <button id="vinstall" class="cbtn blue hidden" data-i18n="vinstall">تثبيت الصوت العربي</button>
       <button id="sunlock" class="cbtn">فتح كل المراحل</button>
       <button id="sreset" class="cbtn pink">مسح التقدم</button>
     </div>
