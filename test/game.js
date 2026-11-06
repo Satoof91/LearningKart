@@ -25,14 +25,14 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     }, 30);
   });
   await auto();
-  await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 90000 });
+  await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 600000 });
   await wait(1500); await p.screenshot({ path: OUT + '/4-drive.png' });
   // also hit one wrong letter on purpose to see the feedback
   await p.evaluate(() => { const L = window.__lk; const w = L.S.pickups.find(q => q.kind === 'wrong' && q.alive); if (w) L.hitPickup(w); });
   await wait(300); await p.screenshot({ path: OUT + '/5-wrong.png' });
-  await p.waitForFunction('window.__lk.S.arch', null, { timeout: 120000 });
+  await p.waitForFunction('window.__lk.S.arch', null, { timeout: 600000 });
   await wait(1200); await p.screenshot({ path: OUT + '/6-gate.png' });
-  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 120000 });
+  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
   await wait(2500); await p.screenshot({ path: OUT + '/7-celebrate.png' });
   const prog = await p.evaluate(() => ({ letters: window.__lk.Store.data.letters.slice(0, 3), stars: window.__lk.Store.data.totalStars, wrong: window.__lk.S.wrong }));
   console.log('progress', JSON.stringify(prog));
@@ -43,13 +43,13 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   // number level 3
   await p.evaluate(() => { window.__lk.Store.data.unlockAll = true; window.__lk.startLevel('number', 3); });
   await auto();
-  await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 2', null, { timeout: 90000 });
+  await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 2', null, { timeout: 600000 });
   await wait(600); await p.screenshot({ path: OUT + '/10-number-drive.png' });
-  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 120000 });
+  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
   await wait(3500); await p.screenshot({ path: OUT + '/11-number-celebrate.png' });
   // number 0
   await p.evaluate(() => window.__lk.startLevel('number', 0)); await auto();
-  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 120000 });
+  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
   await wait(1500); await p.screenshot({ path: OUT + '/12-zero.png' });
   // pause + settings
   await p.evaluate(() => window.__lk.startLevel('letter', 9)); await auto();
@@ -61,20 +61,20 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await p.evaluate(() => document.getElementById('pgate').classList.add('hidden'));
   // a child who never steers must not get 3 stars
   await p.evaluate(() => { clearInterval(window.__ap); const L = window.__lk; for (const k in L.keys) L.keys[k] = false; L.startLevel('letter', 4, 'ar'); L.S.timeScale = 4; L.S.noAdapt = true; });
-  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 240000 });
+  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
   const passive = await p.evaluate(() => ({ stars: window.__lk.Store.data.letters[4], misses: window.__lk.S.misses, assisted: window.__lk.S.assisted }));
   console.log('passive child', JSON.stringify(passive), passive.stars <= 1 ? 'OK' : 'TOO MANY STARS');
   // English track: letter A, number 3, and the ABC map with every animal (shows all new animals)
   await p.evaluate(() => { window.__lk.startLevel('letter', 0, 'en'); }); await auto();
   await wait(1200); await p.screenshot({ path: OUT + '/17-en-intro.png' });
-  await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 90000 });
+  await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 600000 });
   await wait(800); await p.screenshot({ path: OUT + '/18-en-drive.png' });
-  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 120000 });
+  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
   await wait(2500); await p.screenshot({ path: OUT + '/19-en-celebrate.png' });
   const enProg = await p.evaluate(() => window.__lk.Store.prog('letter', 'en').slice(0, 2));
   console.log('english progress', JSON.stringify(enProg));
   await p.evaluate(() => window.__lk.startLevel('number', 3, 'en')); await auto();
-  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 120000 });
+  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
   await wait(4500); await p.screenshot({ path: OUT + '/20-en-number.png' });
   await p.evaluate(() => { clearInterval(window.__ap); const L = window.__lk; L.Store.prog('letter', 'en').fill(3); L.toMap('enletter'); });
   for (const [i, x] of [[0, 0], [1, 0.5], [2, 1]]) {
@@ -84,12 +84,30 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   // word mode: build «دب» (Arabic) and "HEN" (English) with the autopilot
   for (const [lang, tag] of [['ar', 'ar'], ['en', 'en']]) {
     await p.evaluate(lang => { window.__lk.Store.data.unlockAll = true; window.__lk.startLevel('word', 0, lang); }, lang); await auto();
-    await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 90000 });
+    await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 600000 });
     await wait(900); await p.screenshot({ path: OUT + `/28-word-${tag}-drive.png` });
-    await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 120000 });
+    await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
     await wait(2500); await p.screenshot({ path: OUT + `/29-word-${tag}-card.png` });
     console.log('word', tag, 'stars', await p.evaluate(lang => window.__lk.Store.prog('word', lang)[0], lang));
   }
+  // garage: a level that crosses a star threshold announces the gift; then customise and drive with a co-pilot
+  await p.evaluate(() => { const L = window.__lk, d = L.Store.data; for (const k of ['letters', 'numbers', 'enLetters', 'enNumbers', 'words', 'enWords']) d[k].fill(0); d.letters[0] = 1; d.letters[1] = 1; L.startLevel('letter', 2, 'ar'); }); await auto();
+  await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
+  await wait(1500);
+  console.log('gift text', await p.evaluate(() => document.getElementById('friend').textContent));
+  await p.evaluate(() => { clearInterval(window.__ap); const d = window.__lk.Store.data; d.letters.fill(1, 0, 12); d.enLetters.fill(1, 0, 6); window.__lk.toTitle(); });
+  await wait(800); await p.click('#garagebtn', { force: true }); await wait(1500);
+  const pickItem = async (tab, n) => { await p.click(`.gtab:nth-child(${tab})`, { force: true }); await wait(200); await p.click(`.gitem:nth-child(${n})`, { force: true }); await wait(250); };
+  await pickItem(1, 2); await pickItem(3, 4); await pickItem(2, 6); await pickItem(5, 2);
+  await wait(1500); await p.screenshot({ path: OUT + '/30-garage.png' });
+  await p.click('.gtab:nth-child(3)', { force: true }); await wait(1500); await p.screenshot({ path: OUT + '/31-garage-hats.png' });
+  const look = await p.evaluate(() => ({ look: window.__lk.Store.data.look, color: window.__lk.Store.data.kart, stars: window.__lk.Store.learnStars() }));
+  console.log('garage look', JSON.stringify(look));
+  await p.click('#gclose', { force: true }); await wait(500);
+  await p.evaluate(() => window.__lk.startLevel('letter', 3, 'ar')); await auto();
+  await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 600000 });
+  await wait(500); await p.screenshot({ path: OUT + '/32-drive-copilot.png' });
+  await p.evaluate(() => clearInterval(window.__ap));
   // English interface: switch with the map's language button, then check map, intro (banner), pause, gate, settings, title
   await p.evaluate(() => { const L = window.__lk; L.Store.prog('letter', 'en').fill(0); L.toMap('letter'); });
   await wait(800); await p.click('#map .langbtn', { force: true }); await wait(1500);

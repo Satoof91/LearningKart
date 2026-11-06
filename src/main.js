@@ -19,6 +19,7 @@ import { loadFonts, bubbleTexture, drawWord, drawWordProgress, FONT, roundRect }
 import { Voice } from './voice.js';
 import { Sound } from './audio.js';
 import { Store } from './store.js';
+import { GARAGE, GARAGE_TABS, KART_COLORS, newlyUnlocked } from './garage.js';
 
 const $ = id => document.getElementById(id);
 const TAU = Math.PI * 2;
@@ -26,7 +27,6 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 const damp = (a, b, k, dt) => lerp(a, b, 1 - Math.exp(-k * dt));
 const pick = a => a[(Math.random() * a.length) | 0];
-const KART_COLORS = ['#ff4d6d', '#3da5ff', '#ffd23f', '#4cd964', '#c77dff'];
 const BUBBLE_COLORS = [0x3da5ff, 0xff4d6d, 0x8a5cf6, 0xff922b, 0x20c997, 0xf06595];
 
 // ---------- icons ----------
@@ -363,7 +363,7 @@ function hitPickup(p) {
     Voice.say([p.letter.name, praise(), askNext(p)], { gap: 300 });
     p.pop = 0;
   } else if (p.kind === 'target') {
-    const n = S.collected++; S.missStreak = 0; S.recentWrong = false;
+    const n = S.collected++; S.missStreak = 0; S.recentWrong = false; kart.cheerT = 1.4;
     Sound.collect(n); haptic('tick'); confetti.burst(wp, 22, 6, null, 0.45);
     if (isWord()) {
       // the letter flies into the word, which fills in; the bubbles ahead switch to the next letter
@@ -636,13 +636,16 @@ function celebrate() {
   const errs = S.wrong + S.misses;
   let stars = S.kind !== 'number' ? (errs <= 1 ? 3 : errs <= 3 ? 2 : 1) : 3;
   if (S.assisted > 0) stars = Math.min(stars, S.assisted > 2 ? 1 : 2);
+  const starsBefore = Store.learnStars();
   const first = Store.complete(S.kind, S.index, stars, TR.lang);
+  const gifts = newlyUnlocked(starsBefore, Store.learnStars());
   Store.data.totalStars += S.coins; Store.save();
   drawCard();
   const cs = $('cstars'); cs.innerHTML = '';
   for (let i = 0; i < 3; i++) { cs.insertAdjacentHTML('beforeend', ICON.star); }
   [...cs.children].forEach((el, i) => { if (i < stars) setTimeout(() => { el.classList.add('on'); Sound.star(); }, 500 + i * 300); });
   $('friend').textContent = S.kind === 'word' ? ui().wordDone : first && S.kind === 'letter' ? ui().friend : '';
+  if (gifts.length) $('friend').textContent += `  🎁 ${ui().garageNew} ${gifts.map(g => g.icon || '🎨').join(' ')}`;
   $('friend').dir = ui().dir;
   $('celebrate').classList.remove('hidden');
   $('hud').classList.add('hidden');
@@ -715,6 +718,7 @@ canvas.addEventListener('pointerdown', e => {
 // ---------- screens ----------
 function showScreen(name) {
   for (const id of ['title', 'map', 'hud']) $(id).classList.toggle('hidden', id !== name);
+  if (name !== 'none') $('garage').classList.add('hidden');
   if (name !== 'hud') { $('intro').classList.add('hidden'); $('celebrate').classList.add('hidden'); }
 }
 function toTitle() {
@@ -816,18 +820,93 @@ function renderMap() {
   requestAnimationFrame(() => { if (focus) path.scrollLeft = parseFloat(focus.style.left) - path.clientWidth / 2; });
 }
 
-// ---------- title ----------
-{
-  const sw = $('swatches');
-  KART_COLORS.forEach((c, i) => {
-    const b = document.createElement('button'); b.className = 'sw'; b.style.background = c; b.setAttribute('aria-label', 'kart color');
-    b.addEventListener('click', () => { Sound.init(); Sound.click(); Store.data.kart = i; Store.save(); setKartColor(i); [...sw.children].forEach((x, k) => x.classList.toggle('sel', k === i)); });
-    sw.appendChild(b);
-  });
+// ---------- title + garage ----------
+// the kart as the child customised it (body, colour, hat, skin tone, animal co-pilot)
+function setKart() {
+  if (kart) { scene.remove(kart.root); disposeOwned(kart.root); }
+  const look = Store.data.look;
+  kart = makeKart(KART_COLORS[Store.data.kart] || KART_COLORS[1], look);
+  kart.pilotAnimal = null;
+  if (look.pilot && metAnimals().includes(look.pilot)) {
+    try {
+      const a = makeAnimal(look.pilot);
+      a.root.scale.multiplyScalar(1.55 / Math.max(0.5, a.height)); a.root.rotation.y = 0;
+      kart.pilot.add(a.root); kart.pilotAnimal = a;
+    } catch (e) { /* unknown animal: ride alone */ }
+  }
+  scene.add(kart.root); syncKart(0);
 }
-function setKartColor(i) {
-  if (kart) scene.remove(kart.root);
-  kart = makeKart(KART_COLORS[i]); scene.add(kart.root); syncKart(0);
+// animals the child has befriended (finished letters and words, both languages), most recent first
+function metAnimals() {
+  const ids = [];
+  for (const lang of ['ar', 'en']) {
+    const tr = TRACKS[lang];
+    Store.prog('letter', lang).forEach((st, i) => { if (st > 0) ids.push(tr.letters[i].animal); });
+    Store.prog('word', lang).forEach((st, i) => { if (st > 0) ids.push(tr.words[i].animal); });
+  }
+  return [...new Set(ids)];
+}
+let gTab = 'body', gFrom = 'title';
+function openGarage(from) {
+  Sound.init(); Sound.click(); haptic('tick');
+  gFrom = from || 'title';
+  clearLevel(); Voice.stop();
+  showScreen('none');
+  S.mode = 'garage'; S.modeT = 0; S.u = 4; S.d = 0; S.speed = 0; syncKart(0);
+  renderGarage();
+  $('garage').classList.remove('hidden');
+  Sound.startMusic();
+}
+function closeGarage() {
+  Sound.click();
+  $('garage').classList.add('hidden');
+  if (gFrom === 'map') toMap(); else toTitle();
+}
+function renderGarage() {
+  const u = ui(), have = Store.learnStars(), look = Store.data.look;
+  $('gstars').textContent = have;
+  const tabs = $('gtabs'); tabs.innerHTML = '';
+  for (const t of GARAGE_TABS) {
+    const b = document.createElement('button'); b.className = 'gtab' + (t === gTab ? ' on' : ''); b.textContent = u.gTabs[t];
+    b.addEventListener('click', () => { Sound.click(); gTab = t; renderGarage(); });
+    tabs.appendChild(b);
+  }
+  const box = $('gitems'); box.innerHTML = '';
+  const cell = (inner, selected, cost, onPick) => {
+    const el = document.createElement('button'); const locked = cost > have;
+    el.className = 'gitem' + (selected ? ' sel' : '') + (locked ? ' locked' : '');
+    el.innerHTML = inner + (locked ? `<span class="need">★ ${cost}</span>` : '');
+    el.addEventListener('click', () => {
+      if (locked) { Sound.lock(); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); return; }
+      Sound.pop(); haptic('tick'); onPick(); Store.save(); setKart(); renderGarage();
+    });
+    box.appendChild(el);
+  };
+  if (gTab === 'body') for (const it of GARAGE.body) cell(it.icon, look.body === it.id, it.cost, () => { look.body = it.id; });
+  if (gTab === 'hat') for (const it of GARAGE.hat) cell(it.icon, look.hat === it.id, it.cost, () => { look.hat = it.id; });
+  if (gTab === 'color') for (const it of GARAGE.color) cell(`<span class="dot" style="background:${it.color}"></span>`, Store.data.kart === it.id, it.cost, () => { Store.data.kart = it.id; });
+  if (gTab === 'skin') for (const it of GARAGE.skin) cell(`<span class="dot" style="background:${it.color}"></span>`, look.skin === it.id, it.cost, () => { look.skin = it.id; });
+  if (gTab === 'pilot') {
+    const met = metAnimals();
+    cell(`<span style="font-size:.5em;font-weight:800">${u.pilotNone}</span>`, !look.pilot, 0, () => { look.pilot = ''; });
+    if (!met.length) { const e = document.createElement('div'); e.className = 'gempty'; e.textContent = u.pilotEmpty; box.appendChild(e); }
+    for (const id of met) cell(`<img alt="" src="${thumb(id)}">`, look.pilot === id, 0, () => { look.pilot = id; });
+  }
+}
+$('garagebtn').addEventListener('click', () => openGarage('title'));
+$('mgarage').addEventListener('click', () => openGarage('map'));
+$('gclose').addEventListener('click', closeGarage);
+// garage camera: circle slowly around the kart, which stays in the free half of the screen next to the panel
+function garageCamera(dt) {
+  const c = kart.root.position, a = 0.9 + Math.sin(S.modeT * 0.35) * 0.9;
+  const tp = new THREE.Vector3(c.x + Math.sin(T.heading(S.u) + a) * 10.5, 4.6, c.z + Math.cos(T.heading(S.u) + a) * 10.5);
+  const look = new THREE.Vector3(c.x, 1.8, c.z);
+  const fwd = new THREE.Vector3().subVectors(look, tp).normalize(), right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0)).normalize();
+  const shift = 3.6 * Math.min(1.3, camera.aspect / 1.8);
+  look.addScaledVector(right, -shift); tp.addScaledVector(right, -shift);
+  camPos.x = damp(camPos.x, tp.x, 3, dt); camPos.y = damp(camPos.y, tp.y, 3, dt); camPos.z = damp(camPos.z, tp.z, 3, dt);
+  camLook.x = damp(camLook.x, look.x, 4, dt); camLook.y = damp(camLook.y, look.y, 4, dt); camLook.z = damp(camLook.z, look.z, 4, dt);
+  camera.position.copy(camPos); camera.lookAt(camLook);
 }
 $('play').addEventListener('click', async () => {
   Sound.init(); Sound.click(); haptic('tick');
@@ -1001,6 +1080,8 @@ function frame(now) {
     camera.position.set(c.x + Math.sin(a) * 46, 18 + Math.sin(S.t * 0.3) * 3, c.z + Math.cos(a) * 46);
     camera.lookAt(c.x, 4, c.z); camPos.copy(camera.position); camLook.set(c.x, 4, c.z);
     syncKart(dt); followSun(c);
+  } else if (S.mode === 'garage') {
+    garageCamera(dt); syncKart(dt); followSun(kart.root.position);
   } else if (S.mode === 'intro') {
     // swoop from above down behind the kart
     const k = Math.min(1, S.modeT / 2.6), e = k * k * (3 - 2 * k);
@@ -1055,6 +1136,7 @@ function frame(now) {
     for (const a of S.stage.animals) a.update(S.t, S.happyT > 0 ? 'happy' : 'idle', dt);
     for (const it of S.stage.items) if (it.apple && it.root.visible) { it.apple.rotation.y += dt * (S.happyT > 0 ? 4 : 0.8); it.apple.position.y = S.happyT > 0 ? Math.abs(Math.sin(S.t * 6 + it.ph)) * 0.8 : 0; }
   }
+  if (kart.pilotAnimal) { if (kart.cheerT > 0) kart.cheerT -= dt; kart.pilotAnimal.update(S.t, kart.cheerT > 0 || S.mode === 'garage' && Math.sin(S.t * 0.8) > 0.6 ? 'happy' : 'idle', dt); }
   if (S.arch) S.arch.sign.rotation.y = Math.sin(S.t * 2) * 0.12;
   ZOO.clouds.rotation.y += dt * 0.004;
   confetti.update(dt);
@@ -1068,8 +1150,7 @@ async function boot() {
   T = buildTrack();
   ZOO = buildZoo(scene, T);
   confetti = new Confetti(scene);
-  setKartColor(Store.data.kart);
-  [...$('swatches').children].forEach((x, k) => x.classList.toggle('sel', k === Store.data.kart));
+  setKart();
   applySettings();
   applyUiLang();
   if (set().uiLang === 'en') mapTab = 'enletter';
@@ -1087,6 +1168,6 @@ async function boot() {
   $('loading').classList.add('hidden');
   requestAnimationFrame(frame);
   // test hook (headless checks)
-  window.__lk = { keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, TRACKS, get TR() { return TR; } };
+  window.__lk = { keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, openGarage, closeGarage, setKart, metAnimals, TRACKS, get TR() { return TR; } };
 }
 boot();

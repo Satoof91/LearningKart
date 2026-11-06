@@ -1,10 +1,11 @@
 // Progress + settings, saved on the device (localStorage, mirrored to native Preferences in the app).
 import { Preferences } from '@capacitor/preferences';
 import { isNative } from './platform.js';
+import { DEFAULT_LOOK, GARAGE } from './garage.js';
 
 const KEY = 'learningkart_v1';
 const DEFAULT = () => ({
-  v: 2, letters: Array(28).fill(0), numbers: Array(11).fill(0), totalStars: 0, kart: 1,
+  v: 2, look: DEFAULT_LOOK(), letters: Array(28).fill(0), numbers: Array(11).fill(0), totalStars: 0, kart: 1,
   // per letter: how often the child picked a wrong letter or missed it (drives the review pairs)
   miss: Array(28).fill(0),
   // English track (A-Z, 0-10)
@@ -22,7 +23,12 @@ function sanitize(d) {
   out.letters = arr(d.letters, 28, 3); out.numbers = arr(d.numbers, 11, 3); out.miss = arr(d.miss, 28, 999);
   out.words = arr(d.words, 8, 3); out.enWords = arr(d.enWords, 7, 3);
   out.enLetters = arr(d.enLetters, 26, 3); out.enNumbers = arr(d.enNumbers, 11, 3); out.enMiss = arr(d.enMiss, 26, 999);
-  out.totalStars = int(d.totalStars, 0, 1e7, 0); out.kart = int(d.kart, 0, 4, 1); out.unlockAll = !!d.unlockAll; out.v = 2;
+  out.totalStars = int(d.totalStars, 0, 1e7, 0); out.kart = int(d.kart, 0, 7, 1);
+  const lk = (d.look && typeof d.look === 'object') ? d.look : {}, L = DEFAULT_LOOK();
+  out.look = {
+    body: GARAGE.body.some(x => x.id === lk.body) ? lk.body : L.body, hat: GARAGE.hat.some(x => x.id === lk.hat) ? lk.hat : L.hat,
+    skin: int(lk.skin, 0, 3, 0), pilot: typeof lk.pilot === 'string' ? lk.pilot.slice(0, 20) : ''
+  }; out.unlockAll = !!d.unlockAll; out.v = 2;
   return out;
 }
 export const Store = {
@@ -46,6 +52,8 @@ export const Store = {
     if (isNative) { try { Preferences.set({ key: KEY, value: s }).catch(() => {}); } catch (e) { /* ignore */ } }
   },
   reset() { const k = this.data.kart, st = this.data.settings; this.data = DEFAULT(); this.data.kart = k; this.data.settings = st; this.save(); },
+  // learning stars: the sum of the 1-3 stars of every finished level in every track (unlocks garage items)
+  learnStars() { const d = this.data, sum = a => a.reduce((x, y) => x + y, 0); return sum(d.letters) + sum(d.numbers) + sum(d.enLetters) + sum(d.enNumbers) + sum(d.words) + sum(d.enWords); },
   // progress array for a track: kind 'letter' | 'number', lang 'ar' | 'en'
   prog(kind, lang = 'ar') {
     const d = this.data;

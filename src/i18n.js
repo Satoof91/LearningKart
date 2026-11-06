@@ -23,7 +23,9 @@ export const UI = {
     vUnknown: 'اضغط "تجربة الصوت" للتأكد من نطق الحروف.',
     gate: (a, b) => `للوالدين: اضغط ${arDigits(a)} ثم ${arDigits(b)}`, gateDigit: arDigits,
     collect: L => `اجمع حرف ${L.ch}`, apples: d => `اجمع ${d} تفاحات`, zero: 'صفر = لا شيء', friend: 'صديق جديد في حديقتك!',
-    buildWord: W => `ابنِ كلمة ${W.word}`, wordDone: 'كلمة جديدة!'
+    buildWord: W => `ابنِ كلمة ${W.word}`, wordDone: 'كلمة جديدة!',
+    garage: 'المرآب', gTabs: { body: 'السيارة', color: 'اللون', hat: 'القبعة', skin: 'السائق', pilot: 'الرفيق' },
+    garageNew: 'هدية جديدة في المرآب!', pilotNone: 'بدون', pilotEmpty: 'أكمل حرفاً ليركب صديق معك!', learnStars: 'نجوم التعلّم'
   },
   en: {
     dir: 'ltr', switchTo: 'ع', switchLabel: 'العربية',
@@ -44,6 +46,8 @@ export const UI = {
     vUnknown: 'Tap "Test voice" to check the letter voice.',
     gate: (a, b) => `For parents: tap ${a} then ${b}`, gateDigit: n => String(n),
     collect: L => `Find the letter ${L.ch}`, apples: d => `Collect ${d} apples`, zero: '0 = nothing', friend: 'A new friend in your zoo!',
-    buildWord: W => `Build the word ${W.word}`, wordDone: 'You built a word!'
+    buildWord: W => `Build the word ${W.word}`, wordDone: 'You built a word!',
+    garage: 'Garage', gTabs: { body: 'Kart', color: 'Color', hat: 'Hat', skin: 'Driver', pilot: 'Friend' },
+    garageNew: 'New in the garage!', pilotNone: 'None', pilotEmpty: 'Finish a letter and a friend can ride with you!', learnStars: 'Learning stars'
   }
 };

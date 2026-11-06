@@ -30,6 +30,14 @@ Built with Three.js and packaged for **Android** and **iOS** with [Capacitor 8](
 5. **Meet the animal**: the animal's habitat appears. The card shows the letter, the word with the first letter highlighted (أسد), and stars. The letter and word are spoken, the animal jumps, and tapping the animal says it again. The animal then lives in your zoo and appears in the enclosures along the road in later levels.
 6. **Numbers**: collect *n* apples (each one is counted aloud), then exactly *n* apples appear one by one on a table, each with its number (counted right to left). Zero shows an empty basket: «صفر يعني لا شيء».
 
+### Word mode (map tabs **كلمات** and **Words**)
+Hear the word, collect its letters in order, hear it blended: «دُ، دُ، دُبّ» / "F, O, X. Fox!". The word fills in at the top (Arabic stays joined). A word opens once all its letters are learned. Words: دب أسد قرد صقر جمل نمر نسر فيل · HEN DOG PIG CAT FOX OX YAK.
+
+### Garage (🛠️ on the title screen and the map)
+Kart body, colour, hat, skin tone and an **animal co-pilot** (any animal friend the child has met). Items unlock with *learning stars*, the stars of finished levels. Nothing is bought or spent. A level that unlocks something shows "🎁 New in the garage!". Items and thresholds are in `src/garage.js`.
+
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the team's evaluation and the next modes.
+
 ### Interface language (AR / EN)
 The round **EN / ع** button on the title screen and the map switches the whole interface: menus, pause, parent settings, parent gate, on-screen instructions and the zoo banner. The layout also flips between right-to-left and left-to-right. It is separate from what the child learns: an English-speaking family can study the Arabic letters with an English interface, and the other way round. On first launch the interface follows the device language. Strings are in `src/i18n.js`.
 

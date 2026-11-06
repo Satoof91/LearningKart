@@ -347,36 +347,97 @@ export function makeHabitat(biomeName, animalIds, sign, opts = {}) {
 }
 
 // ---------- kart ----------
-export function makeKart(colorHex) {
+// look: { body: 'classic' | 'racer' | 'jeep' | 'rocket', hat: 'helmet' | 'cap' | 'safari' | 'bunny' | 'crown', skin: 0-3 }
+// The returned `pilot` group is the co-pilot seat (an animal friend rides there).
+export const SKINS = [0xffd6a5, 0xf1c27d, 0xc68642, 0x8d5524];
+export function makeKart(colorHex, look = {}) {
+  const body = look.body || 'classic', hat = look.hat || 'helmet', skin = SKINS[look.skin | 0] ?? SKINS[0];
   const root = new THREE.Group();
   const tilt = new THREE.Group(); root.add(tilt);
-  const add = (geo, c, x, y, z, rx = 0, ry = 0, rz = 0) => { const m = new THREE.Mesh(geo, toon(c)); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = true; tilt.add(m); return m; };
+  const add = (geo, c, x, y, z, rx = 0, ry = 0, rz = 0, par = tilt) => { const m = new THREE.Mesh(geo, toon(c)); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = true; par.add(m); return m; };
   const col = new THREE.Color(colorHex).getHex();
-  add(new THREE.BoxGeometry(2.4, 0.75, 3.5), col, 0, 0.9, -0.1);
-  add(new THREE.SphereGeometry(1, 14, 10), col, 0, 0.95, 1.7).scale.set(1.0, 0.45, 1.0);
-  add(new THREE.BoxGeometry(2.7, 0.35, 0.5), 0xffffff, 0, 0.75, 2.85);
-  add(new THREE.BoxGeometry(2.0, 1.0, 1.1), 0x2b2d42, 0, 1.4, -0.8);
-  add(new THREE.BoxGeometry(2.9, 0.28, 0.9), col, 0, 2.05, -2.05);
-  for (const s of [-1, 1]) add(new THREE.BoxGeometry(0.28, 0.9, 0.28), 0x2b2d42, s * 0.9, 1.5, -1.95);
-  for (const s of [-1, 1]) add(new THREE.SphereGeometry(0.28, 10, 8), 0xfff3bf, s * 0.75, 1.0, 2.6);
-  // child driver
-  add(new THREE.CylinderGeometry(0.6, 0.7, 1.1, 12), 0xffffff, 0, 1.85, -0.5);
-  add(new THREE.SphereGeometry(0.78, 16, 12), 0xffd6a5, 0, 2.85, -0.35);
-  const helm = add(new THREE.SphereGeometry(0.86, 16, 12, 0, TAU, 0, Math.PI * 0.55), col, 0, 2.95, -0.42);
-  helm.rotation.x = -0.2;
-  add(new THREE.BoxGeometry(1.2, 0.18, 0.5), 0xffffff, 0, 3.25, 0.15, -0.3);
+  const dark = 0x2b2d42;
+  const pilot = new THREE.Group(); tilt.add(pilot);
+  let wheelScale = 1, flagAt = [-0.9, 2.2, -2.2], driverY = 0;
+  if (body === 'racer') {
+    // low and long, pointed nose, big rear wing
+    add(new THREE.BoxGeometry(2.2, 0.55, 4.0), col, 0, 0.75, -0.1);
+    add(new THREE.ConeGeometry(1.0, 1.6, 4), col, 0, 0.75, 2.6, Math.PI / 2, Math.PI / 4).scale.set(1.05, 1, 0.5);
+    for (const s of [-1, 1]) add(new THREE.BoxGeometry(0.12, 0.12, 3.6), 0xffffff, s * 0.7, 1.04, 0);
+    add(new THREE.BoxGeometry(3.0, 0.15, 0.8), dark, 0, 1.95, -2.15);
+    for (const s of [-1, 1]) add(new THREE.BoxGeometry(0.15, 0.9, 0.3), dark, s * 0.8, 1.45, -2.1);
+    add(new THREE.BoxGeometry(1.8, 0.7, 1.0), dark, 0, 1.25, -0.8);
+    pilot.position.set(0.95, 1.05, -1.55); driverY = -0.15; flagAt = [-1.2, 1.9, -2.3];
+  } else if (body === 'jeep') {
+    // safari jeep: tall box, roll bar, spare wheel, big wheels
+    add(new THREE.BoxGeometry(2.6, 1.0, 3.4), col, 0, 1.15, -0.1);
+    add(new THREE.BoxGeometry(2.6, 0.5, 1.0), col, 0, 1.4, 1.8);
+    add(new THREE.BoxGeometry(2.7, 0.3, 0.4), 0xffffff, 0, 0.85, 2.35);
+    for (const s of [-1, 1]) { add(new THREE.BoxGeometry(0.16, 1.6, 0.16), dark, s * 1.15, 2.4, -1.3); add(new THREE.BoxGeometry(0.16, 1.6, 0.16), dark, s * 1.15, 2.4, 0.3); }
+    add(new THREE.BoxGeometry(2.46, 0.16, 1.76), dark, 0, 3.2, -0.5);
+    const spare = add(new THREE.TorusGeometry(0.5, 0.22, 8, 14), 0x222222, 0, 1.4, -1.95); spare.rotation.y = 0;
+    for (const s of [-1, 1]) add(new THREE.SphereGeometry(0.28, 10, 8), 0xfff3bf, s * 0.85, 1.45, 2.32);
+    add(new THREE.BoxGeometry(2.0, 1.0, 1.1), dark, 0, 1.75, -0.8);
+    wheelScale = 1.25; pilot.position.set(0, 1.65, -1.45); driverY = 0.3; flagAt = [-1.15, 3.2, -1.3];
+  } else if (body === 'rocket') {
+    // rocket kart: a tube with a nose cone, fins and a flame
+    const tube = add(new THREE.CylinderGeometry(1.05, 1.15, 4.2, 16), col, 0, 1.1, -0.2, Math.PI / 2);
+    tube.scale.set(1, 1, 0.78);
+    add(new THREE.ConeGeometry(1.05, 1.5, 16), 0xffffff, 0, 1.1, 2.65, Math.PI / 2).scale.set(1, 1, 0.78);
+    for (const [s, r] of [[1, 0], [-1, 0], [0, 1]]) add(new THREE.BoxGeometry(r ? 0.12 : 1.1, r ? 1.1 : 0.12, 1.0), 0xff4d6d, s * 0.95, 1.1 + r * 0.95, -2.1);
+    const flame = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.4, 12), new THREE.MeshBasicMaterial({ color: 0xffb703 })); flame.rotation.x = -Math.PI / 2; flame.position.set(0, 1.1, -3.0); tilt.add(flame);
+    const core = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.9, 10), new THREE.MeshBasicMaterial({ color: 0xfff3bf })); core.rotation.x = -Math.PI / 2; core.position.set(0, 1.1, -2.8); tilt.add(core);
+    for (let k = 0; k < 4; k++) add(new THREE.SphereGeometry(0.14, 8, 6), 0x9edcff, Math.cos(k) * 0.2 + (k - 1.5) * 0.45, 1.95, 1.2 - k * 0.05);
+    add(new THREE.BoxGeometry(1.8, 0.8, 1.1), dark, 0, 1.7, -0.8);
+    pilot.position.set(0, 1.95, -1.75); driverY = 0.15; flagAt = [-0.95, 2.0, -2.3];
+  } else {
+    add(new THREE.BoxGeometry(2.4, 0.75, 3.5), col, 0, 0.9, -0.1);
+    add(new THREE.SphereGeometry(1, 14, 10), col, 0, 0.95, 1.7).scale.set(1.0, 0.45, 1.0);
+    add(new THREE.BoxGeometry(2.7, 0.35, 0.5), 0xffffff, 0, 0.75, 2.85);
+    add(new THREE.BoxGeometry(2.0, 1.0, 1.1), dark, 0, 1.4, -0.8);
+    add(new THREE.BoxGeometry(2.9, 0.28, 0.9), col, 0, 2.05, -2.05);
+    for (const s of [-1, 1]) add(new THREE.BoxGeometry(0.28, 0.9, 0.28), dark, s * 0.9, 1.5, -1.95);
+    for (const s of [-1, 1]) add(new THREE.SphereGeometry(0.28, 10, 8), 0xfff3bf, s * 0.75, 1.0, 2.6);
+    pilot.position.set(0, 2.2, -2.05);
+  }
+  // child driver (skin tone + hat)
+  const drv = new THREE.Group(); drv.position.y = driverY; tilt.add(drv);
+  add(new THREE.CylinderGeometry(0.6, 0.7, 1.1, 12), 0xffffff, 0, 1.85, -0.5, 0, 0, 0, drv);
+  add(new THREE.SphereGeometry(0.78, 16, 12), skin, 0, 2.85, -0.35, 0, 0, 0, drv);
+  if (hat === 'helmet') {
+    add(new THREE.SphereGeometry(0.86, 16, 12, 0, TAU, 0, Math.PI * 0.55), col, 0, 2.95, -0.42, -0.2, 0, 0, drv);
+    add(new THREE.BoxGeometry(1.2, 0.18, 0.5), 0xffffff, 0, 3.25, 0.15, -0.3, 0, 0, drv);
+  } else if (hat === 'cap') {
+    add(new THREE.SphereGeometry(0.82, 16, 10, 0, TAU, 0, Math.PI * 0.5), 0x3da5ff, 0, 3.05, -0.4, -0.1, 0, 0, drv);
+    add(new THREE.CylinderGeometry(0.55, 0.55, 0.08, 16, 1, false, -Math.PI / 2, Math.PI), 0x1c7ed6, 0, 3.08, 0.25, 0, 0, 0, drv).scale.set(1, 1, 1.3);
+    add(new THREE.SphereGeometry(0.12, 8, 6), 0xffffff, 0, 3.86, -0.4, 0, 0, 0, drv);
+  } else if (hat === 'safari') {
+    add(new THREE.CylinderGeometry(1.25, 1.25, 0.08, 20), 0xd4a373, 0, 3.25, -0.38, -0.12, 0, 0, drv);
+    add(new THREE.SphereGeometry(0.75, 16, 10, 0, TAU, 0, Math.PI * 0.5), 0xe9c46a, 0, 3.2, -0.4, -0.12, 0, 0, drv);
+    add(new THREE.CylinderGeometry(0.76, 0.76, 0.14, 16), 0x6f4518, 0, 3.27, -0.4, -0.12, 0, 0, drv);
+  } else if (hat === 'bunny') {
+    for (const s of [-1, 1]) {
+      const e = add(new THREE.SphereGeometry(0.22, 10, 8), 0xffffff, s * 0.35, 4.0, -0.45, 0, 0, -s * 0.18, drv); e.scale.set(1, 3.0, 0.6);
+      const i = add(new THREE.SphereGeometry(0.12, 8, 6), 0xffafcc, s * 0.35, 4.0, -0.33, 0, 0, -s * 0.18, drv); i.scale.set(1, 3.4, 0.4);
+    }
+    add(new THREE.CylinderGeometry(0.82, 0.82, 0.12, 16), 0xff8fab, 0, 3.3, -0.38, -0.15, 0, 0, drv);
+  } else if (hat === 'crown') {
+    add(new THREE.CylinderGeometry(0.62, 0.62, 0.42, 14, 1, true), 0xffd60a, 0, 3.55, -0.38, 0, 0, 0, drv).material.side = THREE.DoubleSide;
+    for (let k = 0; k < 6; k++) { const a = k / 6 * TAU; add(new THREE.ConeGeometry(0.13, 0.4, 6), 0xffd60a, Math.cos(a) * 0.6, 3.92, -0.38 + Math.sin(a) * 0.6, 0, 0, 0, drv); add(new THREE.SphereGeometry(0.07, 6, 6), [0xff4d6d, 0x3da5ff, 0x4cd964][k % 3], Math.cos(a) * 0.62, 3.55, -0.38 + Math.sin(a) * 0.62, 0, 0, 0, drv); }
+  }
   const eyeM = new THREE.MeshBasicMaterial({ color: 0x1b1b1b });
-  for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), eyeM); e.position.set(s * 0.28, 2.85, 0.38); e.scale.y = 1.3; tilt.add(e); }
-  for (const s of [-1, 1]) { const c = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff9eb5 })); c.position.set(s * 0.48, 2.65, 0.3); c.scale.set(1, 0.6, 0.4); tilt.add(c); }
-  const smileM = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.04, 6, 12, Math.PI), new THREE.MeshBasicMaterial({ color: 0x7a2e2e })); smileM.rotation.z = Math.PI; smileM.position.set(0, 2.62, 0.42); tilt.add(smileM);
-  const wheel = add(new THREE.TorusGeometry(0.38, 0.08, 6, 14), 0x2b2d42, 0, 1.95, 0.55, -0.7);
-  for (const s of [-1, 1]) { const arm = add(new THREE.CylinderGeometry(0.14, 0.14, 0.9, 6), 0xffffff, s * 0.45, 2.05, 0.15, 1.1, 0, -s * 0.3); arm.castShadow = false; }
-  const flag = new THREE.Group(); flag.position.set(-0.9, 2.2, -2.2); tilt.add(flag);
+  for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), eyeM); e.position.set(s * 0.28, 2.85, 0.38); e.scale.y = 1.3; drv.add(e); }
+  for (const s of [-1, 1]) { const c = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff9eb5 })); c.position.set(s * 0.48, 2.65, 0.3); c.scale.set(1, 0.6, 0.4); drv.add(c); }
+  const smileM = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.04, 6, 12, Math.PI), new THREE.MeshBasicMaterial({ color: 0x7a2e2e })); smileM.rotation.z = Math.PI; smileM.position.set(0, 2.62, 0.42); drv.add(smileM);
+  const wheel = add(new THREE.TorusGeometry(0.38, 0.08, 6, 14), dark, 0, 1.95, 0.55, -0.7, 0, 0, drv);
+  for (const s of [-1, 1]) { const arm = add(new THREE.CylinderGeometry(0.14, 0.14, 0.9, 6), 0xffffff, s * 0.45, 2.05, 0.15, 1.1, 0, -s * 0.3, drv); arm.castShadow = false; }
+  const flag = new THREE.Group(); flag.position.set(...flagAt); tilt.add(flag);
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.6, 5), toon(0xdee2e6)); pole.position.y = 1.3; flag.add(pole);
   const fl = new THREE.Mesh(new THREE.ConeGeometry(0.45, 1.1, 3), toon(0xffd60a)); fl.rotation.z = -Math.PI / 2; fl.position.set(0.55, 2.3, 0); flag.add(fl);
   const wheels = [];
-  for (const [x, z, r, front] of [[-1.4, 1.6, 0.6, true], [1.4, 1.6, 0.6, true], [-1.45, -1.35, 0.75, false], [1.45, -1.35, 0.75, false]]) {
-    const steer = new THREE.Group(); steer.position.set(x, r, z);
+  for (const [x, z, r0, front] of [[-1.4, 1.6, 0.6, true], [1.4, 1.6, 0.6, true], [-1.45, -1.35, 0.75, false], [1.45, -1.35, 0.75, false]]) {
+    const r = r0 * wheelScale;
+    const steer = new THREE.Group(); steer.position.set(x * (wheelScale > 1 ? 1.06 : 1), r, z);
     const spin = new THREE.Group(); steer.add(spin);
     const tg = new THREE.CylinderGeometry(r, r, 0.65, 14); tg.rotateZ(Math.PI / 2);
     const t = new THREE.Mesh(tg, toon(0x222222)); t.castShadow = true; spin.add(t);
@@ -386,7 +447,7 @@ export function makeKart(colorHex) {
   }
   const shadow = new THREE.Mesh(new THREE.PlaneGeometry(5, 6.2), new THREE.MeshBasicMaterial({ map: blobTex(), transparent: true, depthWrite: false }));
   shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.12; root.add(shadow);
-  return { root, tilt, wheels, wheel, flag: fl };
+  return { root, tilt, wheels, wheel, flag: fl, pilot };
 }
 let BLOB = null;
 export function blobTex() { if (!BLOB) BLOB = canvasTexture(64, 64, (g) => { const r = g.createRadialGradient(32, 32, 4, 32, 32, 30); r.addColorStop(0, 'rgba(0,0,0,.35)'); r.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = r; g.fillRect(0, 0, 64, 64); }); return BLOB; }

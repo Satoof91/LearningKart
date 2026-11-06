@@ -146,6 +146,26 @@ svg{display:block}
 #pgpad{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vh;direction:ltr}
 .pgk{width:clamp(54px,14vh,84px);height:clamp(54px,14vh,84px);padding:0;font-size:clamp(26px,8vh,46px);border-radius:22px}
 .pgk.ok{background:linear-gradient(#6ee787,#22a845)}
+/* garage */
+#garagebtn{font-size:clamp(18px,5vh,30px);padding:.25em 1em}
+#garage{position:fixed;inset:0;pointer-events:none;z-index:25}
+#garage .gpanel{position:absolute;left:calc(12px + var(--sl));top:calc(10px + var(--st));bottom:calc(10px + var(--sb));width:min(50vw,540px);background:rgba(255,255,255,.95);color:var(--ink);border-radius:30px;padding:1.6vh 1.8vh;display:flex;flex-direction:column;gap:1.2vh;pointer-events:auto;box-shadow:0 10px 0 rgba(43,27,107,.25),0 20px 40px rgba(0,0,0,.25)}
+.ghead{display:flex;align-items:center;gap:10px}.ghead h2{margin:0;font-size:clamp(20px,6vh,34px);flex:1;text-align:center}
+.ghead .round{width:clamp(40px,9vh,52px);height:clamp(40px,9vh,52px)}
+.gtabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.gtab{font-weight:800;font-size:clamp(13px,3.6vh,19px);padding:.2em .8em .3em;border-radius:999px;background:#f1edff;color:var(--ink)}
+.gtab.on{background:var(--purple);color:#fff}
+.gitems{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(62px,17vh,92px),1fr));gap:1.2vh;overflow-y:auto;touch-action:pan-y;padding:4px}
+.gitems *{touch-action:pan-y}
+.gitem{position:relative;aspect-ratio:1;border-radius:22px;background:#f1edff;font-size:clamp(28px,9vh,50px);display:flex;align-items:center;justify-content:center;border:4px solid transparent;box-shadow:0 4px 0 rgba(43,27,107,.15);overflow:hidden}
+.gitem img{width:90%;height:90%;object-fit:contain;pointer-events:none}
+.gitem .dot{width:62%;height:62%;border-radius:50%;border:4px solid #fff;box-shadow:0 3px 6px rgba(0,0,0,.25)}
+.gitem.sel{border-color:var(--pink);background:#fff0f3}
+.gitem.locked{filter:grayscale(1);opacity:.55}
+.gitem .need{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:clamp(11px,3vh,15px);font-weight:800;color:var(--ink);filter:none}
+.gitem.shake{animation:shake .4s}
+.gempty{grid-column:1/-1;text-align:center;font-weight:700;font-size:clamp(14px,3.8vh,20px);padding:2vh}
+#mgarage{font-size:clamp(18px,5vh,28px)}
 #pgclose{position:absolute;top:calc(10px + var(--st));left:calc(10px + var(--sl))}
 #intro.out .card{transition:transform .5s ease-in,opacity .5s;transform:translate(-30vw,-30vh) scale(.2);opacity:0}
 @keyframes zoomIn{from{transform:scale(.2) rotate(-10deg);opacity:0}}
@@ -195,7 +215,7 @@ svg{display:block}
   <div class="logo">Learning<span>Kart</span></div>
   <div class="sub" data-i18n="sub">حديقة الحروف والأرقام</div>
   <button id="play" class="cbtn green"><span data-i18n="play">العب</span><svg viewBox="0 0 24 24"><path fill="#fff" d="M16 5 7 12l9 7z"/></svg></button>
-  <div class="swatches" id="swatches"></div>
+  <button id="garagebtn" class="cbtn blue"><span>🛠️</span><span data-i18n="garage">المرآب</span></button>
 </div>
 
 <div id="map" class="screen hidden">
@@ -205,6 +225,7 @@ svg{display:block}
     <div class="coins" data-icon="star"><b id="totstars">0</b></div>
     <button id="gear" aria-label="settings"><svg class="ring" viewBox="0 0 60 60"><circle cx="30" cy="30" r="27"/></svg><span id="gearhint" data-i18n="gearhint">اضغط مطولاً – للوالدين</span></button>
     <button class="langbtn" aria-label="English">EN</button>
+    <button id="mgarage" class="langbtn" aria-label="garage">🛠️</button>
   </header>
   <div id="path"><div id="world"><svg id="trail"></svg></div></div>
 </div>
@@ -241,6 +262,14 @@ svg{display:block}
       <button id="prestart" class="cbtn blue round" data-icon="replay" aria-label="restart"></button>
       <button id="pmap" class="cbtn blue round" data-icon="home" aria-label="map"></button>
     </div>
+  </div>
+</div>
+
+<div id="garage" class="hidden">
+  <div class="gpanel">
+    <div class="ghead"><button id="gclose" class="cbtn pink round" data-icon="close" aria-label="close"></button><h2 data-i18n="garage">المرآب</h2><div class="coins" data-icon="star"><b id="gstars">0</b></div></div>
+    <div class="gtabs" id="gtabs"></div>
+    <div class="gitems" id="gitems"></div>
   </div>
 </div>
 
