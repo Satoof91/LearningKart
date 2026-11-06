@@ -7,7 +7,7 @@ export const UI = {
   ar: {
     dir: 'rtl', switchTo: 'EN', switchLabel: 'English',
     sub: 'حديقة الحروف والأرقام', play: 'العب', gearhint: 'اضغط مطولاً – للوالدين', banner: 'حديقة الحروف',
-    tabLetter: 'الحروف', tabNumber: 'الأرقام',
+    tabLetter: 'الحروف', tabNumber: 'الأرقام', tabWord: 'كلمات', tabEnWord: 'Words',
     pause: 'استراحة', settingsTitle: 'إعدادات الوالدين',
     vtest: 'تجربة الصوت', vinstall: 'تثبيت الصوت العربي',
     unlock: 'فتح كل المراحل', lock: 'إغلاق المراحل', reset: 'مسح التقدم', resetConfirm: 'اضغط مرة أخرى للتأكيد', resetDone: 'تم المسح ✓',
@@ -22,12 +22,13 @@ export const UI = {
     vNoneWeb: 'هذا المتصفح لا يحتوي على صوت عربي. جرّب متصفح Edge أو Safari، أو ثبّت اللغة العربية في إعدادات الجهاز.',
     vUnknown: 'اضغط "تجربة الصوت" للتأكد من نطق الحروف.',
     gate: (a, b) => `للوالدين: اضغط ${arDigits(a)} ثم ${arDigits(b)}`, gateDigit: arDigits,
-    collect: L => `اجمع حرف ${L.ch}`, apples: d => `اجمع ${d} تفاحات`, zero: 'صفر = لا شيء', friend: 'صديق جديد في حديقتك!'
+    collect: L => `اجمع حرف ${L.ch}`, apples: d => `اجمع ${d} تفاحات`, zero: 'صفر = لا شيء', friend: 'صديق جديد في حديقتك!',
+    buildWord: W => `ابنِ كلمة ${W.word}`, wordDone: 'كلمة جديدة!'
   },
   en: {
     dir: 'ltr', switchTo: 'ع', switchLabel: 'العربية',
     sub: 'Letters & Numbers Zoo', play: 'Play', gearhint: 'Hold – for parents', banner: 'Letter Zoo',
-    tabLetter: 'أ ب ت', tabNumber: '١٢٣',
+    tabLetter: 'أ ب ت', tabNumber: '١٢٣', tabWord: 'كلمات', tabEnWord: 'Words',
     pause: 'Paused', settingsTitle: 'Parent settings',
     vtest: 'Test voice', vinstall: 'Install Arabic voice',
     unlock: 'Unlock all levels', lock: 'Lock levels', reset: 'Reset progress', resetConfirm: 'Tap again to confirm', resetDone: 'Progress reset ✓',
@@ -42,6 +43,7 @@ export const UI = {
     vNoneWeb: 'This browser has no Arabic voice. Try Edge or Safari, or install Arabic in the device settings.',
     vUnknown: 'Tap "Test voice" to check the letter voice.',
     gate: (a, b) => `For parents: tap ${a} then ${b}`, gateDigit: n => String(n),
-    collect: L => `Find the letter ${L.ch}`, apples: d => `Collect ${d} apples`, zero: '0 = nothing', friend: 'A new friend in your zoo!'
+    collect: L => `Find the letter ${L.ch}`, apples: d => `Collect ${d} apples`, zero: '0 = nothing', friend: 'A new friend in your zoo!',
+    buildWord: W => `Build the word ${W.word}`, wordDone: 'You built a word!'
   }
 };

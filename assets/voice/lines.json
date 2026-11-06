@@ -2104,5 +2104,134 @@
     "text": "Fantastic!",
     "note": "praise",
     "lang": "en"
+  },
+  {
+    "id": "word-01-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ دُبّ!",
+    "note": "كلمة دب"
+  },
+  {
+    "id": "word-02-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ أَسَد!",
+    "note": "كلمة أسد"
+  },
+  {
+    "id": "word-03-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ قِرْد!",
+    "note": "كلمة قرد"
+  },
+  {
+    "id": "word-04-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ صَقْر!",
+    "note": "كلمة صقر"
+  },
+  {
+    "id": "word-05-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ جَمَل!",
+    "note": "كلمة جمل"
+  },
+  {
+    "id": "word-06-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ نَمِر!",
+    "note": "كلمة نمر"
+  },
+  {
+    "id": "word-07-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ نَسْر!",
+    "note": "كلمة نسر"
+  },
+  {
+    "id": "word-07-blend",
+    "text": "نَ، نَ، نَسْر",
+    "note": "دمج نسر"
+  },
+  {
+    "id": "word-08-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ فِيل!",
+    "note": "كلمة فيل"
+  },
+  {
+    "id": "en-word-01-intro",
+    "text": "Let's build the word hen!",
+    "note": "word HEN",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-01-blend",
+    "text": "H, E, N. Hen!",
+    "note": "blend HEN",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-02-intro",
+    "text": "Let's build the word dog!",
+    "note": "word DOG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-02-blend",
+    "text": "D, O, G. Dog!",
+    "note": "blend DOG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-03-intro",
+    "text": "Let's build the word pig!",
+    "note": "word PIG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-03-blend",
+    "text": "P, I, G. Pig!",
+    "note": "blend PIG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-04-intro",
+    "text": "Let's build the word cat!",
+    "note": "word CAT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-04-blend",
+    "text": "C, A, T. Cat!",
+    "note": "blend CAT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-05-intro",
+    "text": "Let's build the word fox!",
+    "note": "word FOX",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-05-blend",
+    "text": "F, O, X. Fox!",
+    "note": "blend FOX",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-06-intro",
+    "text": "Let's build the word ox!",
+    "note": "word OX",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-06-blend",
+    "text": "O, X. Ox!",
+    "note": "blend OX",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-07-intro",
+    "text": "Let's build the word yak!",
+    "note": "word YAK",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-07-blend",
+    "text": "Y, A, K. Yak!",
+    "note": "blend YAK",
+    "lang": "en"
   }
 ]

@@ -81,6 +81,15 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     await p.evaluate(x => { const el = document.getElementById('path'); el.scrollLeft = (el.scrollWidth - el.clientWidth) * x; }, x);
     await wait(2500); await p.screenshot({ path: OUT + `/21-en-map-${i}.png` });
   }
+  // word mode: build «دب» (Arabic) and "HEN" (English) with the autopilot
+  for (const [lang, tag] of [['ar', 'ar'], ['en', 'en']]) {
+    await p.evaluate(lang => { window.__lk.Store.data.unlockAll = true; window.__lk.startLevel('word', 0, lang); }, lang); await auto();
+    await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 90000 });
+    await wait(900); await p.screenshot({ path: OUT + `/28-word-${tag}-drive.png` });
+    await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 120000 });
+    await wait(2500); await p.screenshot({ path: OUT + `/29-word-${tag}-card.png` });
+    console.log('word', tag, 'stars', await p.evaluate(lang => window.__lk.Store.prog('word', lang)[0], lang));
+  }
   // English interface: switch with the map's language button, then check map, intro (banner), pause, gate, settings, title
   await p.evaluate(() => { const L = window.__lk; L.Store.prog('letter', 'en').fill(0); L.toMap('letter'); });
   await wait(800); await p.click('#map .langbtn', { force: true }); await wait(1500);

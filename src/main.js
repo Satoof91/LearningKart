@@ -15,7 +15,7 @@ let TR = TRACKS.ar;
 //  - help (glow, then the letter straight ahead) only appears after mistakes; stars count every miss
 import { makeAnimal } from './animals.js';
 import { buildTrack, buildZoo, makeHabitat, makeAppleTable, makeKart, makeArch, makeApple, makeStar, makeBoostPad, glowTex, blobTex, Confetti, FENCE, LANE } from './world.js';
-import { loadFonts, bubbleTexture, drawWord, FONT, roundRect } from './text.js';
+import { loadFonts, bubbleTexture, drawWord, drawWordProgress, FONT, roundRect } from './text.js';
 import { Voice } from './voice.js';
 import { Sound } from './audio.js';
 import { Store } from './store.js';
@@ -187,7 +187,18 @@ function disposeOwned(obj) {
 }
 
 // ---------- level setup ----------
-const cur = () => (S.kind === 'letter' ? TR.letters[S.index] : TR.numbers[S.index]);
+const cur = () => (S.kind === 'letter' ? TR.letters[S.index] : S.kind === 'word' ? TR.words[S.index] : TR.numbers[S.index]);
+// word mode: the word is built letter by letter; these give the letter objects it is made of
+const isWord = () => S.kind === 'word';
+const letterOf = ch => TR.letters.find(x => x.ch === ch);
+const nextLetter = (k = 0) => { const W = cur(); return letterOf(W.parts[Math.min(W.parts.length - 1, S.collected + k)]); };
+// which letter a miss / wrong pick is about (saved per letter, drives the review pairs)
+const missIdx = () => (isWord() ? TR.letters.indexOf(nextLetter()) : S.index);
+function drawWordHud() {
+  const cv = $('wordhud'), g = cv.getContext('2d'), W = cur();
+  g.clearRect(0, 0, cv.width, cv.height);
+  drawWordProgress(g, W.word, S.collected, cv.width / 2, cv.height / 2 + 6, W.word.length > 3 ? 96 : 112, '#e4ddfb', '#ff4d6d');
+}
 function clearLevel() {
   for (const p of S.pickups) removePickup(p);
   S.pickups = [];
@@ -203,28 +214,31 @@ function startLevel(kind, index, lang) {
   const C = cur();
   populateZoo(kind === 'letter' ? index : -1);
   S.u = T.L - 34; S.d = 0; S.vd = 0; S.speed = 0; S.boostT = 0; S.camH = T.heading(S.u);
-  S.collected = 0; S.wrong = 0; S.coins = 0; S.spawned = 0; S.need = kind === 'letter' ? 5 : C.n;
+  S.collected = 0; S.wrong = 0; S.coins = 0; S.spawned = 0; S.need = kind === 'letter' ? 5 : kind === 'word' ? C.parts.length : C.n;
   S.nextU = S.u + 85; S.missStreak = 0; S.countQ = null;
   S.misses = 0; S.assisted = 0; S.reviewDone = false; S.recentWrong = false; S.recall = false; S.lastPraise = -1;
   S.chipBusy = false; clearTimeout(S.chipT);
   S.lvl = (S.lvl || 0) + 1;
   // HUD
-  const glyph = kind === 'letter' ? C.ch : C.digit;
-  setChip(glyph, kind === 'letter' ? 'var(--pink)' : 'var(--org)');
+  const glyph = kind === 'letter' ? C.ch : kind === 'word' ? C.word : C.digit;
+  setChip(kind === 'word' ? letterOf(C.parts[0]).ch : glyph, kind === 'number' ? 'var(--org)' : 'var(--pink)');
   const slots = $('slots'); slots.innerHTML = '';
   for (let i = 0; i < S.need; i++) { const d = document.createElement('div'); d.className = 'slot' + (kind === 'number' ? ' apple' : ''); slots.appendChild(d); }
-  slots.style.display = S.need ? 'flex' : 'none';
+  slots.style.display = S.need && kind !== 'word' ? 'flex' : 'none';
+  // word mode: the word itself is the progress bar (pale outline, fills in colour)
+  $('wordhud').classList.toggle('hidden', kind !== 'word');
+  if (kind === 'word') drawWordHud();
   $('hstars').textContent = '0';
   showScreen('hud');
   $('celebrate').classList.add('hidden'); $('pause').classList.add('hidden');
   // intro card
   $('introglyph').textContent = kind === 'letter' && C.card ? C.card : glyph;
-  $('introglyph').style.color = kind === 'letter' ? 'var(--pink)' : 'var(--org)';
-  $('introtext').textContent = kind === 'letter' ? ui().collect(C) : (C.n ? ui().apples(glyph) : ui().zero);
+  $('introglyph').style.color = kind === 'number' ? 'var(--org)' : 'var(--pink)';
+  $('introtext').textContent = kind === 'letter' ? ui().collect(C) : kind === 'word' ? ui().buildWord(C) : (C.n ? ui().apples(glyph) : ui().zero);
   $('introtext').dir = ui().dir;
   // show the animal from the start: letter -> sound -> animal is the memory hook
   const img = $('introimg');
-  if (kind === 'letter') { img.src = thumb(C.animal); img.classList.remove('hidden'); } else img.classList.add('hidden');
+  if (kind !== 'number') { img.src = thumb(C.animal); img.classList.remove('hidden'); } else img.classList.add('hidden');
   $('intro').classList.remove('hidden', 'out');
   S.mode = 'intro'; S.modeT = 0; S.introDone = false;
   Sound.whoosh();
@@ -233,7 +247,9 @@ function startLevel(kind, index, lang) {
 }
 function sayIntro() {
   const C = cur(), lvl = S.lvl;
-  const lines = S.kind === 'letter' ? [C.name, TR.lines.sound(C), TR.lines.letterIntro(C)] : [C.say, TR.lines.numberIntro(C)];
+  const lines = S.kind === 'letter' ? [C.name, TR.lines.sound(C), TR.lines.letterIntro(C)]
+    : S.kind === 'word' ? [C.say, TR.lines.wordIntro(C), TR.lines.find(letterOf(C.parts[0]))]
+    : [C.say, TR.lines.numberIntro(C)];
   // only this level's intro may end the intro (a stopped older promise must not skip the new one)
   Voice.say(lines, { gap: 350 }).then(() => { if (S.lvl === lvl && !S.paused) S.introDone = true; });
 }
@@ -244,6 +260,7 @@ function setChip(text, bg) {
 }
 function chipShowsTarget() {
   const C = cur();
+  if (S.kind === 'word') return setChip(nextLetter().ch, 'var(--pink)');
   if (S.kind !== 'letter') return setChip(C.digit, 'var(--org)');
   setChip(S.recall ? (TR.lang === 'en' ? '?' : '؟') : C.ch, S.recall ? 'var(--purple)' : 'var(--pink)');
 }
@@ -268,7 +285,7 @@ function bubble(u, d, L, isTarget, color) {
   if (!SHADOW_GEO) { SHADOW_GEO = new THREE.PlaneGeometry(3.4, 3.4); SHADOW_MAT = new THREE.MeshBasicMaterial({ map: blobTex(), transparent: true, depthWrite: false }); }
   const sh = new THREE.Mesh(SHADOW_GEO, SHADOW_MAT);
   sh.rotation.x = -Math.PI / 2; sh.position.y = 0.13; g.add(sh);
-  return { obj: g, spr, glow, mat, glowMat, u, d, kind: isTarget ? 'target' : 'wrong', letter: L, ph: Math.random() * 6, alive: true, r: 2.9, base: 4.6 };
+  return { obj: g, spr, glow, mat, glowMat, col: color, u, d, kind: isTarget ? 'target' : 'wrong', letter: L, ph: Math.random() * 6, alive: true, r: 2.9, base: 4.6 };
 }
 // the earlier letter the child found hardest (most misses, fewest stars), for the review pair
 function weakestLearned() {
@@ -282,16 +299,19 @@ function weakestLearned() {
 }
 function spawnAhead() {
   const C = cur();
-  if (S.kind === 'letter') {
+  if (S.kind !== 'number') {
     const side = Math.random() < 0.5 ? 1 : -1;
     const colA = pick(BUBBLE_COLORS); let colB = pick(BUBBLE_COLORS); if (colB === colA) colB = BUBBLE_COLORS[(BUBBLE_COLORS.indexOf(colA) + 2) % BUBBLE_COLORS.length];
     // spaced review: the 3rd pair of a level asks for an earlier letter (bonus, does not count toward the 5)
-    const R = S.index >= 2 && S.spawned === 2 && !S.reviewDone ? weakestLearned() : null;
-    const target = R || C;
+    const R = S.kind === 'letter' && S.index >= 2 && S.spawned === 2 && !S.reviewDone ? weakestLearned() : null;
+    // word mode: the letter after the ones already waiting on the road
+    const target = R || (isWord() ? nextLetter(S.pickups.filter(q => q.kind === 'target' && q.alive && !q.missed).length) : C);
     // difficulty ladder: a clearly different shape first; a dotted look-alike only once the child is doing well
-    const hard = !R && S.collected >= 2 && S.missStreak === 0 && !S.recentWrong;
-    let pool = TR.distractors(TR.letters.indexOf(target), hard).filter(L => L !== C && L !== target);
-    if (!pool.length) pool = TR.distractors(TR.letters.indexOf(target), false).filter(L => L !== C && L !== target);
+    const hard = !R && !isWord() && S.collected >= 2 && S.missStreak === 0 && !S.recentWrong;
+    const ok = L => L !== C && L !== target && !(isWord() && C.parts.includes(L.ch)); // never a letter of the word itself
+    let pool = TR.distractors(TR.letters.indexOf(target), hard).filter(ok);
+    if (!pool.length) pool = TR.distractors(TR.letters.indexOf(target), false).filter(ok);
+    if (!pool.length) pool = TR.letters.filter(ok);
     const W = pick(pool);
     const tp = addPickup(bubble(S.nextU, side * 4.4, target, true, colA));
     const wp = addPickup(bubble(S.nextU, -side * 4.4, W, false, colB));
@@ -345,10 +365,18 @@ function hitPickup(p) {
   } else if (p.kind === 'target') {
     const n = S.collected++; S.missStreak = 0; S.recentWrong = false;
     Sound.collect(n); haptic('tick'); confetti.burst(wp, 22, 6, null, 0.45);
+    if (isWord()) {
+      // the letter flies into the word, which fills in; the bubbles ahead switch to the next letter
+      flyToWord(wp, p.letter.ch); retarget(); chipShowsTarget(); pingChip();
+      if (S.collected >= S.need) { praise(); Voice.say([TR.lines.wordBlend(C), TR.lines.gate], { gap: 500 }); }
+      else Voice.say([p.letter.name, askNext(p)], { gap: 350 });
+      p.pop = 0;
+      return;
+    }
     flyToSlot(wp, C.ch, n);
     pingChip();
     // after 2 letters: recall rounds, the chip hides the glyph and the voice asks for it
-    if (S.collected === 2 && S.need > 3) { S.recall = true; setTimeout(() => { if (S.mode === 'drive' && S.recall && !S.chipBusy && !S.pickups.some(q => q.review && q.alive && q.asked)) chipShowsTarget(); }, 900); }
+    if (S.kind === 'letter' && S.collected === 2 && S.need > 3) { S.recall = true; setTimeout(() => { if (S.mode === 'drive' && S.recall && !S.chipBusy && !S.pickups.some(q => q.review && q.alive && q.asked)) chipShowsTarget(); }, 900); }
     if (S.collected >= S.need) Voice.say([praise(), TR.lines.gate], { gap: 350 });
     // odd pickups: the letter's SOUND with its word; even ones: the letter's name + praise; then the next question
     else if (S.collected % 2 === 1) Voice.say([TR.lines.sound(C), askNext(p)], { gap: 400 });
@@ -357,12 +385,13 @@ function hitPickup(p) {
   } else if (p.kind === 'wrong') {
     S.wrong++; S.wobble = 0.6; S.recentWrong = true;
     const T0 = p.pair && p.pair.letter ? p.pair.letter : C;
-    if (!(p.pair && p.pair.review)) Store.addMiss(S.index, TR.lang);
+    if (!(p.pair && p.pair.review)) Store.addMiss(missIdx(), TR.lang);
     Sound.wrong(); haptic('bump');
     p.mat.color.setHex(0x9aa5b1);
     // name what was picked, then ask again for the right one, and show it on the chip for a moment
     const nx = nextTarget(p.pair) || p.pair;
-    const want = nx && nx.letter ? nx.letter : T0;
+    // word mode: the letter still missing (this pair's target is about to be passed, not yet counted as missed)
+    const want = isWord() ? nextLetter() : nx && nx.letter ? nx.letter : T0;
     if (nx) nx.asked = true;
     Voice.say([TR.lines.wrong(p.letter), TR.lines.find(want)], { gap: 300 });
     setChip(want.ch, nx && nx.review ? 'var(--blue)' : 'var(--pink)'); pingChip(); S.chipBusy = true;
@@ -394,7 +423,7 @@ function nextTarget(not) {
 function askNext(cur0) {
   const nx = nextTarget(cur0);
   if (!nx || nx.asked) return null;
-  if (!(nx.review || S.recall || S.missStreak >= 1 || S.recentWrong)) return null;
+  if (!(nx.review || isWord() || S.recall || S.missStreak >= 1 || S.recentWrong)) return null;
   nx.asked = true;
   if (nx.review) { setChip(nx.letter.ch, 'var(--blue)'); pingChip(); }
   return TR.lines.find(nx.letter);
@@ -412,7 +441,29 @@ function announcePair(p) {
   if (!p.review && S.missStreak >= 3) assistPair(p);
   if (!p.review && p.glow && set().hint && (S.missStreak >= 1 || S.recentWrong)) p.glow.visible = true;
   // fallback only for the nearest pair: a pair further back would be cut off by the feedback of the one in front
-  if (!p.asked && !Voice.busy && nextTarget(null) === p && (p.review || S.recall || S.missStreak >= 1 || S.recentWrong)) { p.asked = true; Voice.say(TR.lines.find(p.letter)); }
+  if (!p.asked && !Voice.busy && nextTarget(null) === p && (p.review || isWord() || S.recall || S.missStreak >= 1 || S.recentWrong)) { p.asked = true; Voice.say(TR.lines.find(p.letter)); }
+}
+// word mode: bubbles already on the road ask for the letters still missing, in order
+function retarget() {
+  if (!isWord()) return;
+  const W = cur();
+  const ts = S.pickups.filter(q => q.kind === 'target' && q.alive && !q.missed).sort((a, b) => T.delta(S.u, a.u) - T.delta(S.u, b.u));
+  ts.forEach((q, i) => {
+    const L = nextLetter(i);
+    if (q.letter === L) return;
+    q.letter = L; q.asked = false; q.mat.map = bubbleTexture(L.ch, q.col); q.mat.needsUpdate = true;
+    if (q.pair && (q.pair.letter === L || W.parts.includes(q.pair.letter.ch))) {
+      const pool = TR.distractors(TR.letters.indexOf(L), false).filter(x => !W.parts.includes(x.ch));
+      if (pool.length) { q.pair.letter = pick(pool); q.pair.mat.map = bubbleTexture(q.pair.letter.ch, q.pair.col); q.pair.mat.needsUpdate = true; }
+    }
+  });
+}
+function flyToWord(worldPos, ch) {
+  const hud = $('wordhud'), a = screenPos(worldPos), r = hud.getBoundingClientRect();
+  const f = document.createElement('div'); f.className = 'flyer'; f.textContent = ch;
+  f.style.left = a.x + 'px'; f.style.top = a.y + 'px'; document.body.appendChild(f);
+  requestAnimationFrame(() => requestAnimationFrame(() => { f.style.left = (r.left + r.width / 2) + 'px'; f.style.top = (r.top + r.height / 2) + 'px'; f.style.transform = 'scale(.5)'; }));
+  setTimeout(() => { f.remove(); drawWordHud(); $('wordhud').classList.remove('pop'); void $('wordhud').offsetWidth; $('wordhud').classList.add('pop'); }, 720);
 }
 function updatePickups(dt) {
   const t = S.t;
@@ -444,7 +495,8 @@ function updatePickups(dt) {
     if (p.kind === 'target' && p.alive && !p.missed && du < -3) {
       p.missed = true;
       if (p.review) chipShowsTarget();
-      else { S.missStreak++; S.misses++; Store.addMiss(S.index, TR.lang); }
+      else { S.missStreak++; S.misses++; Store.addMiss(missIdx(), TR.lang); }
+      if (isWord()) retarget();
       const nx = nextTarget(p);
       if (nx && !nx.review) {
         if (S.missStreak >= 3) assistPair(nx);
@@ -515,7 +567,7 @@ function spawnGate() {
   // remove anything still waiting ahead
   for (const p of S.pickups) if (T.delta(S.u, p.u) > 6 && p.kind !== 'coin') { p.dead = true; }
   S.archU = T.wrapU(S.u + (S.need === 0 ? 75 : 105));
-  const arch = makeArch(S.kind === 'letter' ? C.ch : C.digit, C.word);
+  const arch = S.kind === 'word' ? makeArch(C.word, '') : makeArch(S.kind === 'letter' ? C.ch : C.digit, C.word);
   arch.group.position.copy(T.pos(S.archU, 0)); arch.group.rotation.y = T.heading(S.archU);
   scene.add(arch.group); S.arch = arch;
   Sound.gateOpen();
@@ -535,8 +587,8 @@ function buildStage() {
   S.stageC.copy(best.c);
   // hide nearby enclosures so the stage is clear
   for (const h of S.slotHabs) if (h) h.group.visible = h.group.position.distanceTo(best.c) > 34;
-  const ids = S.kind === 'letter' ? [C.animal] : [];
-  const hab = makeHabitat(C.biome, ids, { big: S.kind === 'letter' ? C.ch : C.digit, word: C.word }, { radius: 12, animalScale: 1.35, seed: 99 + S.index, signBack: true });
+  const ids = S.kind !== 'number' ? [C.animal] : [];
+  const hab = makeHabitat(C.biome, ids, S.kind === 'word' ? { big: C.word, word: '' } : { big: S.kind === 'letter' ? C.ch : C.digit, word: C.word }, { radius: 12, animalScale: 1.35, seed: 99 + S.index, signBack: true });
   hab.group.position.copy(best.c); hab.group.rotation.y = Math.atan2(road.x - best.c.x, road.z - best.c.z);
   hab.items = hab.animals.map(a => ({ root: a.root, baseScale: a.baseScale, animal: a }));
   if (S.kind === 'number') {
@@ -553,7 +605,14 @@ function drawCard() {
   const C = cur(), cv = $('wordcv'), g = cv.getContext('2d');
   g.clearRect(0, 0, cv.width, cv.height);
   const cx = cv.width / 2;
-  if (S.kind === 'letter') {
+  if (S.kind === 'word') {
+    // the letters one by one, then the word they make (Arabic: joined)
+    g.direction = TR.lang === 'en' ? 'ltr' : 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = `800 92px ${FONT}, sans-serif`; g.fillStyle = '#ff4d6d';
+    g.fillText(C.parts.join(TR.lang === 'en' ? ' + ' : ' + '), cx, 95);
+    g.font = `800 60px ${FONT}, sans-serif`; g.fillStyle = '#8a5cf6'; g.fillText('↓', cx, 185);
+    drawWordProgress(g, C.word, C.parts.length, cx, 300, C.word.length > 3 ? 150 : 175, '#2b1b6b', '#2b1b6b');
+  } else if (S.kind === 'letter') {
     g.fillStyle = '#ff4d6d'; g.beginPath(); g.arc(cx, 140, 128, 0, TAU); g.fill();
     g.fillStyle = 'rgba(0,0,0,.12)'; g.beginPath(); g.arc(cx, 150, 128, 0, Math.PI); g.fill();
     // English: capital + small letter («Aa»), the word left-to-right with its letter highlighted
@@ -575,7 +634,7 @@ function celebrate() {
   S.mode = 'celebrate'; S.modeT = 0; S.countQ = null;
   // honest stars: wrong picks AND missed letters count; a level the game had to steer for is at most 2 stars
   const errs = S.wrong + S.misses;
-  let stars = S.kind === 'letter' ? (errs <= 1 ? 3 : errs <= 3 ? 2 : 1) : 3;
+  let stars = S.kind !== 'number' ? (errs <= 1 ? 3 : errs <= 3 ? 2 : 1) : 3;
   if (S.assisted > 0) stars = Math.min(stars, S.assisted > 2 ? 1 : 2);
   const first = Store.complete(S.kind, S.index, stars, TR.lang);
   Store.data.totalStars += S.coins; Store.save();
@@ -583,7 +642,7 @@ function celebrate() {
   const cs = $('cstars'); cs.innerHTML = '';
   for (let i = 0; i < 3; i++) { cs.insertAdjacentHTML('beforeend', ICON.star); }
   [...cs.children].forEach((el, i) => { if (i < stars) setTimeout(() => { el.classList.add('on'); Sound.star(); }, 500 + i * 300); });
-  $('friend').textContent = first && S.kind === 'letter' ? ui().friend : '';
+  $('friend').textContent = S.kind === 'word' ? ui().wordDone : first && S.kind === 'letter' ? ui().friend : '';
   $('friend').dir = ui().dir;
   $('celebrate').classList.remove('hidden');
   $('hud').classList.add('hidden');
@@ -594,7 +653,9 @@ function celebrate() {
 }
 function sayCelebration(first) {
   const C = cur();
-  if (S.kind === 'letter') {
+  if (S.kind === 'word') {
+    Voice.say([C.say, TR.lines.wordBlend(C), praise()], { gap: 500 });
+  } else if (S.kind === 'letter') {
     Voice.say([C.name, TR.lines.sound(C), praise()].concat(first ? [TR.lines.newFriend] : []), { gap: 450 });
   } else if (C.n === 0) {
     Voice.say([C.say, TR.lines.numberIntro(C), pick(TR.praise)]);
@@ -622,16 +683,16 @@ function updateCounting(dt) {
 function celebrateCamera(dt) {
   const c = S.stageC, road = T.pos(S.stageU, 0);
   const toRoad = new THREE.Vector3().subVectors(road, c).setY(0).normalize();
-  const ang = S.kind === 'letter' ? Math.sin(S.t * 0.25) * 0.22 + 0.2 : Math.sin(S.t * 0.25) * 0.08 + 0.04;
+  const ang = S.kind !== 'number' ? Math.sin(S.t * 0.25) * 0.22 + 0.2 : Math.sin(S.t * 0.25) * 0.08 + 0.04;
   const dir = toRoad.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), ang);
-  const h = S.kind === 'letter' && S.stage.animals[0] ? S.stage.animals[0].height * 1.35 : 5.5;
+  const h = S.kind !== 'number' && S.stage.animals[0] ? S.stage.animals[0].height * 1.35 : 5.5;
   const many = S.kind === 'number' && cur().n > 5;
-  const dist = S.kind === 'letter' ? Math.min(19, 8 + h * 1.15) : many ? 19 : 16;
+  const dist = S.kind !== 'number' ? Math.min(19, 8 + h * 1.15) : many ? 19 : 16;
   const tp = c.clone().addScaledVector(dir, dist); tp.y = many ? 7.5 : 3 + h * 0.6;
-  const look = c.clone(); look.y = h * (S.kind === 'letter' ? 0.55 : 0.5);
+  const look = c.clone(); look.y = h * (S.kind !== 'number' ? 0.55 : 0.5);
   const right = new THREE.Vector3().crossVectors(new THREE.Vector3().subVectors(look, tp).normalize(), new THREE.Vector3(0, 1, 0)).normalize();
   // slide camera and target together so the subject sits on the right of the card, seen straight on
-  const shift = dist * (S.kind === 'letter' ? 0.3 : 0.42) * Math.min(1.4, camera.aspect / 1.8);
+  const shift = dist * (S.kind !== 'number' ? 0.3 : 0.42) * Math.min(1.4, camera.aspect / 1.8);
   look.addScaledVector(right, -shift); tp.addScaledVector(right, -shift);
   camPos.x = damp(camPos.x, tp.x, 2.2, dt); camPos.y = damp(camPos.y, tp.y, 2.2, dt); camPos.z = damp(camPos.z, tp.z, 2.2, dt);
   camLook.x = damp(camLook.x, look.x, 3, dt); camLook.y = damp(camLook.y, look.y, 3, dt); camLook.z = damp(camLook.z, look.z, 3, dt);
@@ -695,7 +756,7 @@ function renderMap() {
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === mapTab));
   $('totstars').textContent = Store.data.totalStars;
   const { kind: tKind, lang: tLang } = tabInfo(mapTab), track = TRACKS[tLang];
-  const list = tKind === 'letter' ? track.letters : track.numbers;
+  const list = tKind === 'letter' ? track.letters : tKind === 'word' ? track.words : track.numbers;
   const arr = Store.prog(tKind, tLang);
   const world = $('world'), path = $('path');
   const H = path.clientHeight || innerHeight * 0.85;
@@ -724,19 +785,22 @@ function renderMap() {
   let currentEl = null;
   list.forEach((item, i) => {
     const el = document.createElement('div');
-    const unlocked = Store.unlocked(tKind, i, tLang);
+    // a word opens once all of its letters have been learned in that language
+    const lp = Store.prog('letter', tLang);
+    const unlocked = tKind === 'word' ? (Store.data.unlockAll || arr[i] > 0 || item.parts.every(ch => lp[track.letters.findIndex(x => x.ch === ch)] > 0)) : Store.unlocked(tKind, i, tLang);
     const done = arr[i] > 0;
-    const glyph = tKind === 'letter' ? item.ch : item.digit;
+    const glyph = tKind === 'letter' ? item.ch : tKind === 'word' ? item.word : item.digit;
     el.className = 'node ' + (done ? 'done' : unlocked ? 'current' : 'locked');
+    if (tKind === 'word') el.classList.add('wordnode');
     el.style.left = pts[i].x + 'px'; el.style.top = pts[i].y + 'px';
     if (done) {
       const img = document.createElement('img'); img.alt = ''; el.appendChild(img);
       // numbers have no animal: show the glyph (thumb(undefined) used to throw and leave the tile blank)
-      if (tKind === 'letter') setTimeout(() => { img.src = thumb(item.animal); }, 10 + i * 25);
-      else { img.remove(); el.insertAdjacentHTML('beforeend', `<span class="glyph">${glyph}</span>`); }
+      if (tKind !== 'number') setTimeout(() => { img.src = thumb(item.animal); }, 10 + i * 25);
+      else { img.remove(); el.insertAdjacentHTML('beforeend', `<span class="glyph${tKind === 'word' ? ' word' : ''}">${glyph}</span>`); }
       el.insertAdjacentHTML('beforeend', `<span class="badge">${glyph}</span><div class="stars">${[0, 1, 2].map(k => (k < arr[i] ? ICON.star : ICON.starOff)).join('')}</div>`);
     } else {
-      el.insertAdjacentHTML('beforeend', `<span class="glyph">${glyph}</span>`);
+      el.insertAdjacentHTML('beforeend', `<span class="glyph${tKind === 'word' ? ' word' : ''}">${glyph}</span>`);
       if (unlocked) { el.insertAdjacentHTML('beforeend', `<div class="pin">${kartSvg(KART_COLORS[Store.data.kart])}</div>`); if (!currentEl) currentEl = el; }
       else el.insertAdjacentHTML('beforeend', `<div class="lock">${ICON.lock}</div>`);
     }
@@ -774,7 +838,7 @@ $('play').addEventListener('click', async () => {
 // ---------- HUD buttons ----------
 $('target').addEventListener('pointerdown', e => {
   e.stopPropagation(); const C = cur();
-  Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : C.say);
+  Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : S.kind === 'word' ? [C.say, nextLetter().name] : C.say);
   // in recall rounds a tap shows the letter again for a moment
   if (S.kind === 'letter' && S.recall) { setChip(C.ch, 'var(--pink)'); setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }
   pingChip();
@@ -784,11 +848,11 @@ $('presume').addEventListener('click', () => { Sound.click(); setPaused(false); 
 $('prestart').addEventListener('click', () => { Sound.click(); S.paused = false; $('pause').classList.add('hidden'); Sound.resume(); startLevel(S.kind, S.index); });
 $('pmap').addEventListener('click', () => { Sound.click(); S.paused = false; Sound.resume(); toMap(); });
 $('chome').addEventListener('click', () => { Sound.click(); toMap(); });
-$('chear').addEventListener('click', () => { Sound.click(); S.happyT = 2.5; const C = cur(); Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : [C.say]); });
+$('chear').addEventListener('click', () => { Sound.click(); S.happyT = 2.5; const C = cur(); Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : S.kind === 'word' ? [TR.lines.wordBlend(C)] : [C.say]); });
 $('cagain').addEventListener('click', () => { Sound.click(); startLevel(S.kind, S.index); });
 $('cnext').addEventListener('click', () => {
   Sound.click();
-  const list = S.kind === 'letter' ? TR.letters : TR.numbers;
+  const list = S.kind === 'letter' ? TR.letters : S.kind === 'word' ? TR.words : TR.numbers;
   if (S.index + 1 < list.length) startLevel(S.kind, S.index + 1); else toMap();
 });
 function setPaused(p) {

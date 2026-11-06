@@ -59,6 +59,26 @@ export function drawWord(g, word, x, y, px, color, hiColor, stroke, hiIndex) {
   return w;
 }
 
+// Word mode HUD: the whole word as a pale outline, the first n letters in colour on top.
+// Arabic keeps its joined shapes: the coloured prefix ends with a zero-width joiner when its last
+// letter connects to the next one, so it lines up exactly with the outline drawn underneath.
+export function drawWordProgress(g, word, n, x, y, px, ghost, color) {
+  g.save();
+  g.font = `800 ${px}px ${FONT}, sans-serif`; g.textBaseline = 'middle';
+  const latin = LATIN.test(word);
+  g.direction = latin ? 'ltr' : 'rtl'; g.textAlign = latin ? 'left' : 'right';
+  const w = g.measureText(word).width, at = latin ? x - w / 2 : x + w / 2;
+  g.lineJoin = 'round'; g.lineWidth = px * 0.1; g.strokeStyle = 'rgba(43,27,107,.18)'; g.strokeText(word, at, y);
+  g.fillStyle = ghost; g.fillText(word, at, y);
+  if (n > 0) {
+    let pre = word.slice(0, n);
+    if (!latin && n < word.length && !NON_JOIN.includes(word[n - 1])) pre += '‍';
+    g.fillStyle = color; g.fillText(pre, at, y);
+  }
+  g.restore();
+  return w;
+}
+
 export function canvasTexture(w, h, draw) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   draw(c.getContext('2d'), w, h);
@@ -96,7 +116,9 @@ export function signTexture(big, word, bg = '#ffffff', fg = '#3a2a7a', hi = '#ff
     g.fillStyle = bg; roundRect(g, 8, 8, w - 16, h - 16, 48); g.fill();
     g.lineWidth = 14; g.strokeStyle = hi; roundRect(g, 14, 14, w - 28, h - 28, 42); g.stroke();
     g.direction = 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = `800 ${word ? 190 : 260}px ${FONT}, sans-serif`;
+    // shrink long text (a whole word on the gate) until it fits the board
+    let px = word ? 190 : 260; g.font = `800 ${px}px ${FONT}, sans-serif`;
+    while (px > 60 && g.measureText(big).width > w - 70) { px -= 10; g.font = `800 ${px}px ${FONT}, sans-serif`; }
     g.fillStyle = hi; g.fillText(big, w / 2, word ? 150 : h / 2 + 18);
     if (word) { const k = LATIN.test(word) ? Math.max(0, word.toUpperCase().indexOf(big)) : 0; drawWord(g, word, w / 2, 300, word.length > 6 ? 70 : 92, fg, hi, null, k); }
   });

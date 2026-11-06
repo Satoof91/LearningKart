@@ -604,6 +604,23 @@ const BUILDERS = {
     const a = bird('vulture', { color: 0x3e3e3e, belly: 0x5a5a5a, wing: 0x2b2b2b, wingStripe: 0x8a8a8a, headColor: 0xf4a3a3, beak: 0xf1e3c8, hook: true, beakL: 0.65, bodyR: 1.1, bodyY: 1.6, neckUp: 1.3, tailColor: 0x2b2b2b });
     sph(a.body, 0xf5f5f5, 0.6, 0, 0.75, 0.6, 1.25, 0.6, 1.0, null, true); // white ruff collar
     return a;
+  },
+  // ---- animals for the English word mode ----
+  cat: () => {
+    const a = quad('cat', { color: 0xffa94d, map: stripes(0xffa94d, 0xe8590c, 12), belly: 0xfff4e6, bodyR: 0.7, bodyL: 1.05, bodyY: 1.25, legR: 0.15, foot: 0xfff4e6, neckL: 0.2, headR: 0.72, headColor: 0xffa94d, snoutL: 0.25, snoutR: 0.3, snoutColor: 0xfff4e6, nose: 0xff8fab, ears: 'pointy', earInner: 0xffc9de, tail: 'thin', tailL: 1.5, tailUp: 0.9, tailColor: 0xffa94d });
+    for (const s of [1, -1]) for (let k = 0; k < 3; k++) mesh(a.head, cyl(0.012, 0.012, 0.6, 4), 0x495057, s * 0.42, -0.2 + k * 0.06, 0.62, 0, 0, Math.PI / 2 + s * (k - 1) * 0.15);
+    return a;
+  },
+  dog: () => quad('dog', { color: 0xc8a27a, belly: 0xfff4e6, bodyR: 0.8, bodyL: 1.2, bodyY: 1.4, legR: 0.18, foot: 0xfff4e6, neckL: 0.35, headR: 0.72, snoutL: 0.5, snoutR: 0.34, snoutColor: 0xfff4e6, nose: 0x212529, ears: 'floppy', earColor: 0x8b5e34, tail: 'thin', tailL: 0.9, tailUp: 0.7, tailColor: 0xc8a27a }),
+  pig: () => {
+    const a = quad('pig', { color: 0xffafcc, belly: 0xffc8dd, bodyR: 0.95, bodyL: 1.3, bodyY: 1.25, legR: 0.2, foot: 0xd88ca8, neckL: 0.1, headR: 0.78, snoutL: 0.12, snoutR: 0.36, snoutColor: 0xff8fab, nose: 0xd6336c, ears: 'pointy', earColor: 0xffafcc, earInner: 0xff8fab, tail: 'thin', tailL: 0.5, tailUp: 0.6 });
+    return a;
+  },
+  hen: () => {
+    const a = bird('hen', { color: 0xfffaf0, belly: 0xffffff, wing: 0xf1e3c8, headColor: 0xfffaf0, beak: 0xffb703, beakL: 0.5, bodyR: 1.0, bodyY: 1.2, tailColor: 0xf1e3c8, legColor: 0xffb703 });
+    for (let k = 0; k < 3; k++) sph(a.head, 0xe63946, 0.16, 0, 0.6 + (k === 1 ? 0.08 : 0), 0.1 - (k - 1) * 0.2, 0.7, 1.1, 0.9); // red comb
+    sph(a.head, 0xe63946, 0.12, 0, -0.45, 0.55, 0.7, 1.2, 0.8); // wattle
+    return a;
   }
 };
 
@@ -615,7 +632,7 @@ function lizard(id, o) {
   return a;
 }
 
-const SCALE = { iguana: 1.5, newt: 1.4, quail: 1.25, owl: 1.1, crocodile: 1.3, turtle: 1.25, frog: 1.15, sparrow: 1.25, dove: 1.15, duck: 1.1, hoopoe: 1.15, monkey: 1.1 };
+const SCALE = { cat: 1.25, dog: 1.2, pig: 1.15, hen: 1.15, iguana: 1.5, newt: 1.4, quail: 1.25, owl: 1.1, crocodile: 1.3, turtle: 1.25, frog: 1.15, sparrow: 1.25, dove: 1.15, duck: 1.1, hoopoe: 1.15, monkey: 1.1 };
 export const ANIMAL_IDS = Object.keys(BUILDERS);
 export function makeAnimal(id) {
   const b = BUILDERS[id];

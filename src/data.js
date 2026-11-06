@@ -61,7 +61,9 @@ export const LINES = {
   wrong: L => `هَذَا حَرْفُ ${L.name}`,
   numberIntro: N => N.n === 0 ? 'صِفْر يَعْنِي لَا شَيْء' : `هَيَّا نَعُدُّ إِلَى ${N.to || N.say}`,
   gate: 'هَيَّا إِلَى البَوَّابَة!',
-  newFriend: 'صَدِيقٌ جَدِيدٌ فِي حَدِيقَتِك!'
+  newFriend: 'صَدِيقٌ جَدِيدٌ فِي حَدِيقَتِك!',
+  wordIntro: W => `هَيَّا نَبْنِي كَلِمَةَ ${W.say}!`,
+  wordBlend: W => `${W.onset}، ${W.onset}، ${W.say}`
 };
 
 // Wrong choices follow a ladder: first an easy, clearly different letter (preferably one already
@@ -111,8 +113,8 @@ export const EN_LETTERS = [
   ['Y', 'Yak', 'yak', 'mountain'], ['Z', 'Zebra', 'zebra', 'savanna']
 ].map(([ch, word, animal, biome, hi]) => ({ ch, card: ch + ch.toLowerCase(), word, say: word.toLowerCase(), name: `Letter ${ch}`, animal, biome, hi: hi || 0 }));
 
-const EN_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
-export const EN_NUMBERS = EN_WORDS.map((w, n) => ({ n, word: w[0].toUpperCase() + w.slice(1), say: w, digit: String(n), alt: arDigits(n), biome: 'orchard' }));
+const EN_NUM_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+export const EN_NUMBERS = EN_NUM_WORDS.map((w, n) => ({ n, word: w[0].toUpperCase() + w.slice(1), say: w, digit: String(n), alt: arDigits(n), biome: 'orchard' }));
 export const EN_PRAISE = ['Great job!', 'Awesome!', 'Well done!', 'Super!', 'You did it!', 'Fantastic!'];
 export const EN_LINES = {
   letterIntro: L => `Let's find the letter ${L.ch}!`,
@@ -122,21 +124,38 @@ export const EN_LINES = {
   wrong: L => `That is the letter ${L.ch}.`,
   numberIntro: N => N.n === 0 ? 'Zero means nothing.' : `Let's count to ${N.say}!`,
   gate: 'Go to the gate!',
-  newFriend: 'A new friend in your zoo!'
+  newFriend: 'A new friend in your zoo!',
+  wordIntro: W => `Let's build the word ${W.say}!`,
+  wordBlend: W => `${W.parts.join(', ')}. ${W.say[0].toUpperCase() + W.say.slice(1)}!`
 };
 // look-alike capitals, introduced only once the child is doing well
 const EN_LOOK = { B: 'PR', P: 'BR', R: 'PB', E: 'F', F: 'E', O: 'QC', Q: 'OG', C: 'GO', G: 'CO', M: 'NW', N: 'MH', H: 'N', W: 'MV', V: 'UW', U: 'V', I: 'LT', L: 'I', T: 'I', K: 'X', X: 'K' };
 export const enDistractorPool = makeDistractors(EN_LETTERS, EN_LOOK, 'AOSXHMTZ');
 
+// ---------------------------------------------------------------------------------------------
+// Word mode ("build the word"): hear the word, collect its letters in order, hear it blended.
+// v1 uses short animal words whose letters keep a recognisable shape (no ة / ئ / ال / لا, no
+// two-word names). `onset` is the first syllable, used in the blend «دُ، دُ، دُبّ».
+// A word unlocks once every one of its letters has been learned in that track.
+export const WORDS = [
+  ['دب', 'دُبّ', 'دُ', 'bear', 'forest'], ['أسد', 'أَسَد', 'أَ', 'lion', 'savanna'], ['قرد', 'قِرْد', 'قِ', 'monkey', 'jungle'],
+  ['صقر', 'صَقْر', 'صَ', 'falcon', 'desert'], ['جمل', 'جَمَل', 'جَ', 'camel', 'desert'], ['نمر', 'نَمِر', 'نَ', 'tiger', 'jungle'],
+  ['نسر', 'نَسْر', 'نَ', 'vulture', 'desert'], ['فيل', 'فِيل', 'فِ', 'elephant', 'savanna']
+].map(([word, say, onset, animal, biome]) => ({ word, say, onset, animal, biome, parts: [...word] }));
+// English: short words read letter by letter ("C, A, T. Cat!"); true letter sounds would need recordings
+export const EN_WORDS = [
+  ['HEN', 'hen'], ['DOG', 'dog'], ['PIG', 'pig'], ['CAT', 'cat'], ['FOX', 'fox'], ['OX', 'ox'], ['YAK', 'yak']
+].map(([word, animal]) => ({ word, say: word.toLowerCase(), animal, biome: { hen: 'farm', dog: 'farm', pig: 'farm', cat: 'garden', fox: 'forest', ox: 'farm', yak: 'mountain' }[animal], parts: [...word] }));
+
 // everything the game needs to teach one language
 export const TRACKS = {
   ar: {
-    lang: 'ar', letters: LETTERS, numbers: NUMBERS, lines: LINES, praise: PRAISE, praiseShow: PRAISE_SHOW,
+    lang: 'ar', letters: LETTERS, numbers: NUMBERS, words: WORDS, lines: LINES, praise: PRAISE, praiseShow: PRAISE_SHOW,
     distractors: distractorPool, digits: arDigits,
     ui: { collect: L => `اجمع حرف ${L.ch}`, apples: d => `اجمع ${d} تفاحات`, zero: 'صفر = لا شيء', friend: 'صديق جديد في حديقتك!' }
   },
   en: {
-    lang: 'en', letters: EN_LETTERS, numbers: EN_NUMBERS, lines: EN_LINES, praise: EN_PRAISE, praiseShow: EN_PRAISE,
+    lang: 'en', letters: EN_LETTERS, numbers: EN_NUMBERS, words: EN_WORDS, lines: EN_LINES, praise: EN_PRAISE, praiseShow: EN_PRAISE,
     distractors: enDistractorPool, digits: n => String(n),
     ui: { collect: L => `Find the letter ${L.ch}`, apples: d => `Collect ${d} apples`, zero: '0 = nothing', friend: 'A new friend in your zoo!' }
   }
@@ -179,5 +198,15 @@ export function voiceLines() {
   out.push({ id: 'en-gate', text: EN_LINES.gate, note: 'after collecting', lang: 'en' });
   out.push({ id: 'en-new-friend', text: EN_LINES.newFriend, note: 'new animal', lang: 'en' });
   EN_PRAISE.forEach((t, i) => out.push({ id: `en-praise-${i + 1}`, text: t, note: 'praise', lang: 'en' }));
-  return out;
+  WORDS.forEach((W, i) => {
+    out.push({ id: `word-${p2(i + 1)}-intro`, text: LINES.wordIntro(W), note: `كلمة ${W.word}` });
+    out.push({ id: `word-${p2(i + 1)}-blend`, text: LINES.wordBlend(W), note: `دمج ${W.word}` });
+  });
+  EN_WORDS.forEach((W, i) => {
+    out.push({ id: `en-word-${p2(i + 1)}-intro`, text: EN_LINES.wordIntro(W), note: `word ${W.word}`, lang: 'en' });
+    out.push({ id: `en-word-${p2(i + 1)}-blend`, text: EN_LINES.wordBlend(W), note: `blend ${W.word}`, lang: 'en' });
+  });
+  // a text that is already spoken by another line reuses that clip (e.g. «دُ، دُ، دُبّ» = letter-08-sound)
+  const seen = new Set();
+  return out.filter(l => (seen.has(l.text) ? false : (seen.add(l.text), true)));
 }

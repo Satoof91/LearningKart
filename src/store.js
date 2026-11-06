@@ -9,6 +9,8 @@ const DEFAULT = () => ({
   miss: Array(28).fill(0),
   // English track (A-Z, 0-10)
   enLetters: Array(26).fill(0), enNumbers: Array(11).fill(0), enMiss: Array(26).fill(0),
+  // word mode (stars per word)
+  words: Array(8).fill(0), enWords: Array(7).fill(0),
   settings: { sfx: true, music: true, voice: true, haptics: true, hint: true, tilt: false, flip: false, speed: 'normal', voiceName: '', voiceRate: 'normal', uiLang: 'ar' }
 });
 const int = (v, lo, hi, dflt) => { const x = Math.round(Number(v)); return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt; };
@@ -18,6 +20,7 @@ function sanitize(d) {
   const def = DEFAULT();
   const out = Object.assign(def, d, { settings: Object.assign(def.settings, (d.settings && typeof d.settings === 'object') ? d.settings : {}) });
   out.letters = arr(d.letters, 28, 3); out.numbers = arr(d.numbers, 11, 3); out.miss = arr(d.miss, 28, 999);
+  out.words = arr(d.words, 8, 3); out.enWords = arr(d.enWords, 7, 3);
   out.enLetters = arr(d.enLetters, 26, 3); out.enNumbers = arr(d.enNumbers, 11, 3); out.enMiss = arr(d.enMiss, 26, 999);
   out.totalStars = int(d.totalStars, 0, 1e7, 0); out.kart = int(d.kart, 0, 4, 1); out.unlockAll = !!d.unlockAll; out.v = 2;
   return out;
@@ -46,6 +49,7 @@ export const Store = {
   // progress array for a track: kind 'letter' | 'number', lang 'ar' | 'en'
   prog(kind, lang = 'ar') {
     const d = this.data;
+    if (kind === 'word') return lang === 'en' ? d.enWords : d.words;
     return lang === 'en' ? (kind === 'letter' ? d.enLetters : d.enNumbers) : (kind === 'letter' ? d.letters : d.numbers);
   },
   missArr(lang = 'ar') { return lang === 'en' ? this.data.enMiss : this.data.miss; },
