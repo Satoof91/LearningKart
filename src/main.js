@@ -215,7 +215,7 @@ function startLevel(kind, index, lang) {
   populateZoo(kind === 'letter' ? index : -1);
   S.u = T.L - 34; S.d = 0; S.vd = 0; S.speed = 0; S.boostT = 0; S.camH = T.heading(S.u);
   S.collected = 0; S.wrong = 0; S.coins = 0; S.spawned = 0; S.need = kind === 'letter' ? 5 : kind === 'word' ? C.parts.length : C.n;
-  S.nextU = S.u + 85; S.missStreak = 0; S.countQ = null;
+  S.nextU = S.u + 85; S.missStreak = 0; S.holdT = 0; S.countQ = null;
   S.misses = 0; S.assisted = 0; S.reviewDone = false; S.recentWrong = false; S.recall = false; S.lastPraise = -1;
   S.chipBusy = false; clearTimeout(S.chipT);
   S.lvl = (S.lvl || 0) + 1;
@@ -316,10 +316,12 @@ function spawnAhead() {
     const tp = addPickup(bubble(S.nextU, side * 4.4, target, true, colA));
     const wp = addPickup(bubble(S.nextU, -side * 4.4, W, false, colB));
     tp.pair = wp; wp.pair = tp; tp.review = !!R; if (R) S.reviewDone = true;
+    if (isWord() && S.spawned === 0) tp.asked = true; // the intro already asked for the first letter
     S.spawned++;
-    if (S.spawned % 3 === 0) { const pad = makeBoostPad(); const at = S.nextU + 34; pad.position.copy(T.pos(at, 0)); pad.position.y = 0.1; pad.rotation.y = T.heading(at); addPickup({ obj: pad, u: at, d: 0, kind: 'boost', alive: true, r: 2.6 }); }
+    if (S.spawned % 3 === 0 && !isWord()) { const pad = makeBoostPad(); const at = S.nextU + 34; pad.position.copy(T.pos(at, 0)); pad.position.y = 0.1; pad.rotation.y = T.heading(at); addPickup({ obj: pad, u: at, d: 0, kind: 'boost', alive: true, r: 2.6 }); }
     for (let k = 1; k <= 3; k++) spawnCoin(S.nextU + 14 + k * 9, (S.spawned % 2 ? 1 : -1) * (k - 2) * 2.4);
-    S.nextU += 78;
+    // word mode: more road between letters so the letter name and the next question finish first
+    S.nextU += isWord() ? 150 : 78;
   } else {
     const d = pick([-4.4, 0, 4.4]);
     const g = makeApple(); g.scale.setScalar(1.35);
@@ -538,6 +540,13 @@ function driveKart(dt, allowSteer, targetSpeed) {
   if (Math.abs(S.d) > LANE) { S.d = Math.sign(S.d) * LANE; if (Math.abs(S.vd) > 6) { Sound.bump(); haptic('tick'); } S.vd = 0; }
   if (S.wobble > 0) S.wobble -= dt;
   S.u = T.wrapU(S.u + S.speed * dt);
+}
+// word mode: ease off while the question is still being spoken and the next letters are close
+function wordHold(dt) {
+  if (!isWord()) return false;
+  const near = S.pickups.some(q => q.kind === 'target' && q.alive && !q.missed && T.delta(S.u, q.u) > 0 && T.delta(S.u, q.u) < 60);
+  S.holdT = near && Voice.busy ? 0.6 : Math.max(0, (S.holdT || 0) - dt);
+  return S.holdT > 0;
 }
 const baseSpeed = () => (set().speed === 'slow' ? 19 : 25);
 
@@ -1097,7 +1106,7 @@ function frame(now) {
       if (S.need === 0) spawnGate();
     }
   } else if (S.mode === 'drive') {
-    driveKart(dt, true, baseSpeed());
+    driveKart(dt, true, wordHold(dt) ? 9 : baseSpeed());
     if (!S.arch && S.collected < S.need) { while (T.delta(S.u, S.nextU) < 170) spawnAhead(); }
     if (!S.arch && S.collected >= S.need) spawnGate();
     updatePickups(dt);
