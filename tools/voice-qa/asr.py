@@ -36,9 +36,18 @@ for i, l in enumerate(todo):
     heard = ''.join(s.text for s in segs).strip()
     want, got = ' '.join(norm(l['text'])), ' '.join(norm(heard))
     score = round(difflib.SequenceMatcher(None, want, got).ratio(), 2)
+    if l['id'].startswith('haraka') and re.search('-(fa|ki|da)', l['id']):
+        h = re.search('-(fa|ki|da)', l['id']).group(1)
+        base = [w for w in norm(l['text']) if len(w) == 1]
+        longv = {'fa': 'ا', 'ki': 'ي', 'da': 'و'}[h]
+        if base and (base[0] + longv) in got.split(): score = min(score, 0.5); heard += '  [⚠ مدّ؟]'
     rows.append({'id': l['id'], 'text': l['text'], 'heard': heard, 'score': score, 'secs': round(len(a) / 16000, 2), 'note': l.get('note', '')})
     print(f"{i+1}/{len(todo)} {l['id']} {score} | {l['text']} -> {heard}", flush=True)
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'report')
+# a partial run (id prefixes given) updates the matching rows of the existing report
+if pref and os.path.exists(out + '.json'):
+    old = {r['id']: r for r in json.load(open(out + '.json', encoding='utf-8'))}
+    old.update({r['id']: r for r in rows}); rows = list(old.values())
 json.dump(rows, open(out + '.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 with open(out + '.csv', 'w', encoding='utf-8-sig', newline='') as fh:
     w = csv.DictWriter(fh, fieldnames=['id', 'score', 'text', 'heard', 'secs', 'note']); w.writeheader()

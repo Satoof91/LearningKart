@@ -60,7 +60,7 @@ export const LINES = {
   sound: L => `${L.snd}، ${L.snd}، ${L.say}`,
   find: L => `أَيْنَ حَرْفُ ${L.name}؟`,
   wrong: L => `هَذَا حَرْفُ ${L.name}`,
-  numberIntro: N => N.n === 0 ? 'صِفْرٌ يَعْنِي: لَا شَيْءَ' : `هَيَّا نَعُدُّ إِلَى ${N.to || N.say}`,
+  numberIntro: N => N.n === 0 ? 'صِفْرٌ يَعْنِي: لَا شَيْءْ' : `هَيَّا نَعُدُّ إِلَى ${N.to || N.say}`,
   gate: 'هَيَّا إِلَى البَوَّابَة!',
   newFriend: 'صَدِيقٌ جَدِيدٌ فِي حَدِيقَتِكَ!',
   wordIntro: W => `هَيَّا نَبْنِي كَلِمَةَ ${W.say}!`,
@@ -172,8 +172,10 @@ for (const pk of WORD_PACKS.slice(1)) for (const [word, animal] of EN_PACKS[pk])
 // ---------------------------------------------------------------------------------------------
 // Harakat mode («حركات»): each letter with fatha, kasra and damma. The skill is telling بَ / بِ / بُ
 // apart on the SAME letter, so the other bubble is always the same letter with another mark.
-// The voice never says a bare syllable at the end of a line on its own: it spells it the classic way
-// («بَاءْ، فَتْحَة، بَ») or asks «أَيْنَ بَ؟».
+// The voice never ends a line on a lone syllable (the engine would stretch بِ into «بي»): it spells
+// «بَاءْ، فَتْحَة: بَ بَ بَ», asks «أَيْنَ بِ يَا بَطَلْ؟» and chants «بَ بِ بُ، بَ بِ بُ».
+// The harakat mode stays hidden until every one of its voice clips has been verified by ear.
+export const HARAKA_ENABLED = false;
 export const HARAKAT = [
   { id: 'fa', mark: 'َ', name: 'فَتْحَة', color: '#ff3b3b' },
   { id: 'ki', mark: 'ِ', name: 'كَسْرَة', color: '#1c7ed6' },
@@ -185,11 +187,12 @@ export const SYLLABLES = LETTERS.map((L, li) => HARAKAT.map((H, hi) => {
   return { ch: base + H.mark, base, mark: H.mark, h: H.id, hi, li, color: H.color, hname: H.name, name: L.name, letter: L, animal: L.animal, biome: L.biome, word: L.word, say: L.say };
 }));
 export const HLINES = {
-  intro: L => `هَيَّا نَقْرَأُ ${L.name} بِالحَرَكَاتْ`,
-  chant: li => SYLLABLES[li].map(x => x.ch).join('، '),
-  spell: x => `${x.name}، ${x.hname}، ${x.ch}`,
-  find: x => `أَيْنَ ${x.ch}؟`,
-  howto: 'الفَتْحَةُ فَوْقَ الحَرْفِ، وَالكَسْرَةُ تَحْتَ الحَرْفِ، وَالضَّمَّةُ وَاوٌ صَغِيرَةٌ فَوْقَ الحَرْفْ'
+  intro: L => `هَيَّا نَقْرَأُ حَرْفَ ${L.name} بِالحَرَكَاتْ`,
+  // a syllable must not end the line alone: at a pause the engine stretches it into a word (فِ -> «في»)
+  chant: li => { const r = SYLLABLES[li].map(x => x.ch).join(' '); return `${r}، ${r}`; },
+  spell: x => `${x.name}، ${x.hname}: ${x.ch} ${x.ch} ${x.ch}`,
+  find: x => `أَيْنَ ${x.ch} ${x.base === 'ي' ? 'يَا شَاطِرْ' : 'يَا بَطَلْ'}؟`,
+  howto: 'الفَتْحَةُ شَرْطَةٌ فَوْقَ الحَرْفِ، وَالكَسْرَةُ شَرْطَةٌ تَحْتَ الحَرْفِ، وَالضَّمَّةُ وَاوٌ صَغِيرَةٌ فَوْقَ الحَرْفْ'
 };
 
 export const TRACKS = {

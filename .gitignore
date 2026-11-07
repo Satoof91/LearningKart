@@ -27,3 +27,4 @@ store/
 # voice QA output (regenerate: python tools/voice-qa/asr.py && python tools/voice-qa/listen.py)
 tools/voice-qa/report.*
 tools/voice-qa/listen.html
+tools/voice-qa/bench/

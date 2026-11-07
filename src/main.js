@@ -1,7 +1,7 @@
 // LearningKart — Arabic letters & numbers zoo kart game for ages 3-6.
 import * as THREE from 'three';
 import { initPlatform, haptic, Tilt, setHaptics, exitApp, isNative as isNativeApp } from './platform.js';
-import { TRACKS, WORD_PACKS, SYLLABLES, HLINES } from './data.js';
+import { TRACKS, WORD_PACKS, SYLLABLES, HLINES, HARAKA_ENABLED } from './data.js';
 import { UI } from './i18n.js';
 // current language track (Arabic or English): letters, numbers, spoken lines, praise, digits
 let TR = TRACKS.ar;
@@ -125,6 +125,7 @@ function applyUiLang() {
   document.querySelector('.tab[data-tab="letter"]').textContent = u.tabLetter;
   document.querySelector('.tab[data-tab="number"]').textContent = u.tabNumber;
   document.querySelector('.tab[data-tab="haraka"]').textContent = u.tabHaraka;
+  document.querySelector('.tab[data-tab="haraka"]').classList.toggle('hidden', !HARAKA_ENABLED);
   document.querySelectorAll('[data-lang]').forEach(b => { b.textContent = u.switchTo; b.setAttribute('aria-label', u.switchLabel); });
   if (ZOO) ZOO.setBanner(u.banner);
 }
@@ -222,6 +223,7 @@ function clearLevel() {
   Voice.stop();
 }
 function startLevel(kind, index, lang) {
+  if (kind === 'haraka' && !HARAKA_ENABLED) return toMap('letter');
   // paid words lead to the parents' unlock screen instead (never straight into a store dialog)
   if (!Purchase.canPlay(kind, index)) { if (S.mode !== 'map') toMap(); openPaywall(); return; }
   clearLevel();
@@ -298,7 +300,8 @@ let SHADOW_GEO = null, SHADOW_MAT = null;
 function bubble(u, d, L, isTarget, color) {
   const g = new THREE.Group();
   const pos = T.pos(u, d); g.position.copy(pos);
-  const mat = new THREE.SpriteMaterial({ map: bubbleTexture(L.ch, color, markColorFor(L)) });
+  const mc = markColorFor(L);
+  const mat = new THREE.SpriteMaterial({ map: bubbleTexture(L.ch, color, mc) });
   const spr = new THREE.Sprite(mat); spr.scale.set(4.6, 4.6, 1); spr.position.y = 3; spr.renderOrder = 2; g.add(spr);
   let glow = null, glowMat = null;
   if (isTarget) {
@@ -309,7 +312,7 @@ function bubble(u, d, L, isTarget, color) {
   if (!SHADOW_GEO) { SHADOW_GEO = new THREE.PlaneGeometry(3.4, 3.4); SHADOW_MAT = new THREE.MeshBasicMaterial({ map: blobTex(), transparent: true, depthWrite: false }); }
   const sh = new THREE.Mesh(SHADOW_GEO, SHADOW_MAT);
   sh.rotation.x = -Math.PI / 2; sh.position.y = 0.13; g.add(sh);
-  return { obj: g, spr, glow, mat, glowMat, col: color, u, d, kind: isTarget ? 'target' : 'wrong', letter: L, ph: Math.random() * 6, alive: true, r: 2.9, base: 4.6 };
+  return { mc, drawn: L, obj: g, spr, glow, mat, glowMat, col: color, u, d, kind: isTarget ? 'target' : 'wrong', letter: L, ph: Math.random() * 6, alive: true, r: 2.9, base: 4.6 };
 }
 // the earlier letter the child found hardest (most misses, fewest stars), for the review pair
 function weakestLearned() {
@@ -372,7 +375,7 @@ function flyToSlot(worldPos, html, slotIdx, cls) {
   if (cls) f.style.background = cls;
   f.style.left = a.x + 'px'; f.style.top = a.y + 'px'; document.body.appendChild(f);
   requestAnimationFrame(() => requestAnimationFrame(() => { f.style.left = (r.left + r.width / 2) + 'px'; f.style.top = (r.top + r.height / 2) + 'px'; f.style.transform = 'scale(.55)'; }));
-  setTimeout(() => { f.remove(); slot.classList.add('on'); slot.innerHTML = html; }, 720);
+  setTimeout(() => { f.remove(); slot.classList.add('on'); slot.innerHTML = html; if (cls) slot.style.background = cls; }, 720);
 }
 // shows a praise word and returns the SAME word for the voice (never the same one twice in a row)
 function praise() {
@@ -437,6 +440,7 @@ function hitPickup(p) {
     const want = isWord() ? nextLetter() : isHaraka() ? sylAt(0) : nx && nx.letter ? nx.letter : T0;
     if (nx) nx.asked = true;
     S.askedCh = want.ch; S.askedT = S.t;
+    if (isHaraka()) retarget(); // the marks on the road get their colours back straight away
     // harakat: spell what was picked («بَاءْ، كَسْرَة، بِ»), then ask for the wanted one
     Voice.say([isHaraka() ? HLINES.spell(p.letter) : TR.lines.wrong(p.letter), findLine(want)], { gap: 300 });
     setChip(want.ch, isHaraka() ? want.color : nx && nx.review ? 'var(--blue)' : 'var(--pink)'); pingChip(); S.chipBusy = true;
@@ -511,13 +515,12 @@ function retargetHaraka() {
   const ts = S.pickups.filter(q => q.kind === 'target' && q.alive && !q.missed).sort((a, b) => T.delta(S.u, a.u) - T.delta(S.u, b.u));
   ts.forEach((q, i) => {
     const x = sylAt(i);
-    if (q.letter !== x) {
-      q.letter = x; q.asked = x.ch === S.askedCh && S.t - (S.askedT || -99) < 4;
-      q.mat.map = bubbleTexture(x.ch, q.col, markColorFor(x)); q.mat.needsUpdate = true;
-    }
-    if (q.pair && q.pair.letter.h === x.h) {
-      q.pair.letter = pick(SYLLABLES[S.index].filter(y => y.h !== x.h));
-      q.pair.mat.map = bubbleTexture(q.pair.letter.ch, q.pair.col, markColorFor(q.pair.letter)); q.pair.mat.needsUpdate = true;
+    if (q.letter !== x) { q.letter = x; q.asked = x.ch === S.askedCh && S.t - (S.askedT || -99) < 4; }
+    if (q.pair && q.pair.letter.h === x.h) q.pair.letter = pick(SYLLABLES[S.index].filter(y => y.h !== x.h));
+    // redraw when the letter OR the colour rule changed (recall starts, a mistake brings colours back)
+    for (const b of q.pair ? [q, q.pair] : [q]) {
+      const mc = markColorFor(b.letter);
+      if (b.drawn !== b.letter || b.mc !== mc) { b.mc = mc; b.drawn = b.letter; b.mat.map = bubbleTexture(b.letter.ch, b.col, mc); b.mat.needsUpdate = true; }
     }
   });
 }
@@ -1009,9 +1012,9 @@ $('play').addEventListener('click', async () => {
 $('target').addEventListener('pointerdown', e => {
   e.stopPropagation(); const C = cur();
   Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : S.kind === 'word' ? [C.say, nextLetter().name] : isHaraka() ? HLINES.spell(sylAt(0)) : C.say);
-  if (isHaraka() && S.recall) { const x = sylAt(0); setChip(x.ch, x.color); setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }
+  if (isHaraka() && S.recall && !S.chipBusy) { const x = sylAt(0); setChip(x.ch, x.color); clearTimeout(S.chipT); S.chipT = setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }
   // in recall rounds a tap shows the letter again for a moment
-  if (S.kind === 'letter' && S.recall) { setChip(C.ch, 'var(--pink)'); setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }
+  if (S.kind === 'letter' && S.recall && !S.chipBusy) { setChip(C.ch, 'var(--pink)'); clearTimeout(S.chipT); S.chipT = setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }
   pingChip();
 });
 $('pausebtn').addEventListener('click', () => setPaused(true));
@@ -1039,7 +1042,7 @@ function setPaused(p) {
     // the intro was cut by the pause: say it again so the child hears which letter to find
     if (S.mode === 'intro' && !S.introDone) sayIntro();
     // recall rounds and words hide the letter: ask again so the child knows what to find
-    else if (S.mode === 'drive' && (S.recall || isWord()) && S.collected < S.need) Voice.say(TR.lines.find(isWord() ? nextLetter() : cur()));
+    else if (S.mode === 'drive' && (S.recall || isWord()) && S.collected < S.need) Voice.say(findLine(isWord() ? nextLetter() : isHaraka() ? sylAt(0) : cur()));
   }
 }
 // Android back button: pause a level instead of closing the app; step back from other screens
@@ -1087,7 +1090,7 @@ function openGate(onPass = openSettings) {
 function openPaywall(fromSettings) {
   const u = ui(), full = Purchase.isFull();
   $('pwtitle').textContent = full ? u.pwOwned : u.pwTitle;
-  $('pwbody').textContent = u.pwBody(TRACKS.ar.words.length + TRACKS.en.words.length - 2 * FREE_WORDS, TRACKS.ar.letters.length - FREE_WORDS);
+  $('pwbody').textContent = u.pwBody(TRACKS.ar.words.length + TRACKS.en.words.length - 2 * FREE_WORDS, HARAKA_ENABLED ? TRACKS.ar.letters.length - FREE_WORDS : 0);
   $('pwfree').textContent = u.pwFree; $('pwparents').textContent = '🔒 ' + u.pwParents;
   $('pwbuy').textContent = u.pwBuy(Purchase.price); $('pwbuy').classList.toggle('hidden', full);
   $('pwrestore').textContent = u.pwRestore; $('pwrestore').classList.toggle('hidden', full);
@@ -1297,6 +1300,6 @@ async function boot() {
   $('loading').classList.add('hidden');
   requestAnimationFrame(frame);
   // test hook (headless checks)
-  window.__lk = { SYLLABLES, HLINES, sylAt, bubbleTexture, thumb, Purchase, openPaywall,  keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, openGarage, closeGarage, setKart, metAnimals, TRACKS, get TR() { return TR; } };
+  window.__lk = { HARAKA_ENABLED, SYLLABLES, HLINES, sylAt, bubbleTexture, thumb, Purchase, openPaywall,  keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, openGarage, closeGarage, setKart, metAnimals, TRACKS, get TR() { return TR; } };
 }
 boot();

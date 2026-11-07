@@ -91,7 +91,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     console.log('word', tag, 'stars', await p.evaluate(lang => window.__lk.Store.prog('word', lang)[0], lang));
   }
   // harakat mode: read أ with fatha / kasra / damma (6 syllables), stars go to the harakat array only
-  {
+  if (await p.evaluate(() => window.__lk.HARAKA_ENABLED)) {
     const before = await p.evaluate(() => JSON.stringify(window.__lk.Store.data.numbers));
     await p.evaluate(() => { const L = window.__lk; L.Store.data.letters[0] = Math.max(1, L.Store.data.letters[0]); L.startLevel('haraka', 0, 'ar'); }); await auto();
     await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 600000 });
