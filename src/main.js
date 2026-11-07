@@ -1,7 +1,7 @@
 // LearningKart — Arabic letters & numbers zoo kart game for ages 3-6.
 import * as THREE from 'three';
 import { initPlatform, haptic, Tilt, setHaptics, isNative as isNativeApp } from './platform.js';
-import { TRACKS } from './data.js';
+import { TRACKS, WORD_PACKS } from './data.js';
 import { UI } from './i18n.js';
 // current language track (Arabic or English): letters, numbers, spoken lines, praise, digits
 let TR = TRACKS.ar;
@@ -14,6 +14,7 @@ let TR = TRACKS.ar;
 //  - one "review pair" per level brings back an earlier letter the child found hard (spaced review)
 //  - help (glow, then the letter straight ahead) only appears after mistakes; stars count every miss
 import { makeAnimal } from './animals.js';
+import { makeFriend, isAnimal } from './friends.js';
 import { buildTrack, buildZoo, makeHabitat, makeAppleTable, makeKart, makeArch, makeApple, makeStar, makeBoostPad, glowTex, blobTex, Confetti, FENCE, LANE } from './world.js';
 import { loadFonts, bubbleTexture, drawWord, drawWordProgress, FONT, roundRect } from './text.js';
 import { Voice } from './voice.js';
@@ -114,6 +115,7 @@ function steerInput() {
 const set = () => Store.data.settings;
 // interface language (menus, settings, instructions); the learning track is chosen on the map
 const ui = () => UI[set().uiLang === 'en' ? 'en' : 'ar'];
+const PACK_ICON = { zoo: '🦁', home: '🏠', market: '🛒', sea: '🌊', sky: '🌤️' };
 const unlockText = () => (Store.data.unlockAll ? ui().lock : ui().unlock);
 function applyUiLang() {
   const u = ui(), L = set().uiLang === 'en' ? 'en' : 'ar';
@@ -215,7 +217,7 @@ function startLevel(kind, index, lang) {
   populateZoo(kind === 'letter' ? index : -1);
   S.u = T.L - 34; S.d = 0; S.vd = 0; S.speed = 0; S.boostT = 0; S.camH = T.heading(S.u);
   S.collected = 0; S.wrong = 0; S.coins = 0; S.spawned = 0; S.need = kind === 'letter' ? 5 : kind === 'word' ? C.parts.length : C.n;
-  S.nextU = S.u + 85; S.missStreak = 0; S.holdT = 0; S.countQ = null;
+  S.nextU = S.u + 85; S.missStreak = 0; S.countQ = null;
   S.misses = 0; S.assisted = 0; S.reviewDone = false; S.recentWrong = false; S.recall = false; S.lastPraise = -1;
   S.chipBusy = false; clearTimeout(S.chipT);
   S.lvl = (S.lvl || 0) + 1;
@@ -321,7 +323,7 @@ function spawnAhead() {
     if (S.spawned % 3 === 0 && !isWord()) { const pad = makeBoostPad(); const at = S.nextU + 34; pad.position.copy(T.pos(at, 0)); pad.position.y = 0.1; pad.rotation.y = T.heading(at); addPickup({ obj: pad, u: at, d: 0, kind: 'boost', alive: true, r: 2.6 }); }
     for (let k = 1; k <= 3; k++) spawnCoin(S.nextU + 14 + k * 9, (S.spawned % 2 ? 1 : -1) * (k - 2) * 2.4);
     // word mode: more road between letters so the letter name and the next question finish first
-    S.nextU += isWord() ? 150 : 78;
+    S.nextU += isWord() ? 170 : 78;
   } else {
     const d = pick([-4.4, 0, 4.4]);
     const g = makeApple(); g.scale.setScalar(1.35);
@@ -541,13 +543,6 @@ function driveKart(dt, allowSteer, targetSpeed) {
   if (S.wobble > 0) S.wobble -= dt;
   S.u = T.wrapU(S.u + S.speed * dt);
 }
-// word mode: ease off while the question is still being spoken and the next letters are close
-function wordHold(dt) {
-  if (!isWord()) return false;
-  const near = S.pickups.some(q => q.kind === 'target' && q.alive && !q.missed && T.delta(S.u, q.u) > 0 && T.delta(S.u, q.u) < 60);
-  S.holdT = near && Voice.busy ? 0.6 : Math.max(0, (S.holdT || 0) - dt);
-  return S.holdT > 0;
-}
 const baseSpeed = () => (set().speed === 'slow' ? 19 : 25);
 
 // ---------- camera ----------
@@ -735,11 +730,11 @@ function toTitle() {
   S.mode = 'title'; S.modeT = 0; S.u = 4; S.d = 0; S.speed = 0; syncKart(0);
   showScreen('title');
 }
-let mapTab = 'letter';
+let mapTab = 'letter', wordPack = 'zoo';
 // map tab -> track: 'letter' | 'number' (Arabic), 'enletter' | 'ennumber' (English)
 const tabInfo = t => ({ kind: t.replace(/^en/, ''), lang: t.startsWith('en') ? 'en' : 'ar' });
 function toMap(tab) {
-  if (!tab && S.lang) mapTab = (S.lang === 'en' ? 'en' : '') + S.kind;
+  if (!tab && S.lang) { mapTab = (S.lang === 'en' ? 'en' : '') + S.kind; if (S.kind === 'word') wordPack = cur().pack || 'zoo'; }
   clearLevel(); Voice.stop(); Sound.engineHum(0, false);
   if (tab) mapTab = tab;
   S.mode = 'map'; S.paused = false;
@@ -757,7 +752,7 @@ function thumb(id) {
   if (!thumbR) { thumbR = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); thumbR.setSize(220, 220); thumbR.setClearColor(0x000000, 0); }
   const s = new THREE.Scene();
   s.add(new THREE.HemisphereLight(0xffffff, 0x99aa77, 1.6)); const d = new THREE.DirectionalLight(0xffffff, 1.6); d.position.set(4, 8, 7); s.add(d);
-  const a = makeAnimal(id); a.update(0.4, 'idle'); a.root.rotation.y = 0.5; s.add(a.root);
+  const a = makeFriend(id); a.update(0.4, 'idle'); a.root.rotation.y = 0.5; s.add(a.root);
   const box = new THREE.Box3().setFromObject(a.root), c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
   const R = Math.max(sz.x * 0.9, sz.y, sz.z * 0.8) * 0.62;
   const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 100); cam.position.set(c.x + R * 0.8, c.y + R * 0.35, c.z + R * 2.9); cam.lookAt(c);
@@ -771,24 +766,35 @@ function renderMap() {
   const { kind: tKind, lang: tLang } = tabInfo(mapTab), track = TRACKS[tLang];
   const list = tKind === 'letter' ? track.letters : tKind === 'word' ? track.words : track.numbers;
   const arr = Store.prog(tKind, tLang);
+  // word tabs: one themed pack at a time (zoo, home, market, sea, nature), chosen with the chips row
+  const packs = $('packs'); packs.classList.toggle('hidden', tKind !== 'word'); packs.innerHTML = '';
+  if (tKind === 'word') for (const pk of WORD_PACKS) {
+    const ids = list.map((w, i) => (w.pack === pk ? i : -1)).filter(i => i >= 0);
+    const got = ids.filter(i => arr[i] > 0).length;
+    const b = document.createElement('button'); b.className = 'pack' + (pk === wordPack ? ' on' : '');
+    b.innerHTML = `<span class="pe">${PACK_ICON[pk]}</span>${ui().packs[pk]}<small>${got}/${ids.length}</small>`;
+    b.addEventListener('click', () => { Sound.click(); haptic('tick'); wordPack = pk; renderMap(); });
+    packs.appendChild(b);
+  }
+  const idx = list.map((_, i) => i).filter(i => tKind !== 'word' || list[i].pack === wordPack);
   const world = $('world'), path = $('path');
   const H = path.clientHeight || innerHeight * 0.85;
   const gap = Math.max(118, H * 0.42), pad = gap * 0.9;
-  const W = pad * 2 + gap * (list.length - 1);
+  const W = Math.max(path.clientWidth || innerWidth, pad * 2 + gap * (idx.length - 1));
   world.style.width = W + 'px';
   [...world.querySelectorAll('.node,.deco')].forEach(e => e.remove());
   // Arabic path runs right-to-left, English left-to-right (reading direction)
-  const pts = list.map((_, i) => ({ x: tLang === 'en' ? pad + i * gap : W - pad - i * gap, y: H * (0.5 + Math.sin(i * 1.15) * 0.22) }));
+  const pts = idx.map((_, i) => ({ x: tLang === 'en' ? pad + i * gap : W - pad - i * gap, y: H * (0.5 + Math.sin(i * 1.15) * 0.22) }));
   // trail
   let dstr = `M ${pts[0].x} ${pts[0].y}`;
   for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], b = pts[i], mx = (a.x + b.x) / 2; dstr += ` C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`; }
-  const firstOpen = arr.findIndex(v => !v);
+  const firstOpen = idx.findIndex(i => !arr[i]);
   const doneUntil = firstOpen < 0 ? pts.length - 1 : firstOpen;
   $('trail').setAttribute('viewBox', `0 0 ${W} ${H}`);
   $('trail').innerHTML = `<path d="${dstr}" fill="none" stroke="#f3e2b3" stroke-width="${H * 0.11}" stroke-linecap="round"/><path d="${dstr}" fill="none" stroke="#fff" stroke-width="6" stroke-dasharray="14 16" stroke-linecap="round" opacity=".9"/>`;
   // decorations
   const rnd = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
-  for (let i = 0; i < list.length * 2.2; i++) {
+  for (let i = 0; i < Math.max(6, idx.length) * 2.2; i++) {
     const x = rnd() * W, y = H * (rnd() < 0.5 ? 0.04 + rnd() * 0.12 : 0.86 + rnd() * 0.1);
     const el = document.createElement('div'); el.className = 'deco tree';
     const s = 26 + rnd() * 34; el.style.cssText = `left:${x}px;top:${y - s}px;--s:${s}px;--c:${['#3fae4a', '#2f9e44', '#58c25a', '#7bd36a'][(rnd() * 4) | 0]}`;
@@ -796,20 +802,21 @@ function renderMap() {
   }
   // nodes
   let currentEl = null;
-  list.forEach((item, i) => {
+  idx.forEach((i, j) => {
+    const item = list[i], prev = j > 0 ? idx[j - 1] : -1;
     const el = document.createElement('div');
-    // a word opens like any level (the first is free, then after the one before), or early once all its letters are learned
+    // a word opens like any level (the first of each pack is free, then after the one before), or early once all its letters are learned
     const lp = Store.prog('letter', tLang);
-    const unlocked = tKind === 'word' ? (Store.data.unlockAll || i === 0 || arr[i] > 0 || arr[i - 1] > 0 || item.parts.every(ch => lp[track.letters.findIndex(x => x.ch === ch)] > 0)) : Store.unlocked(tKind, i, tLang);
+    const unlocked = tKind === 'word' ? (Store.data.unlockAll || prev < 0 || arr[i] > 0 || arr[prev] > 0 || item.parts.every(ch => lp[track.letters.findIndex(x => x.ch === ch)] > 0)) : Store.unlocked(tKind, i, tLang);
     const done = arr[i] > 0;
     const glyph = tKind === 'letter' ? item.ch : tKind === 'word' ? item.word : item.digit;
     el.className = 'node ' + (done ? 'done' : unlocked ? 'current' : 'locked');
     if (tKind === 'word') el.classList.add('wordnode');
-    el.style.left = pts[i].x + 'px'; el.style.top = pts[i].y + 'px';
+    el.style.left = pts[j].x + 'px'; el.style.top = pts[j].y + 'px';
     if (done) {
       const img = document.createElement('img'); img.alt = ''; el.appendChild(img);
       // numbers have no animal: show the glyph (thumb(undefined) used to throw and leave the tile blank)
-      if (tKind !== 'number') setTimeout(() => { img.src = thumb(item.animal); }, 10 + i * 25);
+      if (tKind !== 'number') setTimeout(() => { img.src = thumb(item.animal); }, 10 + j * 25);
       else { img.remove(); el.insertAdjacentHTML('beforeend', `<span class="glyph${tKind === 'word' ? ' word' : ''}">${glyph}</span>`); }
       el.insertAdjacentHTML('beforeend', `<span class="badge">${glyph}</span><div class="stars">${[0, 1, 2].map(k => (k < arr[i] ? ICON.star : ICON.starOff)).join('')}</div>`);
     } else {
@@ -825,7 +832,7 @@ function renderMap() {
     });
     world.appendChild(el);
   });
-  const focus = currentEl || world.querySelectorAll('.node')[Math.min(doneUntil, list.length - 1)];
+  const focus = currentEl || world.querySelectorAll('.node')[Math.min(doneUntil, idx.length - 1)];
   requestAnimationFrame(() => { if (focus) path.scrollLeft = parseFloat(focus.style.left) - path.clientWidth / 2; });
 }
 
@@ -853,7 +860,7 @@ function metAnimals() {
     Store.prog('letter', lang).forEach((st, i) => { if (st > 0) ids.push(tr.letters[i].animal); });
     Store.prog('word', lang).forEach((st, i) => { if (st > 0) ids.push(tr.words[i].animal); });
   }
-  return [...new Set(ids)];
+  return [...new Set(ids)].filter(isAnimal); // objects (cup, sun...) do not ride the kart
 }
 let gTab = 'body', gFrom = 'title';
 function openGarage(from) {
@@ -1106,7 +1113,7 @@ function frame(now) {
       if (S.need === 0) spawnGate();
     }
   } else if (S.mode === 'drive') {
-    driveKart(dt, true, wordHold(dt) ? 9 : baseSpeed());
+    driveKart(dt, true, baseSpeed());
     if (!S.arch && S.collected < S.need) { while (T.delta(S.u, S.nextU) < 170) spawnAhead(); }
     if (!S.arch && S.collected >= S.need) spawnGate();
     updatePickups(dt);
@@ -1177,6 +1184,6 @@ async function boot() {
   $('loading').classList.add('hidden');
   requestAnimationFrame(frame);
   // test hook (headless checks)
-  window.__lk = { keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, openGarage, closeGarage, setKart, metAnimals, TRACKS, get TR() { return TR; } };
+  window.__lk = { thumb,  keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, openGarage, closeGarage, setKart, metAnimals, TRACKS, get TR() { return TR; } };
 }
 boot();

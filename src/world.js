@@ -1,7 +1,8 @@
 // The zoo: looping road, scenery, enclosures (habitats), kart, gate arch, pickups and confetti.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { toon, makeAnimal } from './animals.js';
+import { toon } from './animals.js';
+import { makeFriend } from './friends.js';
 import { BIOMES } from './data.js';
 import { canvasTexture, signTexture, bubbleTexture, FONT } from './text.js';
 import { arDigits } from './data.js';
@@ -332,7 +333,7 @@ export function makeHabitat(biomeName, animalIds, sign, opts = {}) {
   const cnt = animalIds.length;
   const sc = opts.animalScale || 1;
   animalIds.forEach((id, i) => {
-    const a = makeAnimal(id);
+    const a = makeFriend(id);
     let x = 0, z = 0;
     if (cnt > 1) {
       const cols = Math.min(cnt, 5), row = Math.floor(i / cols), col = i % cols, inRow = Math.min(cols, cnt - row * cols);

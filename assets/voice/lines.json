@@ -2146,9 +2146,374 @@
     "note": "دمج نسر"
   },
   {
+    "id": "word-07-say",
+    "text": "نَسْر",
+    "note": "الكلمة نسر"
+  },
+  {
     "id": "word-08-intro",
     "text": "هَيَّا نَبْنِي كَلِمَةَ فِيل!",
     "note": "كلمة فيل"
+  },
+  {
+    "id": "word-09-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ بَيْت!",
+    "note": "كلمة بيت"
+  },
+  {
+    "id": "word-09-blend",
+    "text": "بَ، بَ، بَيْت",
+    "note": "دمج بيت"
+  },
+  {
+    "id": "word-09-say",
+    "text": "بَيْت",
+    "note": "الكلمة بيت"
+  },
+  {
+    "id": "word-10-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ كُوب!",
+    "note": "كلمة كوب"
+  },
+  {
+    "id": "word-10-blend",
+    "text": "كُ، كُ، كُوب",
+    "note": "دمج كوب"
+  },
+  {
+    "id": "word-10-say",
+    "text": "كُوب",
+    "note": "الكلمة كوب"
+  },
+  {
+    "id": "word-11-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ سَرِير!",
+    "note": "كلمة سرير"
+  },
+  {
+    "id": "word-11-blend",
+    "text": "سَ، سَ، سَرِير",
+    "note": "دمج سرير"
+  },
+  {
+    "id": "word-11-say",
+    "text": "سَرِير",
+    "note": "الكلمة سرير"
+  },
+  {
+    "id": "word-12-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ قَلَم!",
+    "note": "كلمة قلم"
+  },
+  {
+    "id": "word-12-blend",
+    "text": "قَ، قَ، قَلَم",
+    "note": "دمج قلم"
+  },
+  {
+    "id": "word-12-say",
+    "text": "قَلَم",
+    "note": "الكلمة قلم"
+  },
+  {
+    "id": "word-13-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ مُشْط!",
+    "note": "كلمة مشط"
+  },
+  {
+    "id": "word-13-blend",
+    "text": "مُ، مُ، مُشْط",
+    "note": "دمج مشط"
+  },
+  {
+    "id": "word-13-say",
+    "text": "مُشْط",
+    "note": "الكلمة مشط"
+  },
+  {
+    "id": "word-14-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ صَحْن!",
+    "note": "كلمة صحن"
+  },
+  {
+    "id": "word-14-blend",
+    "text": "صَ، صَ، صَحْن",
+    "note": "دمج صحن"
+  },
+  {
+    "id": "word-14-say",
+    "text": "صَحْن",
+    "note": "الكلمة صحن"
+  },
+  {
+    "id": "word-15-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ مَوْز!",
+    "note": "كلمة موز"
+  },
+  {
+    "id": "word-15-blend",
+    "text": "مَ، مَ، مَوْز",
+    "note": "دمج موز"
+  },
+  {
+    "id": "word-15-say",
+    "text": "مَوْز",
+    "note": "الكلمة موز"
+  },
+  {
+    "id": "word-16-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ خُبْز!",
+    "note": "كلمة خبز"
+  },
+  {
+    "id": "word-16-blend",
+    "text": "خُ، خُ، خُبْز",
+    "note": "دمج خبز"
+  },
+  {
+    "id": "word-16-say",
+    "text": "خُبْز",
+    "note": "الكلمة خبز"
+  },
+  {
+    "id": "word-17-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ عِنَب!",
+    "note": "كلمة عنب"
+  },
+  {
+    "id": "word-17-blend",
+    "text": "عِ، عِ، عِنَب",
+    "note": "دمج عنب"
+  },
+  {
+    "id": "word-17-say",
+    "text": "عِنَب",
+    "note": "الكلمة عنب"
+  },
+  {
+    "id": "word-18-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ تَمْر!",
+    "note": "كلمة تمر"
+  },
+  {
+    "id": "word-18-blend",
+    "text": "تَ، تَ، تَمْر",
+    "note": "دمج تمر"
+  },
+  {
+    "id": "word-18-say",
+    "text": "تَمْر",
+    "note": "الكلمة تمر"
+  },
+  {
+    "id": "word-19-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ حَلِيب!",
+    "note": "كلمة حليب"
+  },
+  {
+    "id": "word-19-blend",
+    "text": "حَ، حَ، حَلِيب",
+    "note": "دمج حليب"
+  },
+  {
+    "id": "word-19-say",
+    "text": "حَلِيب",
+    "note": "الكلمة حليب"
+  },
+  {
+    "id": "word-20-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ جَزَر!",
+    "note": "كلمة جزر"
+  },
+  {
+    "id": "word-20-blend",
+    "text": "جَ، جَ، جَزَر",
+    "note": "دمج جزر"
+  },
+  {
+    "id": "word-20-say",
+    "text": "جَزَر",
+    "note": "الكلمة جزر"
+  },
+  {
+    "id": "word-21-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ سَمَك!",
+    "note": "كلمة سمك"
+  },
+  {
+    "id": "word-21-blend",
+    "text": "سَ، سَ، سَمَك",
+    "note": "دمج سمك"
+  },
+  {
+    "id": "word-21-say",
+    "text": "سَمَك",
+    "note": "الكلمة سمك"
+  },
+  {
+    "id": "word-22-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ حُوت!",
+    "note": "كلمة حوت"
+  },
+  {
+    "id": "word-22-blend",
+    "text": "حُ، حُ، حُوت",
+    "note": "دمج حوت"
+  },
+  {
+    "id": "word-22-say",
+    "text": "حُوت",
+    "note": "الكلمة حوت"
+  },
+  {
+    "id": "word-23-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ قِرْش!",
+    "note": "كلمة قرش"
+  },
+  {
+    "id": "word-23-blend",
+    "text": "قِ، قِ، قِرْش",
+    "note": "دمج قرش"
+  },
+  {
+    "id": "word-23-say",
+    "text": "قِرْش",
+    "note": "الكلمة قرش"
+  },
+  {
+    "id": "word-24-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ صَدَف!",
+    "note": "كلمة صدف"
+  },
+  {
+    "id": "word-24-blend",
+    "text": "صَ، صَ، صَدَف",
+    "note": "دمج صدف"
+  },
+  {
+    "id": "word-24-say",
+    "text": "صَدَف",
+    "note": "الكلمة صدف"
+  },
+  {
+    "id": "word-25-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ رَمْل!",
+    "note": "كلمة رمل"
+  },
+  {
+    "id": "word-25-blend",
+    "text": "رَ، رَ، رَمْل",
+    "note": "دمج رمل"
+  },
+  {
+    "id": "word-25-say",
+    "text": "رَمْل",
+    "note": "الكلمة رمل"
+  },
+  {
+    "id": "word-26-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ مَرْكَب!",
+    "note": "كلمة مركب"
+  },
+  {
+    "id": "word-26-blend",
+    "text": "مَ، مَ، مَرْكَب",
+    "note": "دمج مركب"
+  },
+  {
+    "id": "word-26-say",
+    "text": "مَرْكَب",
+    "note": "الكلمة مركب"
+  },
+  {
+    "id": "word-27-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ شَمْس!",
+    "note": "كلمة شمس"
+  },
+  {
+    "id": "word-27-blend",
+    "text": "شَ، شَ، شَمْس",
+    "note": "دمج شمس"
+  },
+  {
+    "id": "word-27-say",
+    "text": "شَمْس",
+    "note": "الكلمة شمس"
+  },
+  {
+    "id": "word-28-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ قَمَر!",
+    "note": "كلمة قمر"
+  },
+  {
+    "id": "word-28-blend",
+    "text": "قَ، قَ، قَمَر",
+    "note": "دمج قمر"
+  },
+  {
+    "id": "word-28-say",
+    "text": "قَمَر",
+    "note": "الكلمة قمر"
+  },
+  {
+    "id": "word-29-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ نَجْم!",
+    "note": "كلمة نجم"
+  },
+  {
+    "id": "word-29-blend",
+    "text": "نَ، نَ، نَجْم",
+    "note": "دمج نجم"
+  },
+  {
+    "id": "word-29-say",
+    "text": "نَجْم",
+    "note": "الكلمة نجم"
+  },
+  {
+    "id": "word-30-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ غَيْم!",
+    "note": "كلمة غيم"
+  },
+  {
+    "id": "word-30-blend",
+    "text": "غَ، غَ، غَيْم",
+    "note": "دمج غيم"
+  },
+  {
+    "id": "word-30-say",
+    "text": "غَيْم",
+    "note": "الكلمة غيم"
+  },
+  {
+    "id": "word-31-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ وَرْد!",
+    "note": "كلمة ورد"
+  },
+  {
+    "id": "word-31-blend",
+    "text": "وَ، وَ، وَرْد",
+    "note": "دمج ورد"
+  },
+  {
+    "id": "word-31-say",
+    "text": "وَرْد",
+    "note": "الكلمة ورد"
+  },
+  {
+    "id": "word-32-intro",
+    "text": "هَيَّا نَبْنِي كَلِمَةَ نَحْل!",
+    "note": "كلمة نحل"
+  },
+  {
+    "id": "word-32-blend",
+    "text": "نَ، نَ، نَحْل",
+    "note": "دمج نحل"
+  },
+  {
+    "id": "word-32-say",
+    "text": "نَحْل",
+    "note": "الكلمة نحل"
   },
   {
     "id": "en-word-01-intro",
@@ -2160,6 +2525,12 @@
     "id": "en-word-01-blend",
     "text": "H, E, N. Hen!",
     "note": "blend HEN",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-01-say",
+    "text": "hen",
+    "note": "HEN",
     "lang": "en"
   },
   {
@@ -2175,6 +2546,12 @@
     "lang": "en"
   },
   {
+    "id": "en-word-02-say",
+    "text": "dog",
+    "note": "DOG",
+    "lang": "en"
+  },
+  {
     "id": "en-word-03-intro",
     "text": "Let's build the word pig!",
     "note": "word PIG",
@@ -2187,6 +2564,12 @@
     "lang": "en"
   },
   {
+    "id": "en-word-03-say",
+    "text": "pig",
+    "note": "PIG",
+    "lang": "en"
+  },
+  {
     "id": "en-word-04-intro",
     "text": "Let's build the word cat!",
     "note": "word CAT",
@@ -2196,6 +2579,12 @@
     "id": "en-word-04-blend",
     "text": "C, A, T. Cat!",
     "note": "blend CAT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-04-say",
+    "text": "cat",
+    "note": "CAT",
     "lang": "en"
   },
   {
@@ -2232,6 +2621,420 @@
     "id": "en-word-07-blend",
     "text": "Y, A, K. Yak!",
     "note": "blend YAK",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-08-intro",
+    "text": "Let's build the word bed!",
+    "note": "word BED",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-08-blend",
+    "text": "B, E, D. Bed!",
+    "note": "blend BED",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-08-say",
+    "text": "bed",
+    "note": "BED",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-09-intro",
+    "text": "Let's build the word cup!",
+    "note": "word CUP",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-09-blend",
+    "text": "C, U, P. Cup!",
+    "note": "blend CUP",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-09-say",
+    "text": "cup",
+    "note": "CUP",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-10-intro",
+    "text": "Let's build the word box!",
+    "note": "word BOX",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-10-blend",
+    "text": "B, O, X. Box!",
+    "note": "blend BOX",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-10-say",
+    "text": "box",
+    "note": "BOX",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-11-intro",
+    "text": "Let's build the word pot!",
+    "note": "word POT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-11-blend",
+    "text": "P, O, T. Pot!",
+    "note": "blend POT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-11-say",
+    "text": "pot",
+    "note": "POT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-12-intro",
+    "text": "Let's build the word rug!",
+    "note": "word RUG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-12-blend",
+    "text": "R, U, G. Rug!",
+    "note": "blend RUG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-12-say",
+    "text": "rug",
+    "note": "RUG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-13-intro",
+    "text": "Let's build the word lamp!",
+    "note": "word LAMP",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-13-blend",
+    "text": "L, A, M, P. Lamp!",
+    "note": "blend LAMP",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-13-say",
+    "text": "lamp",
+    "note": "LAMP",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-14-intro",
+    "text": "Let's build the word jam!",
+    "note": "word JAM",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-14-blend",
+    "text": "J, A, M. Jam!",
+    "note": "blend JAM",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-14-say",
+    "text": "jam",
+    "note": "JAM",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-15-intro",
+    "text": "Let's build the word fig!",
+    "note": "word FIG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-15-blend",
+    "text": "F, I, G. Fig!",
+    "note": "blend FIG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-15-say",
+    "text": "fig",
+    "note": "FIG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-16-intro",
+    "text": "Let's build the word nut!",
+    "note": "word NUT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-16-blend",
+    "text": "N, U, T. Nut!",
+    "note": "blend NUT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-16-say",
+    "text": "nut",
+    "note": "NUT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-17-intro",
+    "text": "Let's build the word bun!",
+    "note": "word BUN",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-17-blend",
+    "text": "B, U, N. Bun!",
+    "note": "blend BUN",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-17-say",
+    "text": "bun",
+    "note": "BUN",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-18-intro",
+    "text": "Let's build the word milk!",
+    "note": "word MILK",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-18-blend",
+    "text": "M, I, L, K. Milk!",
+    "note": "blend MILK",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-18-say",
+    "text": "milk",
+    "note": "MILK",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-19-intro",
+    "text": "Let's build the word plum!",
+    "note": "word PLUM",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-19-blend",
+    "text": "P, L, U, M. Plum!",
+    "note": "blend PLUM",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-19-say",
+    "text": "plum",
+    "note": "PLUM",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-20-intro",
+    "text": "Let's build the word crab!",
+    "note": "word CRAB",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-20-blend",
+    "text": "C, R, A, B. Crab!",
+    "note": "blend CRAB",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-20-say",
+    "text": "crab",
+    "note": "CRAB",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-21-intro",
+    "text": "Let's build the word sand!",
+    "note": "word SAND",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-21-blend",
+    "text": "S, A, N, D. Sand!",
+    "note": "blend SAND",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-21-say",
+    "text": "sand",
+    "note": "SAND",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-22-intro",
+    "text": "Let's build the word net!",
+    "note": "word NET",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-22-blend",
+    "text": "N, E, T. Net!",
+    "note": "blend NET",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-22-say",
+    "text": "net",
+    "note": "NET",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-23-intro",
+    "text": "Let's build the word raft!",
+    "note": "word RAFT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-23-blend",
+    "text": "R, A, F, T. Raft!",
+    "note": "blend RAFT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-23-say",
+    "text": "raft",
+    "note": "RAFT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-24-intro",
+    "text": "Let's build the word clam!",
+    "note": "word CLAM",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-24-blend",
+    "text": "C, L, A, M. Clam!",
+    "note": "blend CLAM",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-24-say",
+    "text": "clam",
+    "note": "CLAM",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-25-intro",
+    "text": "Let's build the word sun!",
+    "note": "word SUN",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-25-blend",
+    "text": "S, U, N. Sun!",
+    "note": "blend SUN",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-25-say",
+    "text": "sun",
+    "note": "SUN",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-26-intro",
+    "text": "Let's build the word ant!",
+    "note": "word ANT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-26-blend",
+    "text": "A, N, T. Ant!",
+    "note": "blend ANT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-26-say",
+    "text": "ant",
+    "note": "ANT",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-27-intro",
+    "text": "Let's build the word bug!",
+    "note": "word BUG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-27-blend",
+    "text": "B, U, G. Bug!",
+    "note": "blend BUG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-27-say",
+    "text": "bug",
+    "note": "BUG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-28-intro",
+    "text": "Let's build the word nest!",
+    "note": "word NEST",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-28-blend",
+    "text": "N, E, S, T. Nest!",
+    "note": "blend NEST",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-28-say",
+    "text": "nest",
+    "note": "NEST",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-29-intro",
+    "text": "Let's build the word web!",
+    "note": "word WEB",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-29-blend",
+    "text": "W, E, B. Web!",
+    "note": "blend WEB",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-29-say",
+    "text": "web",
+    "note": "WEB",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-30-intro",
+    "text": "Let's build the word log!",
+    "note": "word LOG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-30-blend",
+    "text": "L, O, G. Log!",
+    "note": "blend LOG",
+    "lang": "en"
+  },
+  {
+    "id": "en-word-30-say",
+    "text": "log",
+    "note": "LOG",
     "lang": "en"
   }
 ]

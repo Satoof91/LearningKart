@@ -32,6 +32,18 @@ The owner asked for more levels and modes to add excitement and learning value, 
   - بطة (ة, last)
   - English CVC words: bed, bag, fig, jam, sun, cup, web, hat (need props)
 
+### Word packs (v2, 2026-11-07)
+The word tabs are split into five themed packs, chosen with a row of buttons on the map. Each pack has its own short road with its first word open:
+- 🦁 **Animals**: the original 8 / 7 words
+- 🏠 **Home**: بيت كوب سرير قلم مشط صحن · BED CUP BOX POT RUG LAMP
+- 🛒 **Market**: موز خبز عنب تمر حليب جزر · JAM FIG NUT BUN MILK PLUM
+- 🌊 **Sea**: سمك حوت قرش صدف رمل مركب · CRAB SAND NET RAFT CLAM
+- 🌤️ **Nature**: شمس قمر نجم غيم ورد نحل · SUN ANT BUG NEST WEB LOG
+
+Each word has a low-poly 3D object (`src/things.js`, ids shared between languages). Objects appear on the map, on the intro and on the celebration stage, but never as kart co-pilots. Arabic words avoid a bare ا, because only أ is taught. Next: a ا/long-vowel pack (باب تاج تفاح) once ا is added as a letter.
+
+Word mode spaces letter pairs 170 apart (78 elsewhere) with no boost pads, so the letter name finishes before the next pair.
+
 ## 2. Garage: kart and driver customisation (shipped in v1)
 
 **Evaluation:** a strong engagement hook for 3–6-year-olds. Ownership and self-expression make "my kart" something to show off. The design rules keep it a learning reward:
@@ -63,7 +75,7 @@ The owner asked for more levels and modes to add excitement and learning value, 
 
 ## 4. Platform work the team flagged as urgent
 
-- **Bundle size:** `index.html` is 8.3 MB because all 407 clips are inlined as base64. Move them to `www/assets/voice/` and play them through WebAudio: faster cold start, less memory, and no iOS autoplay risk for clips started without a tap. This should happen before more audio is added. (Product owner and developer, both rounds.)
+- **Bundle size:** `index.html` is 11 MB because all 553 clips are inlined as base64. Move them to `www/assets/voice/` and play them through WebAudio: faster cold start, less memory, and no iOS autoplay risk for clips started without a tap. This should happen before more audio is added. (Product owner and developer, both rounds.)
 - **Parent progress page** behind the parent gate: stars per letter, number and word, and the most-confused pairs (the data is already saved).
 - **Low-end performance:** merge animal meshes (about 40 → 8 draw calls each) and turn off shadows for zoo-slot animals.
 - **Owner listening pass:** listen to the new clips (letter sounds, word intros and blends) before release.

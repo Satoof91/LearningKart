@@ -95,7 +95,8 @@ export const BIOMES = {
   jungle: { ground: 0x4caf50, accent: 0x2e7d32, props: ['palm', 'bush', 'flower'] },
   garden: { ground: 0xa5e08b, accent: 0xff8fab, props: ['flower', 'round', 'birdhouse'] },
   mountain: { ground: 0xb7c4a0, accent: 0x8d99ae, props: ['rock', 'pine', 'grass'] },
-  orchard: { ground: 0x9bd770, accent: 0xff6b6b, props: ['appletree', 'flower', 'hay'] }
+  orchard: { ground: 0x9bd770, accent: 0xff6b6b, props: ['appletree', 'flower', 'hay'] },
+  beach: { ground: 0xf6e3a8, accent: 0x4dabf7, props: ['water', 'palm', 'rock'] }
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -141,11 +142,30 @@ export const WORDS = [
   ['دب', 'دُبّ', 'دُ', 'bear', 'forest'], ['أسد', 'أَسَد', 'أَ', 'lion', 'savanna'], ['قرد', 'قِرْد', 'قِ', 'monkey', 'jungle'],
   ['صقر', 'صَقْر', 'صَ', 'falcon', 'desert'], ['جمل', 'جَمَل', 'جَ', 'camel', 'desert'], ['نمر', 'نَمِر', 'نَ', 'tiger', 'jungle'],
   ['نسر', 'نَسْر', 'نَ', 'vulture', 'desert'], ['فيل', 'فِيل', 'فِ', 'elephant', 'savanna']
-].map(([word, say, onset, animal, biome]) => ({ word, say, onset, animal, biome, parts: [...word] }));
+].map(([word, say, onset, animal, biome]) => ({ word, say, onset, animal, biome, pack: 'zoo', parts: [...word] }));
+// themed packs, appended after the animals so saved stars keep their index. `animal` is the 3D friend id
+// (an animal or an object from things.js). No bare ا (only أ is taught), no ة / ال / لا.
+const PACK_BIOME = { zoo: 'savanna', home: 'garden', market: 'orchard', sea: 'beach', sky: 'garden' };
+export const WORD_PACKS = ['zoo', 'home', 'market', 'sea', 'sky'];
+const AR_PACKS = {
+  home: [['بيت', 'بَيْت', 'بَ', 'house'], ['كوب', 'كُوب', 'كُ', 'cup'], ['سرير', 'سَرِير', 'سَ', 'bed'], ['قلم', 'قَلَم', 'قَ', 'pen'], ['مشط', 'مُشْط', 'مُ', 'comb'], ['صحن', 'صَحْن', 'صَ', 'plate']],
+  market: [['موز', 'مَوْز', 'مَ', 'banana'], ['خبز', 'خُبْز', 'خُ', 'bread'], ['عنب', 'عِنَب', 'عِ', 'grapes'], ['تمر', 'تَمْر', 'تَ', 'dates'], ['حليب', 'حَلِيب', 'حَ', 'milk'], ['جزر', 'جَزَر', 'جَ', 'carrot']],
+  sea: [['سمك', 'سَمَك', 'سَ', 'fish'], ['حوت', 'حُوت', 'حُ', 'whale'], ['قرش', 'قِرْش', 'قِ', 'shark'], ['صدف', 'صَدَف', 'صَ', 'shell'], ['رمل', 'رَمْل', 'رَ', 'sand'], ['مركب', 'مَرْكَب', 'مَ', 'boat']],
+  sky: [['شمس', 'شَمْس', 'شَ', 'sun'], ['قمر', 'قَمَر', 'قَ', 'moon'], ['نجم', 'نَجْم', 'نَ', 'star'], ['غيم', 'غَيْم', 'غَ', 'cloud'], ['ورد', 'وَرْد', 'وَ', 'rose'], ['نحل', 'نَحْل', 'نَ', 'bee']]
+};
+for (const pk of WORD_PACKS.slice(1)) for (const [word, say, onset, animal] of AR_PACKS[pk]) WORDS.push({ word, say, onset, animal, biome: PACK_BIOME[pk], pack: pk, parts: [...word] });
 // English: short words read letter by letter ("C, A, T. Cat!"); true letter sounds would need recordings
 export const EN_WORDS = [
   ['HEN', 'hen'], ['DOG', 'dog'], ['PIG', 'pig'], ['CAT', 'cat'], ['FOX', 'fox'], ['OX', 'ox'], ['YAK', 'yak']
-].map(([word, animal]) => ({ word, say: word.toLowerCase(), animal, biome: { hen: 'farm', dog: 'farm', pig: 'farm', cat: 'garden', fox: 'forest', ox: 'farm', yak: 'mountain' }[animal], parts: [...word] }));
+].map(([word, animal]) => ({ word, say: word.toLowerCase(), animal, biome: { hen: 'farm', dog: 'farm', pig: 'farm', cat: 'garden', fox: 'forest', ox: 'farm', yak: 'mountain' }[animal], pack: 'zoo', parts: [...word] }));
+// English packs: 3-4 letter words with one sound per letter (no digraphs, silent e or doubled letters)
+const EN_PACKS = {
+  home: [['BED', 'bed'], ['CUP', 'cup'], ['BOX', 'box'], ['POT', 'pot'], ['RUG', 'rug'], ['LAMP', 'lamp']],
+  market: [['JAM', 'jam'], ['FIG', 'fig'], ['NUT', 'nut'], ['BUN', 'bun'], ['MILK', 'milk'], ['PLUM', 'plum']],
+  sea: [['CRAB', 'crab'], ['SAND', 'sand'], ['NET', 'net'], ['RAFT', 'raft'], ['CLAM', 'shell']],
+  sky: [['SUN', 'sun'], ['ANT', 'ant'], ['BUG', 'bug'], ['NEST', 'nest'], ['WEB', 'web'], ['LOG', 'log']]
+};
+for (const pk of WORD_PACKS.slice(1)) for (const [word, animal] of EN_PACKS[pk]) EN_WORDS.push({ word, say: word.toLowerCase(), animal, biome: PACK_BIOME[pk], pack: pk, parts: [...word] });
 
 // everything the game needs to teach one language
 export const TRACKS = {
@@ -201,10 +221,12 @@ export function voiceLines() {
   WORDS.forEach((W, i) => {
     out.push({ id: `word-${p2(i + 1)}-intro`, text: LINES.wordIntro(W), note: `كلمة ${W.word}` });
     out.push({ id: `word-${p2(i + 1)}-blend`, text: LINES.wordBlend(W), note: `دمج ${W.word}` });
+    out.push({ id: `word-${p2(i + 1)}-say`, text: W.say, note: `الكلمة ${W.word}` });
   });
   EN_WORDS.forEach((W, i) => {
     out.push({ id: `en-word-${p2(i + 1)}-intro`, text: EN_LINES.wordIntro(W), note: `word ${W.word}`, lang: 'en' });
     out.push({ id: `en-word-${p2(i + 1)}-blend`, text: EN_LINES.wordBlend(W), note: `blend ${W.word}`, lang: 'en' });
+    out.push({ id: `en-word-${p2(i + 1)}-say`, text: W.say, note: W.word, lang: 'en' });
   });
   // a text that is already spoken by another line reuses that clip (e.g. «دُ، دُ، دُبّ» = letter-08-sound)
   const seen = new Set();
