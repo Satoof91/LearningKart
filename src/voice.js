@@ -81,7 +81,8 @@ export const Voice = {
     if (isNative) {
       const opt = { text, lang: en ? 'en-US' : 'ar-SA', rate: this.rate, pitch: this.pitch, volume: 1.0, category: 'ambient', queueStrategy: 0 };
       if (!en && nativeVoiceIdx >= 0) opt.voice = nativeVoiceIdx;
-      await TextToSpeech.speak(opt);
+      // the Android plugin never resolves a line that was stopped: do not wait for it forever
+      await Promise.race([TextToSpeech.speak(opt).catch(() => {}), new Promise(r => setTimeout(r, 1800 + text.length * 160))]);
       return;
     }
     if (!('speechSynthesis' in window) || (!en && !webVoice && this.available !== null)) return;

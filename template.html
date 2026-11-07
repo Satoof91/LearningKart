@@ -103,6 +103,14 @@ svg{display:block}
 .node.locked{background:#e7ecf3;border-color:#cfd8e3}
 .node.locked .glyph{color:#a0aec0}
 .node .lock{position:absolute;bottom:-8px;left:-8px;width:40%;height:40%;background:#7b8794;border-radius:50%;padding:6px;border:3px solid #fff}
+.node .lock.gold{background:#ffb703;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,3.6vh,22px);padding:0}
+.cbtn.gold{background:#ffb703;color:#3d2600;box-shadow:0 5px 0 #c98a00}
+#paywall .box{text-align:center;max-width:min(92vw,620px)}
+#paywall .pwart{font-size:clamp(28px,8vh,52px);letter-spacing:.15em}
+#paywall h2{margin:.2em 0}
+#paywall p{margin:.35em 0;font-weight:700;font-size:clamp(13px,3.4vh,19px)}
+#paywall p.dim{opacity:.65}
+#paywall #pwmsg{min-height:1.3em;color:var(--purple)}
 .node.shake{animation:shake .4s}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
@@ -146,6 +154,7 @@ svg{display:block}
 #intro .irow{display:flex;align-items:center;gap:3vh}
 #introimg{width:clamp(90px,34vh,210px);height:clamp(90px,34vh,210px);object-fit:contain;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fffbe6,#ffe08a)}
 /* parent gate */
+#pgate{z-index:40}
 #pgate .box{width:min(92vw,560px)}
 #pgq{font-size:clamp(20px,6vh,34px);text-align:center}
 #pgpad{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vh;direction:ltr}
@@ -171,7 +180,7 @@ svg{display:block}
 .gitem.shake{animation:shake .4s}
 .gempty{grid-column:1/-1;text-align:center;font-weight:700;font-size:clamp(14px,3.8vh,20px);padding:2vh}
 #mgarage{font-size:clamp(18px,5vh,28px)}
-#pgclose{position:absolute;top:calc(10px + var(--st));left:calc(10px + var(--sl))}
+#pgclose,#pwclose{position:absolute;top:calc(10px + var(--st));left:calc(10px + var(--sl))}
 #intro.out .card{transition:transform .5s ease-in,opacity .5s;transform:translate(-30vw,-30vh) scale(.2);opacity:0}
 @keyframes zoomIn{from{transform:scale(.2) rotate(-10deg);opacity:0}}
 
@@ -287,6 +296,19 @@ svg{display:block}
   </div>
 </div>
 
+<div id="paywall" class="overlay hidden">
+  <button id="pwclose" class="cbtn pink round" data-icon="close" aria-label="close"></button>
+  <div class="box">
+    <div class="pwart">🏠 🛒 🌊 🌤️</div>
+    <h2 id="pwtitle"></h2>
+    <p id="pwbody"></p>
+    <p id="pwfree" class="dim"></p>
+    <div class="srow"><button id="pwbuy" class="cbtn gold"></button><button id="pwrestore" class="cbtn blue"></button></div>
+    <p id="pwparents" class="dim"></p>
+    <p id="pwmsg"></p>
+  </div>
+</div>
+
 <div id="settings" class="overlay hidden">
   <button id="sclose" class="cbtn pink round" data-icon="close" aria-label="close"></button>
   <div class="box">
@@ -296,6 +318,7 @@ svg{display:block}
     <div class="srow">
       <button id="vtest" class="cbtn blue" data-i18n="vtest">تجربة الصوت</button>
       <button id="vinstall" class="cbtn blue hidden" data-i18n="vinstall">تثبيت الصوت العربي</button>
+      <button id="spw" class="cbtn gold"></button>
       <button id="sunlock" class="cbtn">فتح كل المراحل</button>
       <button id="sreset" class="cbtn pink">مسح التقدم</button>
     </div>

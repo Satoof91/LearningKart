@@ -26,6 +26,8 @@ export function haptic(kind) {
   } catch (e) { /* ignore */ }
 }
 
+// Android back on the title screen: leave the app (a backButton listener disables Capacitor's default exit)
+export function exitApp() { if (isNative) { try { App.exitApp(); } catch (e) { /* ignore */ } } }
 export async function initPlatform({ onBackground, onBack }) {
   if (isNative) {
     // Android back button / back gesture: without a listener Capacitor closes the app mid-level

@@ -29,7 +29,7 @@ function sanitize(d) {
   out.look = {
     body: GARAGE.body.some(x => x.id === lk.body) ? lk.body : L.body, hat: GARAGE.hat.some(x => x.id === lk.hat) ? lk.hat : L.hat,
     skin: int(lk.skin, 0, 3, 0), pilot: typeof lk.pilot === 'string' ? lk.pilot.slice(0, 20) : ''
-  }; out.unlockAll = !!d.unlockAll; out.v = 2;
+  }; out.unlockAll = !!d.unlockAll; out.full = !!d.full; out.v = 2;
   return out;
 }
 export const Store = {

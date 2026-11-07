@@ -1,6 +1,6 @@
 // LearningKart — Arabic letters & numbers zoo kart game for ages 3-6.
 import * as THREE from 'three';
-import { initPlatform, haptic, Tilt, setHaptics, isNative as isNativeApp } from './platform.js';
+import { initPlatform, haptic, Tilt, setHaptics, exitApp, isNative as isNativeApp } from './platform.js';
 import { TRACKS, WORD_PACKS } from './data.js';
 import { UI } from './i18n.js';
 // current language track (Arabic or English): letters, numbers, spoken lines, praise, digits
@@ -15,6 +15,7 @@ let TR = TRACKS.ar;
 //  - help (glow, then the letter straight ahead) only appears after mistakes; stars count every miss
 import { makeAnimal } from './animals.js';
 import { makeFriend, isAnimal } from './friends.js';
+import { Purchase, FREE_WORDS } from './purchase.js';
 import { buildTrack, buildZoo, makeHabitat, makeAppleTable, makeKart, makeArch, makeApple, makeStar, makeBoostPad, glowTex, blobTex, Confetti, FENCE, LANE } from './world.js';
 import { loadFonts, bubbleTexture, drawWord, drawWordProgress, FONT, roundRect } from './text.js';
 import { Voice } from './voice.js';
@@ -168,7 +169,7 @@ function populateZoo(excludeIdx = -1, showcase = false) {
   }
   ZOO.slots.forEach((slot, k) => {
     const p = plan[k];
-    const key = p ? (p.known ? 'A' + p.i : 'M' + p.i) : 'none';
+    const key = p ? TR.lang + (p.known ? 'A' + p.i : 'M' + p.i) : 'none';
     let h = S.slotHabs[k];
     if (h && h.key === key) { h.group.visible = true; return; }
     if (h) { scene.remove(h.group); disposeOwned(h.group); }
@@ -209,6 +210,8 @@ function clearLevel() {
   Voice.stop();
 }
 function startLevel(kind, index, lang) {
+  // paid words lead to the parents' unlock screen instead (never straight into a store dialog)
+  if (!Purchase.canPlay(kind, index)) { if (S.mode !== 'map') toMap(); openPaywall(); return; }
   clearLevel();
   if (lang) TR = TRACKS[lang];
   S.lang = TR.lang;
@@ -388,6 +391,7 @@ function hitPickup(p) {
     p.pop = 0;
   } else if (p.kind === 'wrong') {
     S.wrong++; S.wobble = 0.6; S.recentWrong = true;
+    if (p.pair) p.pair.handled = true; // its target will pass behind the kart: already counted as this mistake
     const T0 = p.pair && p.pair.letter ? p.pair.letter : C;
     if (!(p.pair && p.pair.review)) Store.addMiss(missIdx(), TR.lang);
     Sound.wrong(); haptic('bump');
@@ -397,6 +401,7 @@ function hitPickup(p) {
     // word mode: the letter still missing (this pair's target is about to be passed, not yet counted as missed)
     const want = isWord() ? nextLetter() : nx && nx.letter ? nx.letter : T0;
     if (nx) nx.asked = true;
+    S.askedCh = want.ch; S.askedT = S.t;
     Voice.say([TR.lines.wrong(p.letter), TR.lines.find(want)], { gap: 300 });
     setChip(want.ch, nx && nx.review ? 'var(--blue)' : 'var(--pink)'); pingChip(); S.chipBusy = true;
     clearTimeout(S.chipT); S.chipT = setTimeout(() => { S.chipBusy = false; if (S.mode === 'drive') chipShowsTarget(); }, 2600);
@@ -455,7 +460,7 @@ function retarget() {
   ts.forEach((q, i) => {
     const L = nextLetter(i);
     if (q.letter === L) return;
-    q.letter = L; q.asked = false; q.mat.map = bubbleTexture(L.ch, q.col); q.mat.needsUpdate = true;
+    q.letter = L; q.asked = L.ch === S.askedCh && S.t - (S.askedT || -99) < 4; // just asked after a wrong pick q.mat.map = bubbleTexture(L.ch, q.col); q.mat.needsUpdate = true;
     if (q.pair && (q.pair.letter === L || W.parts.includes(q.pair.letter.ch))) {
       const pool = TR.distractors(TR.letters.indexOf(L), false).filter(x => !W.parts.includes(x.ch));
       if (pool.length) { q.pair.letter = pick(pool); q.pair.mat.map = bubbleTexture(q.pair.letter.ch, q.pair.col); q.pair.mat.needsUpdate = true; }
@@ -499,7 +504,7 @@ function updatePickups(dt) {
     if (p.kind === 'target' && p.alive && !p.missed && du < -3) {
       p.missed = true;
       if (p.review) chipShowsTarget();
-      else { S.missStreak++; S.misses++; Store.addMiss(missIdx(), TR.lang); }
+      else if (!p.handled) { S.missStreak++; S.misses++; Store.addMiss(missIdx(), TR.lang); }
       if (isWord()) retarget();
       const nx = nextTarget(p);
       if (nx && !nx.review) {
@@ -734,7 +739,8 @@ let mapTab = 'letter', wordPack = 'zoo';
 // map tab -> track: 'letter' | 'number' (Arabic), 'enletter' | 'ennumber' (English)
 const tabInfo = t => ({ kind: t.replace(/^en/, ''), lang: t.startsWith('en') ? 'en' : 'ar' });
 function toMap(tab) {
-  if (!tab && S.lang) { mapTab = (S.lang === 'en' ? 'en' : '') + S.kind; if (S.kind === 'word') wordPack = cur().pack || 'zoo'; }
+  const fromLevel = ['intro', 'drive', 'arrive', 'celebrate'].includes(S.mode);
+  if (!tab && fromLevel && S.lang) { mapTab = (S.lang === 'en' ? 'en' : '') + S.kind; if (S.kind === 'word') wordPack = cur().pack || 'zoo'; }
   clearLevel(); Voice.stop(); Sound.engineHum(0, false);
   if (tab) mapTab = tab;
   S.mode = 'map'; S.paused = false;
@@ -770,9 +776,10 @@ function renderMap() {
   const packs = $('packs'); packs.classList.toggle('hidden', tKind !== 'word'); packs.innerHTML = '';
   if (tKind === 'word') for (const pk of WORD_PACKS) {
     const ids = list.map((w, i) => (w.pack === pk ? i : -1)).filter(i => i >= 0);
+    const paid = !ids.some(i => Purchase.canPlay('word', i));
     const got = ids.filter(i => arr[i] > 0).length;
     const b = document.createElement('button'); b.className = 'pack' + (pk === wordPack ? ' on' : '');
-    b.innerHTML = `<span class="pe">${PACK_ICON[pk]}</span>${ui().packs[pk]}<small>${got}/${ids.length}</small>`;
+    b.innerHTML = `<span class="pe">${PACK_ICON[pk]}</span>${ui().packs[pk]}<small>${paid ? '🔒' : `${got}/${ids.length}`}</small>`;
     b.addEventListener('click', () => { Sound.click(); haptic('tick'); wordPack = pk; renderMap(); });
     packs.appendChild(b);
   }
@@ -808,9 +815,10 @@ function renderMap() {
     // a word opens like any level (the first of each pack is free, then after the one before), or early once all its letters are learned
     const lp = Store.prog('letter', tLang);
     const unlocked = tKind === 'word' ? (Store.data.unlockAll || prev < 0 || arr[i] > 0 || arr[prev] > 0 || item.parts.every(ch => lp[track.letters.findIndex(x => x.ch === ch)] > 0)) : Store.unlocked(tKind, i, tLang);
-    const done = arr[i] > 0;
+    const paid = !Purchase.canPlay(tKind, i);
+    const done = arr[i] > 0 && !paid;
     const glyph = tKind === 'letter' ? item.ch : tKind === 'word' ? item.word : item.digit;
-    el.className = 'node ' + (done ? 'done' : unlocked ? 'current' : 'locked');
+    el.className = 'node ' + (done ? 'done' : unlocked && !paid ? 'current' : 'locked') + (paid ? ' paid' : '');
     if (tKind === 'word') el.classList.add('wordnode');
     el.style.left = pts[j].x + 'px'; el.style.top = pts[j].y + 'px';
     if (done) {
@@ -821,11 +829,13 @@ function renderMap() {
       el.insertAdjacentHTML('beforeend', `<span class="badge">${glyph}</span><div class="stars">${[0, 1, 2].map(k => (k < arr[i] ? ICON.star : ICON.starOff)).join('')}</div>`);
     } else {
       el.insertAdjacentHTML('beforeend', `<span class="glyph${tKind === 'word' ? ' word' : ''}">${glyph}</span>`);
-      if (unlocked) { el.insertAdjacentHTML('beforeend', `<div class="pin">${kartSvg(KART_COLORS[Store.data.kart])}</div>`); if (!currentEl) currentEl = el; }
+      if (paid) el.insertAdjacentHTML('beforeend', '<div class="lock gold">★</div>');
+      else if (unlocked) { el.insertAdjacentHTML('beforeend', `<div class="pin">${kartSvg(KART_COLORS[Store.data.kart])}</div>`); if (!currentEl) currentEl = el; }
       else el.insertAdjacentHTML('beforeend', `<div class="lock">${ICON.lock}</div>`);
     }
     el.addEventListener('click', () => {
       Sound.init();
+      if (paid) { Sound.click(); openPaywall(); return; }
       if (!unlocked && !done) { Sound.lock(); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); return; }
       Sound.click(); haptic('tick');
       startLevel(tKind, i, tLang);
@@ -955,11 +965,13 @@ function setPaused(p) {
   if (p === S.paused) return;
   S.paused = p;
   $('pause').classList.toggle('hidden', !p);
-  if (p) { Voice.stop(); releaseTouch(); }
+  if (p) { Voice.stop(); releaseTouch(); Sound.engineHum(0, false); }
   else {
     Sound.resume(); if (Tilt.enabled) Tilt.calibrate(); last = performance.now();
     // the intro was cut by the pause: say it again so the child hears which letter to find
     if (S.mode === 'intro' && !S.introDone) sayIntro();
+    // recall rounds and words hide the letter: ask again so the child knows what to find
+    else if (S.mode === 'drive' && (S.recall || isWord()) && S.collected < S.need) Voice.say(TR.lines.find(isWord() ? nextLetter() : cur()));
   }
 }
 // Android back button: pause a level instead of closing the app; step back from other screens
@@ -967,8 +979,11 @@ function onBack() {
   if (!$('pgate').classList.contains('hidden')) { $('pgate').classList.add('hidden'); return; }
   if (!$('settings').classList.contains('hidden')) { $('settings').classList.add('hidden'); renderMap(); return; }
   if (['drive', 'intro', 'arrive'].includes(S.mode)) { if (!S.paused) setPaused(true); return; }
+  if (!$('paywall').classList.contains('hidden')) { closePaywall(); return; }
   if (S.mode === 'celebrate') { toMap(); return; }
-  if (S.mode === 'map') toTitle();
+  if (S.mode === 'garage') { closeGarage(); return; }
+  if (S.mode === 'map') { toTitle(); return; }
+  if (S.mode === 'title') exitApp();
 }
 
 // ---------- parent settings (long-press the gear) ----------
@@ -983,7 +998,7 @@ function onBack() {
   for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) gear.addEventListener(ev, cancel);
 }
 // parent gate: after the long press, tap two digits in the order written (a pre-reader cannot follow the sentence)
-function openGate() {
+function openGate(onPass = openSettings) {
   Sound.click();
   const a = 1 + ((Math.random() * 9) | 0); let b = 1 + ((Math.random() * 9) | 0); if (b === a) b = (a % 9) + 1;
   $('pgq').textContent = ui().gate(a, b);
@@ -993,13 +1008,40 @@ function openGate() {
     const k = document.createElement('button'); k.className = 'cbtn blue pgk'; k.textContent = ui().gateDigit(n);
     k.addEventListener('click', () => {
       Sound.click();
-      if (n === (step === 0 ? a : b)) { step++; k.classList.add('ok'); if (step === 2) { $('pgate').classList.add('hidden'); openSettings(); } }
+      if (n === (step === 0 ? a : b)) { step++; k.classList.add('ok'); if (step === 2) { $('pgate').classList.add('hidden'); onPass(); } }
       else { Sound.lock(); $('pgate').classList.add('hidden'); }
     });
     pad.appendChild(k);
   }
   $('pgate').classList.remove('hidden');
 }
+// ---------- full-game unlock (parents) ----------
+function openPaywall(fromSettings) {
+  const u = ui(), full = Purchase.isFull();
+  $('pwtitle').textContent = full ? u.pwOwned : u.pwTitle;
+  $('pwbody').textContent = u.pwBody(TRACKS.ar.words.length + TRACKS.en.words.length - 2 * FREE_WORDS);
+  $('pwfree').textContent = u.pwFree; $('pwparents').textContent = '🔒 ' + u.pwParents;
+  $('pwbuy').textContent = u.pwBuy(Purchase.price); $('pwbuy').classList.toggle('hidden', full);
+  $('pwrestore').textContent = u.pwRestore; $('pwrestore').classList.toggle('hidden', full);
+  $('pwmsg').textContent = '';
+  $('paywall').dataset.gated = fromSettings ? '1' : '';
+  $('paywall').dir = u.dir;
+  $('paywall').classList.remove('hidden');
+}
+function closePaywall() { $('paywall').classList.add('hidden'); if (S.mode === 'map') renderMap(); }
+// every store action passes the parent gate first (unless the parent already passed it to reach settings)
+const gated = fn => () => { Sound.click(); if ($('paywall').dataset.gated) fn(); else openGate(fn); };
+async function storeAction(kind) {
+  const u = ui(), msg = $('pwmsg');
+  msg.textContent = '…';
+  const r = kind === 'buy' ? await Purchase.buy() : await Purchase.restore();
+  msg.textContent = { ok: u.pwOk, cancel: u.pwCancel, none: u.pwNone, unavailable: u.pwWeb, error: u.pwFail }[r] || u.pwFail;
+  if (r === 'ok') { Sound.fanfare(); $('pwbuy').classList.add('hidden'); $('pwrestore').classList.add('hidden'); $('pwtitle').textContent = u.pwOwned; }
+}
+$('pwbuy').addEventListener('click', gated(() => storeAction('buy')));
+$('pwrestore').addEventListener('click', gated(() => storeAction('restore')));
+$('pwclose').addEventListener('click', () => { Sound.click(); closePaywall(); });
+$('spw').addEventListener('click', () => { Sound.click(); $('settings').classList.add('hidden'); openPaywall(true); });
 $('pgclose').addEventListener('click', () => { Sound.click(); $('pgate').classList.add('hidden'); });
 const OPTS = ['sfx', 'music', 'voice', 'haptics', 'hint', 'tilt', 'flip', 'speed', 'voiceRate', 'voiceName'];
 // a short sample in the track the child is learning
@@ -1038,6 +1080,7 @@ function openSettings() {
   voiceStatus();
   $('sreset').textContent = ui().reset; $('sreset').dataset.armed = '';
   $('sunlock').textContent = unlockText();
+  $('spw').textContent = Purchase.isFull() ? ui().pwOwned : '⭐ ' + ui().pwTitle;
   $('settings').classList.remove('hidden');
 }
 function voiceStatus() {
@@ -1061,7 +1104,7 @@ $('sreset').addEventListener('click', () => {
     return;
   }
   clearTimeout(b._t);
-  Store.reset(); b.dataset.armed = ''; b.textContent = ui().resetDone; Sound.lock();
+  Store.reset(); setKart(); b.dataset.armed = ''; b.textContent = ui().resetDone; Sound.lock();
   $('sunlock').textContent = unlockText();
 });
 
@@ -1171,6 +1214,8 @@ async function boot() {
   applyUiLang();
   if (set().uiLang === 'en') mapTab = 'enletter';
   Voice.init(set().voiceName);
+  Purchase.onChange = () => { if (S.mode === 'map') renderMap(); };
+  Purchase.init();
   initPlatform({
     onBack,
     onBackground: () => {
@@ -1184,6 +1229,6 @@ async function boot() {
   $('loading').classList.add('hidden');
   requestAnimationFrame(frame);
   // test hook (headless checks)
-  window.__lk = { thumb,  keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, openGarage, closeGarage, setKart, metAnimals, TRACKS, get TR() { return TR; } };
+  window.__lk = { thumb, Purchase, openPaywall,  keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, openGarage, closeGarage, setKart, metAnimals, TRACKS, get TR() { return TR; } };
 }
 boot();

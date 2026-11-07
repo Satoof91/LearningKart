@@ -6,7 +6,7 @@ Built with Three.js and packaged for **Android** and **iOS** with [Capacitor 8](
 | | |
 |---|---|
 | App name | LearningKart |
-| App ID (bundle ID) | `com.example.learningkart` &nbsp;← **change before publishing** (see below) |
+| App ID (bundle ID) | `com.satoof.learningkart` |
 | Content | `src/data.js`: 28 Arabic letters and 26 English letters, each with an animal and a word; numbers 0–10 in both languages (`TRACKS`) |
 | Game | `src/main.js` (flow, levels, map, celebration), `src/world.js` (zoo, road, habitats, kart), `src/animals.js` (28 animals) |
 | Voice / sound | `src/voice.js` (Arabic text-to-speech), `src/audio.js` (synthesized effects + music) |
@@ -127,18 +127,13 @@ You can also run any workflow by hand from the repository's **Actions** tab ("Ru
 
 ## Before you publish
 
-1. **Change the app ID** from `com.example.learningkart` to yours (e.g. `sa.com.yourcompany.learningkart`):
-   - `capacitor.config.json` → `appId`
-   - `android/app/build.gradle` → `namespace` and `applicationId`
-   - move `android/app/src/main/java/com/example/learningkart/MainActivity.java` to the matching folder and fix its `package` line
-   - `android/app/src/main/res/values/strings.xml` → `package_name`, `custom_url_scheme`
-   - iOS: Xcode → target **App** → *Signing & Capabilities* → Bundle Identifier (also `PRODUCT_BUNDLE_IDENTIFIER` in `ios/App/App.xcodeproj/project.pbxproj`)
-   - then `npx cap sync`
-2. **Android signing**: create a keystore (`keytool -genkey -v -keystore learningkart.keystore -alias learningkart -keyalg RSA -keysize 2048 -validity 10000`), keep it safe and **never commit it**. Locally, export `KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` and run `cd android && ./gradlew bundleRelease`; in CI add them as repository secrets and run `android-release.yml`.
-3. **iOS signing**: in Xcode choose your Apple Developer *Team* under Signing & Capabilities, then Product → Archive → Distribute (TestFlight / App Store).
-4. Bump `versionCode` / `versionName` (`android/app/build.gradle`) and the iOS *Version / Build* for every store upload.
-5. App icon / splash: edit `tools/make-assets.js` (or replace the PNGs in `assets/`), then `npm run assets`.
-6. **Kids' apps**: Google Play (Families policy) and the App Store (Kids category) have extra rules. The app has no ads, accounts, analytics or network calls. The voice uses the phone's offline engine. If you want to be strict, remove `<uses-permission android:name="android.permission.INTERNET" />` from `AndroidManifest.xml` after confirming the app still runs on a device.
+The step-by-step beta guide (Google Play internal testing + TestFlight) is in [docs/BETA-RELEASE.md](docs/BETA-RELEASE.md). Store texts, categories, privacy answers and the in-app product are in [docs/STORE-LISTING.md](docs/STORE-LISTING.md), and the privacy policy page is [docs/privacy.html](docs/privacy.html).
+
+- **App ID:** `com.satoof.learningkart` on both platforms. It is permanent once uploaded.
+- **Full-game unlock:** a one-time non-consumable `full_game` (src/purchase.js, Capgo native-purchases). Letters and numbers are free in both languages, plus the first 5 animal words per language. Purchase and restore always go through the parent gate.
+- **Build numbers:** Android reads `VERSION_CODE` / `VERSION_NAME`; CI passes the run number. iOS: raise *Build* in Xcode for every upload.
+- **Store graphics:** run `npm run build && node tools/store-shots.js`. Screenshots for every required size, the Play icon and the feature graphic go to `store/` (gitignored).
+- **Kids policies:** no ads, accounts, analytics or network calls, and no INTERNET permission of our own (Play Billing adds what it needs). The iOS privacy manifest is `ios/App/App/PrivacyInfo.xcprivacy`.
 
 ## Project layout
 

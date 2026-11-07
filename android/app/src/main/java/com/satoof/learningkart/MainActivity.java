@@ -1,4 +1,4 @@
-package com.example.learningkart;
+package com.satoof.learningkart;
 
 import android.os.Bundle;
 import android.view.WindowManager;
