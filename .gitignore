@@ -28,3 +28,4 @@ store/
 tools/voice-qa/report.*
 tools/voice-qa/listen.html
 tools/voice-qa/bench/
+tools/voice-qa/cand/
