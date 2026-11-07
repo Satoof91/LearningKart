@@ -12,7 +12,7 @@ Texts, categories and privacy answers are in [STORE-LISTING.md](STORE-LISTING.md
 ## 1. Privacy policy page (both stores require one)
 1. Open `docs/privacy.html` and replace `SUPPORT_EMAIL` with the support address you want to publish (it appears twice).
 2. Push. In GitHub, go to **Settings → Pages → Deploy from a branch → `main` / `/docs`**.
-3. The URL becomes `https://satoof91.github.io/LearningKart/privacy.html`. Open it once to check.
+3. The URL becomes `https://sites.google.com/view/learningkart`. Open it once to check.
 
 ## 2. Android: Google Play internal testing
 ### 2a. Upload key (one time)

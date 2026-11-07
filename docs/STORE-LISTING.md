@@ -66,7 +66,7 @@ LearningKart يحوّل الحروف إلى سباق! يقود طفلك سيار
 ## Privacy answers
 - **Play Data safety:** "This app does not collect or share any user data." Data is not encrypted in transit because nothing is sent. There's no account to delete.
 - **Apple App Privacy:** **Data Not Collected.**
-- **Privacy policy URL:** host `docs/privacy.html` (see BETA-RELEASE.md, step 1), for example `https://satoof91.github.io/LearningKart/privacy.html`.
+- **Privacy policy URL:** host `docs/privacy.html` (see BETA-RELEASE.md, step 1), for example `https://sites.google.com/view/learningkart`.
 
 ## In-app product
 | Field | Value |
