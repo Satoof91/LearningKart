@@ -46,9 +46,9 @@ async def gen(voice, text, path):
     """returns word boundaries [(offset_s, dur_s, word)]"""
     if os.path.exists(path + '.json'):
         return json.load(open(path + '.json', encoding='utf-8'))
-    for attempt in range(3):
+    for attempt in range(6):
         try:
-            c = edge_tts.Communicate(text, voice, rate=a.rate, pitch=a.pitch)
+            c = edge_tts.Communicate(text, voice, rate=a.rate, pitch=a.pitch, boundary='WordBoundary')
             audio, words = b'', []
             async for ch in c.stream():
                 if ch['type'] == 'audio': audio += ch['data']
@@ -56,7 +56,7 @@ async def gen(voice, text, path):
             open(path, 'wb').write(audio); json.dump(words, open(path + '.json', 'w', encoding='utf-8'), ensure_ascii=False)
             return words
         except Exception as e:
-            err = e; await asyncio.sleep(2)
+            err = e; await asyncio.sleep(3 + attempt * 2)
     print('FAIL', voice, text, err); return None
 
 def load(path):
@@ -82,12 +82,15 @@ async def main():
             path = os.path.join(d, pid + '.mp3')
             words = await gen(v, text, path)
             if words is None or not os.path.exists(path): continue
-            au = load(path)
-            segs, _ = model.transcribe(au, language='ar', beam_size=5, condition_on_previous_text=False, initial_prompt=PROMPT)
-            heard = ''.join(s.text for s in segs).strip()
+            hp = path + '.heard.txt'
+            if os.path.exists(hp): heard = open(hp, encoding='utf-8').read()
+            else:
+                au = load(path)
+                segs, _ = model.transcribe(au, language='ar', beam_size=5, condition_on_previous_text=False, initial_prompt=PROMPT)
+                heard = ''.join(s.text for s in segs).strip(); open(hp, 'w', encoding='utf-8').write(heard)
             match = round(difflib.SequenceMatcher(None, norm(text), norm(heard)).ratio(), 2)
             bare = round(difflib.SequenceMatcher(None, nomark(norm(text)), nomark(norm(heard))).ratio(), 2)
-            speech = round(sum(w[1] for w in words), 3) if words else round(len(au) / 16000, 3)
+            speech = round(sum(w[1] for w in words), 3) if words else 0
             res[pid] = dict(id=pid, voice=v, kind=kind, text=text, heard=heard, match=match, bare=bare, speech=speech, nwords=len(words))
             print(f'{v} {pid} match={match} dur={speech} | {text} -> {heard}', flush=True)
         # syllable shortness: duration against the long twin

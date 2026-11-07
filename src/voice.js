@@ -115,7 +115,8 @@ export const Voice = {
     return p;
   },
   async _say(texts, { gap = 300 } = {}) {
-    const list = (Array.isArray(texts) ? texts : [texts]).filter(Boolean);
+    // lines may be built from short atoms (['بَ', 'بَ', 'بَطَّة']): nested arrays are flattened
+    const list = (Array.isArray(texts) ? texts : [texts]).flat(2).filter(Boolean);
     this._halt();
     const my = ++this.token;
     this._start();

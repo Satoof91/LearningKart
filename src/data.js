@@ -1,37 +1,37 @@
 // Learning content: 28 Arabic letters (each with a zoo animal) and numbers 0-10.
-// `name` / `say` carry full harakat for the voice (a word ending a line gets an explicit sukun, a final
-// hamza is written ءْ so the engine does not drop it or turn بَاء into «باب»);
+// `name` / `say` carry harakat for the voice. Measured 2026-11-08: a sukun on the final hamza (بَاءْ) makes the
+// engines clip the name to «بَ», so names keep their plain form (بَاء);
 // `word` is what is shown on screen (no harakat, easier to read for small children).
 
 export const LETTERS = [
-  { ch: 'أ', snd: 'أَ', name: 'أَلِفْ', word: 'أسد', say: 'أَسَد', animal: 'lion', biome: 'savanna' },
-  { ch: 'ب', snd: 'بَ', name: 'بَاءْ', word: 'بطة', say: 'بَطَّة', animal: 'duck', biome: 'pond' },
-  { ch: 'ت', snd: 'تِ', name: 'تَاءْ', word: 'تمساح', say: 'تِمْسَاح', animal: 'crocodile', biome: 'pond' },
-  { ch: 'ث', snd: 'ثَ', name: 'ثَاءْ', word: 'ثعلب', say: 'ثَعْلَب', animal: 'fox', biome: 'forest' },
-  { ch: 'ج', snd: 'جَ', name: 'جِيمْ', word: 'جمل', say: 'جَمَل', animal: 'camel', biome: 'desert' },
-  { ch: 'ح', snd: 'حِ', name: 'حَاءْ', word: 'حصان', say: 'حِصَان', animal: 'horse', biome: 'farm' },
-  { ch: 'خ', snd: 'خَ', name: 'خَاءْ', word: 'خروف', say: 'خَرُوف', animal: 'sheep', biome: 'farm' },
-  { ch: 'د', snd: 'دُ', name: 'دَالْ', word: 'دب', say: 'دُبّ', animal: 'bear', biome: 'forest' },
-  { ch: 'ذ', snd: 'ذِ', name: 'ذَالْ', word: 'ذئب', say: 'ذِئْب', animal: 'wolf', biome: 'forest' },
-  { ch: 'ر', snd: 'رَ', name: 'رَاءْ', word: 'رنة', say: 'رَنَّة', animal: 'reindeer', biome: 'snow' },
-  { ch: 'ز', snd: 'زَ', name: 'زَايْ', word: 'زرافة', say: 'زَرَافَة', animal: 'giraffe', biome: 'savanna' },
-  { ch: 'س', snd: 'سُ', name: 'سِينْ', word: 'سلحفاة', say: 'سُلَحْفَاة', animal: 'turtle', biome: 'pond' },
-  { ch: 'ش', snd: 'شِ', name: 'شِينْ', word: 'شمبانزي', say: 'شِمْبَانْزِي', animal: 'chimp', biome: 'jungle' },
-  { ch: 'ص', snd: 'صَ', name: 'صَادْ', word: 'صقر', say: 'صَقْر', animal: 'falcon', biome: 'desert' },
-  { ch: 'ض', snd: 'ضِ', name: 'ضَادْ', word: 'ضفدع', say: 'ضِفْدَع', animal: 'frog', biome: 'pond' },
-  { ch: 'ط', snd: 'طَ', name: 'طَاءْ', word: 'طاووس', say: 'طَاوُوس', animal: 'peacock', biome: 'garden' },
-  { ch: 'ظ', snd: 'ظَ', name: 'ظَاءْ', word: 'ظبي', say: 'ظَبْيْ', animal: 'deer', biome: 'forest' },
-  { ch: 'ع', snd: 'عُ', name: 'عَيْنْ', word: 'عصفور', say: 'عُصْفُور', animal: 'sparrow', biome: 'garden' },
-  { ch: 'غ', snd: 'غَ', name: 'غَيْنْ', word: 'غزال', say: 'غَزَال', animal: 'gazelle', biome: 'savanna' },
-  { ch: 'ف', snd: 'فِ', name: 'فَاءْ', word: 'فيل', say: 'فِيل', animal: 'elephant', biome: 'savanna' },
-  { ch: 'ق', snd: 'قِ', name: 'قَافْ', word: 'قرد', say: 'قِرْد', animal: 'monkey', biome: 'jungle' },
-  { ch: 'ك', snd: 'كَ', name: 'كَافْ', word: 'كنغر', say: 'كَنْغَر', animal: 'kangaroo', biome: 'desert' },
-  { ch: 'ل', snd: 'لَ', name: 'لَامْ', word: 'لاما', say: 'لَامَا', animal: 'llama', biome: 'mountain' },
-  { ch: 'م', snd: 'مَ', name: 'مِيمْ', word: 'ماعز', say: 'مَاعِز', animal: 'goat', biome: 'mountain' },
-  { ch: 'ن', snd: 'نَ', name: 'نُونْ', word: 'نمر', say: 'نَمِر', animal: 'tiger', biome: 'jungle' },
-  { ch: 'ه', snd: 'هُ', name: 'هَاءْ', word: 'هدهد', say: 'هُدْهُد', animal: 'hoopoe', biome: 'garden' },
-  { ch: 'و', snd: 'وَ', name: 'وَاوْ', word: 'وحيد القرن', say: 'وَحِيدُ القَرْن', animal: 'rhino', biome: 'savanna' },
-  { ch: 'ي', snd: 'يَ', name: 'يَاءْ', word: 'يمامة', say: 'يَمَامَة', animal: 'dove', biome: 'garden' }
+  { ch: 'أ', snd: 'أَ', name: 'أَلِف', word: 'أسد', say: 'أَسَد', animal: 'lion', biome: 'savanna' },
+  { ch: 'ب', snd: 'بَ', name: 'بَاء', word: 'بطة', say: 'بَطَّة', animal: 'duck', biome: 'pond' },
+  { ch: 'ت', snd: 'تِ', name: 'تَاء', word: 'تمساح', say: 'تِمْسَاح', animal: 'crocodile', biome: 'pond' },
+  { ch: 'ث', snd: 'ثَ', name: 'ثَاء', word: 'ثعلب', say: 'ثَعْلَب', animal: 'fox', biome: 'forest' },
+  { ch: 'ج', snd: 'جَ', name: 'جِيم', word: 'جمل', say: 'جَمَل', animal: 'camel', biome: 'desert' },
+  { ch: 'ح', snd: 'حِ', name: 'حَاء', word: 'حصان', say: 'حِصَان', animal: 'horse', biome: 'farm' },
+  { ch: 'خ', snd: 'خَ', name: 'خَاء', word: 'خروف', say: 'خَرُوف', animal: 'sheep', biome: 'farm' },
+  { ch: 'د', snd: 'دُ', name: 'دَال', word: 'دب', say: 'دُبّ', animal: 'bear', biome: 'forest' },
+  { ch: 'ذ', snd: 'ذِ', name: 'ذَال', word: 'ذئب', say: 'ذِئْب', animal: 'wolf', biome: 'forest' },
+  { ch: 'ر', snd: 'رَ', name: 'رَاء', word: 'رنة', say: 'رَنَّة', animal: 'reindeer', biome: 'snow' },
+  { ch: 'ز', snd: 'زَ', name: 'زَاي', word: 'زرافة', say: 'زَرَافَة', animal: 'giraffe', biome: 'savanna' },
+  { ch: 'س', snd: 'سُ', name: 'سِين', word: 'سلحفاة', say: 'سُلَحْفَاة', animal: 'turtle', biome: 'pond' },
+  { ch: 'ش', snd: 'شِ', name: 'شِين', word: 'شمبانزي', say: 'شِمْبَانْزِي', animal: 'chimp', biome: 'jungle' },
+  { ch: 'ص', snd: 'صَ', name: 'صَاد', word: 'صقر', say: 'صَقْر', animal: 'falcon', biome: 'desert' },
+  { ch: 'ض', snd: 'ضِ', name: 'ضَاد', word: 'ضفدع', say: 'ضِفْدَع', animal: 'frog', biome: 'pond' },
+  { ch: 'ط', snd: 'طَ', name: 'طَاء', word: 'طاووس', say: 'طَاوُوس', animal: 'peacock', biome: 'garden' },
+  { ch: 'ظ', snd: 'ظَ', name: 'ظَاء', word: 'ظبي', say: 'ظَبْيْ', animal: 'deer', biome: 'forest' },
+  { ch: 'ع', snd: 'عُ', name: 'عَيْن', word: 'عصفور', say: 'عُصْفُور', animal: 'sparrow', biome: 'garden' },
+  { ch: 'غ', snd: 'غَ', name: 'غَيْن', word: 'غزال', say: 'غَزَال', animal: 'gazelle', biome: 'savanna' },
+  { ch: 'ف', snd: 'فِ', name: 'فَاء', word: 'فيل', say: 'فِيل', animal: 'elephant', biome: 'savanna' },
+  { ch: 'ق', snd: 'قِ', name: 'قَاف', word: 'قرد', say: 'قِرْد', animal: 'monkey', biome: 'jungle' },
+  { ch: 'ك', snd: 'كَ', name: 'كَاف', word: 'كنغر', say: 'كَنْغَر', animal: 'kangaroo', biome: 'desert' },
+  { ch: 'ل', snd: 'لَ', name: 'لَام', word: 'لاما', say: 'لَامَا', animal: 'llama', biome: 'mountain' },
+  { ch: 'م', snd: 'مَ', name: 'مِيم', word: 'ماعز', say: 'مَاعِز', animal: 'goat', biome: 'mountain' },
+  { ch: 'ن', snd: 'نَ', name: 'نُون', word: 'نمر', say: 'نَمِر', animal: 'tiger', biome: 'jungle' },
+  { ch: 'ه', snd: 'هُ', name: 'هَاء', word: 'هدهد', say: 'هُدْهُد', animal: 'hoopoe', biome: 'garden' },
+  { ch: 'و', snd: 'وَ', name: 'وَاو', word: 'وحيد القرن', say: 'وَحِيدُ القَرْن', animal: 'rhino', biome: 'savanna' },
+  { ch: 'ي', snd: 'يَ', name: 'يَاء', word: 'يمامة', say: 'يَمَامَة', animal: 'dove', biome: 'garden' }
 ];
 
 const AR = '٠١٢٣٤٥٦٧٨٩';
@@ -57,14 +57,15 @@ export const PRAISE_SHOW = ['أحسنت!', 'رائع!', 'ممتاز!', 'بطل!'
 export const LINES = {
   letterIntro: L => `هَيَّا نَجْمَعُ حَرْفَ ${L.name}`,
   // letter SOUND (phonics) tied to the animal word: «بَ، بَ، بَطَّة»
-  sound: L => `${L.snd}، ${L.snd}، ${L.say}`,
+  // «بَ، بَ، بَطَّة» as three short clips: engines stretch a chain of lone syllables into long vowels
+  sound: L => [L.snd, L.snd, L.say],
   find: L => `أَيْنَ حَرْفُ ${L.name}؟`,
   wrong: L => `هَذَا حَرْفُ ${L.name}`,
   numberIntro: N => N.n === 0 ? 'صِفْرٌ يَعْنِي: لَا شَيْءْ' : `هَيَّا نَعُدُّ إِلَى ${N.to || N.say}`,
   gate: 'هَيَّا إِلَى البَوَّابَة!',
   newFriend: 'صَدِيقٌ جَدِيدٌ فِي حَدِيقَتِكَ!',
   wordIntro: W => `هَيَّا نَبْنِي كَلِمَةَ ${W.say}!`,
-  wordBlend: W => `${W.onset}، ${W.onset}، ${W.say}`
+  wordBlend: W => [W.onset, W.onset, W.say] // «دُ، دُ، دُبّ» from three short clips
 };
 
 // Wrong choices follow a ladder: first an easy, clearly different letter (preferably one already
@@ -172,8 +173,8 @@ for (const pk of WORD_PACKS.slice(1)) for (const [word, animal] of EN_PACKS[pk])
 // ---------------------------------------------------------------------------------------------
 // Harakat mode («حركات»): each letter with fatha, kasra and damma. The skill is telling بَ / بِ / بُ
 // apart on the SAME letter, so the other bubble is always the same letter with another mark.
-// The voice never ends a line on a lone syllable (the engine would stretch بِ into «بي»): it spells
-// «بَاءْ، فَتْحَة: بَ بَ بَ», asks «أَيْنَ بِ يَا بَطَلْ؟» and chants «بَ بِ بُ، بَ بِ بُ».
+// Spelling («بَاء، فَتْحَة، بَ») and the chant are played from single-syllable clips: one clip per
+// syllable stays short, while a chain in one line gets stretched into long vowels by every engine.
 // The harakat mode stays hidden until every one of its voice clips has been verified by ear.
 export const HARAKA_ENABLED = false;
 export const HARAKAT = [
@@ -188,10 +189,10 @@ export const SYLLABLES = LETTERS.map((L, li) => HARAKAT.map((H, hi) => {
 }));
 export const HLINES = {
   intro: L => `هَيَّا نَقْرَأُ حَرْفَ ${L.name} بِالحَرَكَاتْ`,
-  // a syllable must not end the line alone: at a pause the engine stretches it into a word (فِ -> «في»)
-  chant: li => { const r = SYLLABLES[li].map(x => x.ch).join(' '); return `${r}، ${r}`; },
-  spell: x => `${x.name}، ${x.hname}: ${x.ch} ${x.ch} ${x.ch}`,
-  find: x => `أَيْنَ ${x.ch} ${x.base === 'ي' ? 'يَا شَاطِرْ' : 'يَا بَطَلْ'}؟`,
+  // sequences are played from one-syllable clips (engines stretch a chain of syllables into long vowels)
+  chant: li => SYLLABLES[li].map(x => x.ch),
+  spell: x => [x.name, x.hname, x.ch],
+  find: x => `أَيْنَ ${x.ch}؟`,
   howto: 'الفَتْحَةُ شَرْطَةٌ فَوْقَ الحَرْفِ، وَالكَسْرَةُ شَرْطَةٌ تَحْتَ الحَرْفِ، وَالضَّمَّةُ وَاوٌ صَغِيرَةٌ فَوْقَ الحَرْفْ'
 };
 
@@ -219,7 +220,7 @@ export function voiceLines() {
     out.push({ id: `${k}-word`, text: L.say, note: `الكلمة ${L.word}` });
     out.push({ id: `${k}-intro`, text: LINES.letterIntro(L), note: 'بداية المرحلة' });
     out.push({ id: `${k}-wrong`, text: LINES.wrong(L), note: 'عند اختيار هذا الحرف خطأ' });
-    out.push({ id: `${k}-sound`, text: LINES.sound(L), note: `صوت الحرف ${L.ch} مع الكلمة` });
+    out.push({ id: `${k}-snd`, text: L.snd, note: `صوت الحرف ${L.ch} (مقطع واحد)` });
     out.push({ id: `${k}-find`, text: LINES.find(L), note: `البحث عن الحرف ${L.ch}` });
   });
   NUMBERS.forEach(N => {
@@ -247,7 +248,7 @@ export function voiceLines() {
   EN_PRAISE.forEach((t, i) => out.push({ id: `en-praise-${i + 1}`, text: t, note: 'praise', lang: 'en' }));
   WORDS.forEach((W, i) => {
     out.push({ id: `word-${p2(i + 1)}-intro`, text: LINES.wordIntro(W), note: `كلمة ${W.word}` });
-    out.push({ id: `word-${p2(i + 1)}-blend`, text: LINES.wordBlend(W), note: `دمج ${W.word}` });
+    out.push({ id: `word-${p2(i + 1)}-onset`, text: W.onset, note: `مقطع ${W.word}` });
     out.push({ id: `word-${p2(i + 1)}-say`, text: W.say, note: `الكلمة ${W.word}` });
   });
   EN_WORDS.forEach((W, i) => {
@@ -256,16 +257,16 @@ export function voiceLines() {
     out.push({ id: `en-word-${p2(i + 1)}-say`, text: W.say, note: W.word, lang: 'en' });
   });
   out.push({ id: 'haraka-howto', text: HLINES.howto, note: 'شرح الحركات (أول مرحلة)' });
+  HARAKAT.forEach(H => out.push({ id: `haraka-name-${H.id}`, text: H.name, note: 'اسم الحركة' }));
   LETTERS.forEach((L, i) => {
     const k = `haraka-${p2(i + 1)}`;
     out.push({ id: `${k}-intro`, text: HLINES.intro(L), note: `حركات ${L.ch}` });
-    out.push({ id: `${k}-chant`, text: HLINES.chant(i), note: `أنشودة ${L.ch}` });
     for (const x of SYLLABLES[i]) {
-      out.push({ id: `${k}-${x.h}`, text: HLINES.spell(x), note: `تهجئة ${x.ch}` });
+      out.push({ id: `${k}-${x.h}`, text: x.ch, note: `مقطع ${x.ch}` });
       out.push({ id: `${k}-${x.h}-find`, text: HLINES.find(x), note: `سؤال ${x.ch}` });
     }
   });
-  // a text that is already spoken by another line reuses that clip (e.g. «دُ، دُ، دُبّ» = letter-08-sound)
+  // a text that is already spoken by another line reuses that clip (e.g. the onset «دُ» = letter-08-snd)
   const seen = new Set();
   return out.filter(l => (seen.has(l.text) ? false : (seen.add(l.text), true)));
 }
