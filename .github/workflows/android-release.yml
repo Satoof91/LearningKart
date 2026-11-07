@@ -18,11 +18,11 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
-      - uses: android-actions/setup-android@v3
+      # the ubuntu runner already ships the Android SDK (setup-android's sdkmanager step broke on new images)
       - uses: gradle/actions/setup-gradle@v4
 
       - run: npm ci
