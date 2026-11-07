@@ -37,21 +37,28 @@ def main():
     with open(os.path.join(OUT, 'lines.json'), encoding='utf-8') as f:
         lines = json.load(f)
 
+    # which text each clip was generated from: a line whose text changed is generated again
+    # (otherwise the old recording would silently play for the new text)
+    man_path = os.path.join(OUT, 'clips-texts.json')
+    made = json.load(open(man_path, encoding='utf-8')) if os.path.exists(man_path) else {}
+
     async def run():
         done = skipped = failed = 0
         for L in lines:
             path = os.path.join(OUT, f"{L['id']}.mp3")
-            if os.path.exists(path) and not a.force:
-                skipped += 1; continue
+            if os.path.exists(path) and not a.force and made.get(L['id'], L['text']) == L['text']:
+                made[L['id']] = L['text']; skipped += 1; continue
             try:
                 en = L.get('lang') == 'en'
                 tts = edge_tts.Communicate(L['text'], a.voice_en if en else a.voice, rate=a.rate_en if en else a.rate, pitch='+0Hz' if en else a.pitch)
                 await tts.save(path)
+                made[L['id']] = L['text']
                 done += 1
                 print(f"ok   {L['id']}  {L['text']}")
             except Exception as e:  # keep going; missing clips fall back to the device voice
                 failed += 1
                 print(f"FAIL {L['id']}: {e}")
+        json.dump(made, open(man_path, 'w', encoding='utf-8'), ensure_ascii=False, indent=0, sort_keys=True)
         print(f"\n{done} generated, {skipped} already existed, {failed} failed -> {os.path.abspath(OUT)}")
         if failed: print('Run the script again to retry the failed ones.')
 

@@ -23,3 +23,7 @@ test/shots/
 
 # store screenshots and graphics (regenerate with node tools/store-shots.js)
 store/
+
+# voice QA output (regenerate: python tools/voice-qa/asr.py && python tools/voice-qa/listen.py)
+tools/voice-qa/report.*
+tools/voice-qa/listen.html

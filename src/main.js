@@ -1,7 +1,7 @@
 // LearningKart — Arabic letters & numbers zoo kart game for ages 3-6.
 import * as THREE from 'three';
 import { initPlatform, haptic, Tilt, setHaptics, exitApp, isNative as isNativeApp } from './platform.js';
-import { TRACKS, WORD_PACKS } from './data.js';
+import { TRACKS, WORD_PACKS, SYLLABLES, HLINES } from './data.js';
 import { UI } from './i18n.js';
 // current language track (Arabic or English): letters, numbers, spoken lines, praise, digits
 let TR = TRACKS.ar;
@@ -17,7 +17,7 @@ import { makeAnimal } from './animals.js';
 import { makeFriend, isAnimal } from './friends.js';
 import { Purchase, FREE_WORDS } from './purchase.js';
 import { buildTrack, buildZoo, makeHabitat, makeAppleTable, makeKart, makeArch, makeApple, makeStar, makeBoostPad, glowTex, blobTex, Confetti, FENCE, LANE } from './world.js';
-import { loadFonts, bubbleTexture, drawWord, drawWordProgress, FONT, roundRect } from './text.js';
+import { loadFonts, bubbleTexture, drawWord, drawWordProgress, drawSyllable, syllableURL, FONT, roundRect } from './text.js';
 import { Voice } from './voice.js';
 import { Sound } from './audio.js';
 import { Store } from './store.js';
@@ -124,6 +124,7 @@ function applyUiLang() {
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = u[el.dataset.i18n]; });
   document.querySelector('.tab[data-tab="letter"]').textContent = u.tabLetter;
   document.querySelector('.tab[data-tab="number"]').textContent = u.tabNumber;
+  document.querySelector('.tab[data-tab="haraka"]').textContent = u.tabHaraka;
   document.querySelectorAll('[data-lang]').forEach(b => { b.textContent = u.switchTo; b.setAttribute('aria-label', u.switchLabel); });
   if (ZOO) ZOO.setBanner(u.banner);
 }
@@ -132,7 +133,7 @@ function toggleUiLang() {
   set().uiLang = set().uiLang === 'en' ? 'ar' : 'en'; Store.save(); applyUiLang();
   // the map follows: English interface opens the ABC track, Arabic the Arabic letters (same kind)
   const k = mapTab.replace(/^en/, '');
-  mapTab = (set().uiLang === 'en' ? 'en' : '') + k;
+  if (k !== 'haraka') mapTab = (set().uiLang === 'en' ? 'en' : '') + k; // harakat are Arabic-only
   if (S.mode === 'map') renderMap();
 }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', toggleUiLang));
@@ -190,7 +191,18 @@ function disposeOwned(obj) {
 }
 
 // ---------- level setup ----------
-const cur = () => (S.kind === 'letter' ? TR.letters[S.index] : S.kind === 'word' ? TR.words[S.index] : TR.numbers[S.index]);
+const cur = () => (S.kind === 'letter' || S.kind === 'haraka' ? TR.letters[S.index] : S.kind === 'word' ? TR.words[S.index] : TR.numbers[S.index]);
+// harakat mode: 6 syllables of one letter (fatha, kasra, damma, then the three again in a shuffled order)
+const isHaraka = () => S.kind === 'haraka';
+const sylAt = (k = 0) => SYLLABLES[S.index][S.seq[Math.min(S.seq.length - 1, S.collected + k)]];
+const sylRow = i => SYLLABLES[i].map(x => x.ch).join(' ');
+// the three syllables as images in their mark colours (map nodes, intro card)
+const sylImgs = i => `<span class="sylrow">${SYLLABLES[i].map(x => `<img class="syl" alt="${x.ch}" src="${syllableURL(x.ch, x.color, '#2b1b6b', '#ffffff')}">`).join('')}</span>`;
+// the question line for a letter or a syllable
+const findLine = x => (x && x.mark ? HLINES.find(x) : TR.lines.find(x));
+// marks are coloured while the child learns them (first 3) and again after a mistake; white in recall
+const markColorFor = x => (x && x.mark && (!S.recall || S.missStreak > 0 || S.recentWrong) ? x.color : null);
+function addMissNow() { if (isHaraka()) Store.addHMiss(S.index); else Store.addMiss(missIdx(), TR.lang); }
 // word mode: the word is built letter by letter; these give the letter objects it is made of
 const isWord = () => S.kind === 'word';
 const letterOf = ch => TR.letters.find(x => x.ch === ch);
@@ -214,19 +226,22 @@ function startLevel(kind, index, lang) {
   if (!Purchase.canPlay(kind, index)) { if (S.mode !== 'map') toMap(); openPaywall(); return; }
   clearLevel();
   if (lang) TR = TRACKS[lang];
+  if (kind === 'haraka') TR = TRACKS.ar; // the harakat are an Arabic-only mode
   S.lang = TR.lang;
   S.kind = kind; S.index = index; S.paused = false;
   const C = cur();
   populateZoo(kind === 'letter' ? index : -1);
   S.u = T.L - 34; S.d = 0; S.vd = 0; S.speed = 0; S.boostT = 0; S.camH = T.heading(S.u);
-  S.collected = 0; S.wrong = 0; S.coins = 0; S.spawned = 0; S.need = kind === 'letter' ? 5 : kind === 'word' ? C.parts.length : C.n;
+  S.collected = 0; S.wrong = 0; S.coins = 0; S.spawned = 0; S.need = kind === 'letter' ? 5 : kind === 'word' ? C.parts.length : kind === 'haraka' ? 6 : C.n;
+  S.seq = [0, 1, 2].concat([0, 1, 2].sort(() => Math.random() - 0.5));
   S.nextU = S.u + 85; S.missStreak = 0; S.countQ = null;
   S.misses = 0; S.assisted = 0; S.reviewDone = false; S.recentWrong = false; S.recall = false; S.lastPraise = -1;
   S.chipBusy = false; clearTimeout(S.chipT);
   S.lvl = (S.lvl || 0) + 1;
   // HUD
-  const glyph = kind === 'letter' ? C.ch : kind === 'word' ? C.word : C.digit;
-  setChip(kind === 'word' ? letterOf(C.parts[0]).ch : glyph, kind === 'number' ? 'var(--org)' : 'var(--pink)');
+  const glyph = kind === 'letter' ? C.ch : kind === 'word' ? C.word : kind === 'haraka' ? sylRow(index) : C.digit;
+  if (kind === 'haraka') chipShowsTarget();
+  else setChip(kind === 'word' ? letterOf(C.parts[0]).ch : glyph, kind === 'number' ? 'var(--org)' : 'var(--pink)');
   const slots = $('slots'); slots.innerHTML = '';
   for (let i = 0; i < S.need; i++) { const d = document.createElement('div'); d.className = 'slot' + (kind === 'number' ? ' apple' : ''); slots.appendChild(d); }
   slots.style.display = S.need && kind !== 'word' ? 'flex' : 'none';
@@ -237,9 +252,9 @@ function startLevel(kind, index, lang) {
   showScreen('hud');
   $('celebrate').classList.add('hidden'); $('pause').classList.add('hidden');
   // intro card
-  $('introglyph').textContent = kind === 'letter' && C.card ? C.card : glyph;
+  if (kind === 'haraka') $('introglyph').innerHTML = sylImgs(index); else $('introglyph').textContent = kind === 'letter' && C.card ? C.card : glyph;
   $('introglyph').style.color = kind === 'number' ? 'var(--org)' : 'var(--pink)';
-  $('introtext').textContent = kind === 'letter' ? ui().collect(C) : kind === 'word' ? ui().buildWord(C) : (C.n ? ui().apples(glyph) : ui().zero);
+  $('introtext').textContent = kind === 'letter' ? ui().collect(C) : kind === 'word' ? ui().buildWord(C) : kind === 'haraka' ? ui().harakaCollect(C) : (C.n ? ui().apples(glyph) : ui().zero);
   $('introtext').dir = ui().dir;
   // show the animal from the start: letter -> sound -> animal is the memory hook
   const img = $('introimg');
@@ -254,18 +269,22 @@ function sayIntro() {
   const C = cur(), lvl = S.lvl;
   const lines = S.kind === 'letter' ? [C.name, TR.lines.sound(C), TR.lines.letterIntro(C)]
     : S.kind === 'word' ? [C.say, TR.lines.wordIntro(C), TR.lines.find(letterOf(C.parts[0]))]
+    : S.kind === 'haraka' ? [HLINES.intro(C), HLINES.chant(S.index)].concat(S.index === 0 ? [HLINES.howto] : []).concat([HLINES.find(sylAt(0))])
     : [C.say, TR.lines.numberIntro(C)];
   // only this level's intro may end the intro (a stopped older promise must not skip the new one)
   Voice.say(lines, { gap: 350 }).then(() => { if (S.lvl === lvl && !S.paused) S.introDone = true; });
 }
 // HUD target chip: the letter to find (or "؟" in recall rounds, where the child listens and finds the shape)
 function setChip(text, bg) {
-  $('tglyph').textContent = text;
+  // a letter with a haraka is drawn as an image: font marks are too small to read in the chip
+  if (/[َ-ِ]/.test(text)) $('tglyph').innerHTML = `<img class="syl" alt="${text}" src="${syllableURL(text)}">`;
+  else $('tglyph').textContent = text;
   if (bg) $('tglyph').style.background = bg;
 }
 function chipShowsTarget() {
   const C = cur();
   if (S.kind === 'word') return setChip(nextLetter().ch, 'var(--pink)');
+  if (isHaraka()) { const x = sylAt(0); return S.recall ? setChip('؟', 'var(--purple)') : setChip(x.ch, x.color); }
   if (S.kind !== 'letter') return setChip(C.digit, 'var(--org)');
   setChip(S.recall ? (TR.lang === 'en' ? '?' : '؟') : C.ch, S.recall ? 'var(--purple)' : 'var(--pink)');
 }
@@ -279,7 +298,7 @@ let SHADOW_GEO = null, SHADOW_MAT = null;
 function bubble(u, d, L, isTarget, color) {
   const g = new THREE.Group();
   const pos = T.pos(u, d); g.position.copy(pos);
-  const mat = new THREE.SpriteMaterial({ map: bubbleTexture(L.ch, color) });
+  const mat = new THREE.SpriteMaterial({ map: bubbleTexture(L.ch, color, markColorFor(L)) });
   const spr = new THREE.Sprite(mat); spr.scale.set(4.6, 4.6, 1); spr.position.y = 3; spr.renderOrder = 2; g.add(spr);
   let glow = null, glowMat = null;
   if (isTarget) {
@@ -309,24 +328,29 @@ function spawnAhead() {
     const colA = pick(BUBBLE_COLORS); let colB = pick(BUBBLE_COLORS); if (colB === colA) colB = BUBBLE_COLORS[(BUBBLE_COLORS.indexOf(colA) + 2) % BUBBLE_COLORS.length];
     // spaced review: the 3rd pair of a level asks for an earlier letter (bonus, does not count toward the 5)
     const R = S.kind === 'letter' && S.index >= 2 && S.spawned === 2 && !S.reviewDone ? weakestLearned() : null;
+    const pending = S.pickups.filter(q => q.kind === 'target' && q.alive && !q.missed).length;
     // word mode: the letter after the ones already waiting on the road
-    const target = R || (isWord() ? nextLetter(S.pickups.filter(q => q.kind === 'target' && q.alive && !q.missed).length) : C);
+    const target = R || (isWord() ? nextLetter(pending) : isHaraka() ? sylAt(pending) : C);
     // difficulty ladder: a clearly different shape first; a dotted look-alike only once the child is doing well
     const hard = !R && !isWord() && S.collected >= 2 && S.missStreak === 0 && !S.recentWrong;
     const ok = L => L !== C && L !== target && !(isWord() && C.parts.includes(L.ch)); // never a letter of the word itself
-    let pool = TR.distractors(TR.letters.indexOf(target), hard).filter(ok);
-    if (!pool.length) pool = TR.distractors(TR.letters.indexOf(target), false).filter(ok);
-    if (!pool.length) pool = TR.letters.filter(ok);
-    const W = pick(pool);
+    let pool = [];
+    if (!isHaraka()) {
+      pool = TR.distractors(TR.letters.indexOf(target), hard).filter(ok);
+      if (!pool.length) pool = TR.distractors(TR.letters.indexOf(target), false).filter(ok);
+      if (!pool.length) pool = TR.letters.filter(ok);
+    }
+    // harakat: the other bubble is the same letter with another mark (بَ against بِ / بُ)
+    const W = isHaraka() ? pick(SYLLABLES[S.index].filter(x => x.h !== target.h)) : pick(pool);
     const tp = addPickup(bubble(S.nextU, side * 4.4, target, true, colA));
     const wp = addPickup(bubble(S.nextU, -side * 4.4, W, false, colB));
     tp.pair = wp; wp.pair = tp; tp.review = !!R; if (R) S.reviewDone = true;
-    if (isWord() && S.spawned === 0) tp.asked = true; // the intro already asked for the first letter
+    if ((isWord() || isHaraka()) && S.spawned === 0) tp.asked = true; // the intro already asked for the first one
     S.spawned++;
-    if (S.spawned % 3 === 0 && !isWord()) { const pad = makeBoostPad(); const at = S.nextU + 34; pad.position.copy(T.pos(at, 0)); pad.position.y = 0.1; pad.rotation.y = T.heading(at); addPickup({ obj: pad, u: at, d: 0, kind: 'boost', alive: true, r: 2.6 }); }
+    if (S.spawned % 3 === 0 && !isWord() && !isHaraka()) { const pad = makeBoostPad(); const at = S.nextU + 34; pad.position.copy(T.pos(at, 0)); pad.position.y = 0.1; pad.rotation.y = T.heading(at); addPickup({ obj: pad, u: at, d: 0, kind: 'boost', alive: true, r: 2.6 }); }
     for (let k = 1; k <= 3; k++) spawnCoin(S.nextU + 14 + k * 9, (S.spawned % 2 ? 1 : -1) * (k - 2) * 2.4);
     // word mode: more road between letters so the letter name and the next question finish first
-    S.nextU += isWord() ? 170 : 78;
+    S.nextU += isWord() ? 170 : isHaraka() ? 150 : 78;
   } else {
     const d = pick([-4.4, 0, 4.4]);
     const g = makeApple(); g.scale.setScalar(1.35);
@@ -380,6 +404,17 @@ function hitPickup(p) {
       p.pop = 0;
       return;
     }
+    if (isHaraka()) {
+      // the syllable fills its slot on its mark's colour; the bubbles ahead switch to the next one
+      const x = p.letter;
+      flyToSlot(wp, `<img class="syl" alt="${x.ch}" src="${syllableURL(x.ch)}">`, n, x.color);
+      if (S.collected === 3) S.recall = true; // second half: white marks, the voice asks, the chip shows ؟
+      retarget(); chipShowsTarget(); pingChip();
+      if (S.collected >= S.need) { praise(); Voice.say([HLINES.chant(S.index), TR.lines.gate], { gap: 450 }); }
+      else Voice.say([HLINES.spell(x), askNext(p)], { gap: 350 });
+      p.pop = 0;
+      return;
+    }
     flyToSlot(wp, C.ch, n);
     pingChip();
     // after 2 letters: recall rounds, the chip hides the glyph and the voice asks for it
@@ -393,17 +428,18 @@ function hitPickup(p) {
     S.wrong++; S.wobble = 0.6; S.recentWrong = true;
     if (p.pair) p.pair.handled = true; // its target will pass behind the kart: already counted as this mistake
     const T0 = p.pair && p.pair.letter ? p.pair.letter : C;
-    if (!(p.pair && p.pair.review)) Store.addMiss(missIdx(), TR.lang);
+    if (!(p.pair && p.pair.review)) addMissNow();
     Sound.wrong(); haptic('bump');
     p.mat.color.setHex(0x9aa5b1);
     // name what was picked, then ask again for the right one, and show it on the chip for a moment
     const nx = nextTarget(p.pair) || p.pair;
     // word mode: the letter still missing (this pair's target is about to be passed, not yet counted as missed)
-    const want = isWord() ? nextLetter() : nx && nx.letter ? nx.letter : T0;
+    const want = isWord() ? nextLetter() : isHaraka() ? sylAt(0) : nx && nx.letter ? nx.letter : T0;
     if (nx) nx.asked = true;
     S.askedCh = want.ch; S.askedT = S.t;
-    Voice.say([TR.lines.wrong(p.letter), TR.lines.find(want)], { gap: 300 });
-    setChip(want.ch, nx && nx.review ? 'var(--blue)' : 'var(--pink)'); pingChip(); S.chipBusy = true;
+    // harakat: spell what was picked («بَاءْ، كَسْرَة، بِ»), then ask for the wanted one
+    Voice.say([isHaraka() ? HLINES.spell(p.letter) : TR.lines.wrong(p.letter), findLine(want)], { gap: 300 });
+    setChip(want.ch, isHaraka() ? want.color : nx && nx.review ? 'var(--blue)' : 'var(--pink)'); pingChip(); S.chipBusy = true;
     clearTimeout(S.chipT); S.chipT = setTimeout(() => { S.chipBusy = false; if (S.mode === 'drive') chipShowsTarget(); }, 2600);
     p.pop = 0;
   } else if (p.kind === 'apple') {
@@ -432,10 +468,10 @@ function nextTarget(not) {
 function askNext(cur0) {
   const nx = nextTarget(cur0);
   if (!nx || nx.asked) return null;
-  if (!(nx.review || isWord() || S.recall || S.missStreak >= 1 || S.recentWrong)) return null;
+  if (!(nx.review || isWord() || isHaraka() || S.recall || S.missStreak >= 1 || S.recentWrong)) return null;
   nx.asked = true;
   if (nx.review) { setChip(nx.letter.ch, 'var(--blue)'); pingChip(); }
-  return TR.lines.find(nx.letter);
+  return findLine(nx.letter);
 }
 // the child is not steering at all: bring the letter straight ahead (counted as helped)
 function assistPair(p) {
@@ -450,20 +486,38 @@ function announcePair(p) {
   if (!p.review && S.missStreak >= 3) assistPair(p);
   if (!p.review && p.glow && set().hint && (S.missStreak >= 1 || S.recentWrong)) p.glow.visible = true;
   // fallback only for the nearest pair: a pair further back would be cut off by the feedback of the one in front
-  if (!p.asked && !Voice.busy && nextTarget(null) === p && (p.review || isWord() || S.recall || S.missStreak >= 1 || S.recentWrong)) { p.asked = true; Voice.say(TR.lines.find(p.letter)); }
+  if (!p.asked && !Voice.busy && nextTarget(null) === p && (p.review || isWord() || isHaraka() || S.recall || S.missStreak >= 1 || S.recentWrong)) { p.asked = true; Voice.say(findLine(p.letter)); }
 }
 // word mode: bubbles already on the road ask for the letters still missing, in order
 function retarget() {
+  if (isHaraka()) return retargetHaraka();
   if (!isWord()) return;
   const W = cur();
   const ts = S.pickups.filter(q => q.kind === 'target' && q.alive && !q.missed).sort((a, b) => T.delta(S.u, a.u) - T.delta(S.u, b.u));
   ts.forEach((q, i) => {
     const L = nextLetter(i);
     if (q.letter === L) return;
-    q.letter = L; q.asked = L.ch === S.askedCh && S.t - (S.askedT || -99) < 4; // just asked after a wrong pick q.mat.map = bubbleTexture(L.ch, q.col); q.mat.needsUpdate = true;
+    // keep `asked` when this letter was just asked for after a wrong pick (no double question)
+    q.letter = L; q.asked = L.ch === S.askedCh && S.t - (S.askedT || -99) < 4;
+    q.mat.map = bubbleTexture(L.ch, q.col); q.mat.needsUpdate = true;
     if (q.pair && (q.pair.letter === L || W.parts.includes(q.pair.letter.ch))) {
       const pool = TR.distractors(TR.letters.indexOf(L), false).filter(x => !W.parts.includes(x.ch));
       if (pool.length) { q.pair.letter = pick(pool); q.pair.mat.map = bubbleTexture(q.pair.letter.ch, q.pair.col); q.pair.mat.needsUpdate = true; }
+    }
+  });
+}
+// harakat: bubbles ahead ask for the syllables still missing, in order; the other bubble never shows the same mark
+function retargetHaraka() {
+  const ts = S.pickups.filter(q => q.kind === 'target' && q.alive && !q.missed).sort((a, b) => T.delta(S.u, a.u) - T.delta(S.u, b.u));
+  ts.forEach((q, i) => {
+    const x = sylAt(i);
+    if (q.letter !== x) {
+      q.letter = x; q.asked = x.ch === S.askedCh && S.t - (S.askedT || -99) < 4;
+      q.mat.map = bubbleTexture(x.ch, q.col, markColorFor(x)); q.mat.needsUpdate = true;
+    }
+    if (q.pair && q.pair.letter.h === x.h) {
+      q.pair.letter = pick(SYLLABLES[S.index].filter(y => y.h !== x.h));
+      q.pair.mat.map = bubbleTexture(q.pair.letter.ch, q.pair.col, markColorFor(q.pair.letter)); q.pair.mat.needsUpdate = true;
     }
   });
 }
@@ -504,8 +558,8 @@ function updatePickups(dt) {
     if (p.kind === 'target' && p.alive && !p.missed && du < -3) {
       p.missed = true;
       if (p.review) chipShowsTarget();
-      else if (!p.handled) { S.missStreak++; S.misses++; Store.addMiss(missIdx(), TR.lang); }
-      if (isWord()) retarget();
+      else if (!p.handled) { S.missStreak++; S.misses++; addMissNow(); }
+      if (isWord() || isHaraka()) retarget();
       const nx = nextTarget(p);
       if (nx && !nx.review) {
         if (S.missStreak >= 3) assistPair(nx);
@@ -576,7 +630,7 @@ function spawnGate() {
   // remove anything still waiting ahead
   for (const p of S.pickups) if (T.delta(S.u, p.u) > 6 && p.kind !== 'coin') { p.dead = true; }
   S.archU = T.wrapU(S.u + (S.need === 0 ? 75 : 105));
-  const arch = S.kind === 'word' ? makeArch(C.word, '') : makeArch(S.kind === 'letter' ? C.ch : C.digit, C.word);
+  const arch = S.kind === 'word' ? makeArch(C.word, '') : isHaraka() ? makeArch(sylRow(S.index), '') : makeArch(S.kind === 'letter' ? C.ch : C.digit, C.word);
   arch.group.position.copy(T.pos(S.archU, 0)); arch.group.rotation.y = T.heading(S.archU);
   scene.add(arch.group); S.arch = arch;
   Sound.gateOpen();
@@ -597,7 +651,7 @@ function buildStage() {
   // hide nearby enclosures so the stage is clear
   for (const h of S.slotHabs) if (h) h.group.visible = h.group.position.distanceTo(best.c) > 34;
   const ids = S.kind !== 'number' ? [C.animal] : [];
-  const hab = makeHabitat(C.biome, ids, S.kind === 'word' ? { big: C.word, word: '' } : { big: S.kind === 'letter' ? C.ch : C.digit, word: C.word }, { radius: 12, animalScale: 1.35, seed: 99 + S.index, signBack: true });
+  const hab = makeHabitat(C.biome, ids, S.kind === 'word' ? { big: C.word, word: '' } : isHaraka() ? { big: sylRow(S.index), word: '' } : { big: S.kind === 'letter' ? C.ch : C.digit, word: C.word }, { radius: 12, animalScale: 1.35, seed: 99 + S.index, signBack: true });
   hab.group.position.copy(best.c); hab.group.rotation.y = Math.atan2(road.x - best.c.x, road.z - best.c.z);
   hab.items = hab.animals.map(a => ({ root: a.root, baseScale: a.baseScale, animal: a }));
   if (S.kind === 'number') {
@@ -614,7 +668,16 @@ function drawCard() {
   const C = cur(), cv = $('wordcv'), g = cv.getContext('2d');
   g.clearRect(0, 0, cv.width, cv.height);
   const cx = cv.width / 2;
-  if (S.kind === 'word') {
+  if (isHaraka()) {
+    // three circles, one per mark, with the mark's name under each (right to left: fatha first)
+    SYLLABLES[S.index].forEach((x, k) => {
+      const X = cx + (1 - k) * 200;
+      g.fillStyle = x.color; g.beginPath(); g.arc(X, 150, 86, 0, TAU); g.fill();
+      g.direction = 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      drawSyllable(g, x.ch, X, 150, 150, '#ffffff', 'rgba(0,0,0,.25)', '#ffffff');
+      g.font = `800 46px ${FONT}, sans-serif`; g.fillStyle = x.color; g.fillText(ui().hnames[k], X, 300);
+    });
+  } else if (S.kind === 'word') {
     // the letters one by one, then the word they make (Arabic: joined)
     g.direction = TR.lang === 'en' ? 'ltr' : 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.font = `800 92px ${FONT}, sans-serif`; g.fillStyle = '#ff4d6d';
@@ -653,7 +716,7 @@ function celebrate() {
   const cs = $('cstars'); cs.innerHTML = '';
   for (let i = 0; i < 3; i++) { cs.insertAdjacentHTML('beforeend', ICON.star); }
   [...cs.children].forEach((el, i) => { if (i < stars) setTimeout(() => { el.classList.add('on'); Sound.star(); }, 500 + i * 300); });
-  $('friend').textContent = S.kind === 'word' ? ui().wordDone : first && S.kind === 'letter' ? ui().friend : '';
+  $('friend').textContent = S.kind === 'word' ? ui().wordDone : isHaraka() ? ui().harakaDone : first && S.kind === 'letter' ? ui().friend : '';
   if (gifts.length) $('friend').textContent += `  🎁 ${ui().garageNew} ${gifts.map(g => g.icon || '🎨').join(' ')}`;
   $('friend').dir = ui().dir;
   $('celebrate').classList.remove('hidden');
@@ -665,7 +728,9 @@ function celebrate() {
 }
 function sayCelebration(first) {
   const C = cur();
-  if (S.kind === 'word') {
+  if (isHaraka()) {
+    Voice.say([HLINES.chant(S.index), praise()], { gap: 500 });
+  } else if (S.kind === 'word') {
     Voice.say([C.say, TR.lines.wordBlend(C), praise()], { gap: 500 });
   } else if (S.kind === 'letter') {
     Voice.say([C.name, TR.lines.sound(C), praise()].concat(first ? [TR.lines.newFriend] : []), { gap: 450 });
@@ -770,7 +835,7 @@ function renderMap() {
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === mapTab));
   $('totstars').textContent = Store.data.totalStars;
   const { kind: tKind, lang: tLang } = tabInfo(mapTab), track = TRACKS[tLang];
-  const list = tKind === 'letter' ? track.letters : tKind === 'word' ? track.words : track.numbers;
+  const list = tKind === 'letter' || tKind === 'haraka' ? track.letters : tKind === 'word' ? track.words : track.numbers;
   const arr = Store.prog(tKind, tLang);
   // word tabs: one themed pack at a time (zoo, home, market, sea, nature), chosen with the chips row
   const packs = $('packs'); packs.classList.toggle('hidden', tKind !== 'word'); packs.innerHTML = '';
@@ -817,18 +882,18 @@ function renderMap() {
     const unlocked = tKind === 'word' ? (Store.data.unlockAll || prev < 0 || arr[i] > 0 || arr[prev] > 0 || item.parts.every(ch => lp[track.letters.findIndex(x => x.ch === ch)] > 0)) : Store.unlocked(tKind, i, tLang);
     const paid = !Purchase.canPlay(tKind, i);
     const done = arr[i] > 0 && !paid;
-    const glyph = tKind === 'letter' ? item.ch : tKind === 'word' ? item.word : item.digit;
+    const glyph = tKind === 'letter' ? item.ch : tKind === 'word' ? item.word : tKind === 'haraka' ? sylImgs(i) : item.digit;
     el.className = 'node ' + (done ? 'done' : unlocked && !paid ? 'current' : 'locked') + (paid ? ' paid' : '');
-    if (tKind === 'word') el.classList.add('wordnode');
+    if (tKind === 'word' || tKind === 'haraka') el.classList.add('wordnode');
     el.style.left = pts[j].x + 'px'; el.style.top = pts[j].y + 'px';
     if (done) {
       const img = document.createElement('img'); img.alt = ''; el.appendChild(img);
       // numbers have no animal: show the glyph (thumb(undefined) used to throw and leave the tile blank)
       if (tKind !== 'number') setTimeout(() => { img.src = thumb(item.animal); }, 10 + j * 25);
-      else { img.remove(); el.insertAdjacentHTML('beforeend', `<span class="glyph${tKind === 'word' ? ' word' : ''}">${glyph}</span>`); }
-      el.insertAdjacentHTML('beforeend', `<span class="badge">${glyph}</span><div class="stars">${[0, 1, 2].map(k => (k < arr[i] ? ICON.star : ICON.starOff)).join('')}</div>`);
+      else { img.remove(); el.insertAdjacentHTML('beforeend', `<span class="glyph${tKind === 'word' || tKind === 'haraka' ? ' word' : ''}">${glyph}</span>`); }
+      el.insertAdjacentHTML('beforeend', `<span class="badge">${tKind === 'haraka' ? item.ch : glyph}</span><div class="stars">${[0, 1, 2].map(k => (k < arr[i] ? ICON.star : ICON.starOff)).join('')}</div>`);
     } else {
-      el.insertAdjacentHTML('beforeend', `<span class="glyph${tKind === 'word' ? ' word' : ''}">${glyph}</span>`);
+      el.insertAdjacentHTML('beforeend', `<span class="glyph${tKind === 'word' || tKind === 'haraka' ? ' word' : ''}">${glyph}</span>`);
       if (paid) el.insertAdjacentHTML('beforeend', '<div class="lock gold">★</div>');
       else if (unlocked) { el.insertAdjacentHTML('beforeend', `<div class="pin">${kartSvg(KART_COLORS[Store.data.kart])}</div>`); if (!currentEl) currentEl = el; }
       else el.insertAdjacentHTML('beforeend', `<div class="lock">${ICON.lock}</div>`);
@@ -943,7 +1008,8 @@ $('play').addEventListener('click', async () => {
 // ---------- HUD buttons ----------
 $('target').addEventListener('pointerdown', e => {
   e.stopPropagation(); const C = cur();
-  Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : S.kind === 'word' ? [C.say, nextLetter().name] : C.say);
+  Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : S.kind === 'word' ? [C.say, nextLetter().name] : isHaraka() ? HLINES.spell(sylAt(0)) : C.say);
+  if (isHaraka() && S.recall) { const x = sylAt(0); setChip(x.ch, x.color); setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }
   // in recall rounds a tap shows the letter again for a moment
   if (S.kind === 'letter' && S.recall) { setChip(C.ch, 'var(--pink)'); setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }
   pingChip();
@@ -953,11 +1019,13 @@ $('presume').addEventListener('click', () => { Sound.click(); setPaused(false); 
 $('prestart').addEventListener('click', () => { Sound.click(); S.paused = false; $('pause').classList.add('hidden'); Sound.resume(); startLevel(S.kind, S.index); });
 $('pmap').addEventListener('click', () => { Sound.click(); S.paused = false; Sound.resume(); toMap(); });
 $('chome').addEventListener('click', () => { Sound.click(); toMap(); });
-$('chear').addEventListener('click', () => { Sound.click(); S.happyT = 2.5; const C = cur(); Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : S.kind === 'word' ? [TR.lines.wordBlend(C)] : [C.say]); });
+$('chear').addEventListener('click', () => { Sound.click(); S.happyT = 2.5; const C = cur(); Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : S.kind === 'word' ? [TR.lines.wordBlend(C)] : isHaraka() ? [HLINES.chant(S.index)] : [C.say]); });
 $('cagain').addEventListener('click', () => { Sound.click(); startLevel(S.kind, S.index); });
 $('cnext').addEventListener('click', () => {
   Sound.click();
-  const list = S.kind === 'letter' ? TR.letters : S.kind === 'word' ? TR.words : TR.numbers;
+  const list = S.kind === 'letter' || isHaraka() ? TR.letters : S.kind === 'word' ? TR.words : TR.numbers;
+  // a harakat level only opens after its plain letter: otherwise back to the map
+  if (isHaraka() && !Store.unlocked('haraka', S.index + 1)) return toMap();
   if (S.index + 1 < list.length) startLevel(S.kind, S.index + 1); else toMap();
 });
 function setPaused(p) {
@@ -1019,7 +1087,7 @@ function openGate(onPass = openSettings) {
 function openPaywall(fromSettings) {
   const u = ui(), full = Purchase.isFull();
   $('pwtitle').textContent = full ? u.pwOwned : u.pwTitle;
-  $('pwbody').textContent = u.pwBody(TRACKS.ar.words.length + TRACKS.en.words.length - 2 * FREE_WORDS);
+  $('pwbody').textContent = u.pwBody(TRACKS.ar.words.length + TRACKS.en.words.length - 2 * FREE_WORDS, TRACKS.ar.letters.length - FREE_WORDS);
   $('pwfree').textContent = u.pwFree; $('pwparents').textContent = '🔒 ' + u.pwParents;
   $('pwbuy').textContent = u.pwBuy(Purchase.price); $('pwbuy').classList.toggle('hidden', full);
   $('pwrestore').textContent = u.pwRestore; $('pwrestore').classList.toggle('hidden', full);
@@ -1045,7 +1113,7 @@ $('spw').addEventListener('click', () => { Sound.click(); $('settings').classLis
 $('pgclose').addEventListener('click', () => { Sound.click(); $('pgate').classList.add('hidden'); });
 const OPTS = ['sfx', 'music', 'voice', 'haptics', 'hint', 'tilt', 'flip', 'speed', 'voiceRate', 'voiceName'];
 // a short sample in the track the child is learning
-const voiceSample = () => (TR.lang === 'en' ? ['Letter A', TR.lines.sound(TR.letters[0])] : ['أَلِف', 'أَسَد']);
+const voiceSample = () => (TR.lang === 'en' ? ['Letter A', TR.lines.sound(TR.letters[0])] : [TR.letters[0].name, TR.letters[0].say]);
 function openSettings() {
   Sound.click();
   const grid = $('sgrid'); grid.innerHTML = '';
@@ -1229,6 +1297,6 @@ async function boot() {
   $('loading').classList.add('hidden');
   requestAnimationFrame(frame);
   // test hook (headless checks)
-  window.__lk = { thumb, Purchase, openPaywall,  keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, openGarage, closeGarage, setKart, metAnimals, TRACKS, get TR() { return TR; } };
+  window.__lk = { SYLLABLES, HLINES, sylAt, bubbleTexture, thumb, Purchase, openPaywall,  keys, touch, S, T, startLevel, toMap, toTitle, hitPickup, Store, Voice, cur, celebrate, scene, camera, renderer, setPaused, openSettings, openGate, onBack, openGarage, closeGarage, setKart, metAnimals, TRACKS, get TR() { return TR; } };
 }
 boot();

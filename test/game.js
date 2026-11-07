@@ -90,8 +90,21 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     await wait(2500); await p.screenshot({ path: OUT + `/29-word-${tag}-card.png` });
     console.log('word', tag, 'stars', await p.evaluate(lang => window.__lk.Store.prog('word', lang)[0], lang));
   }
+  // harakat mode: read أ with fatha / kasra / damma (6 syllables), stars go to the harakat array only
+  {
+    const before = await p.evaluate(() => JSON.stringify(window.__lk.Store.data.numbers));
+    await p.evaluate(() => { const L = window.__lk; L.Store.data.letters[0] = Math.max(1, L.Store.data.letters[0]); L.startLevel('haraka', 0, 'ar'); }); await auto();
+    await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 600000 });
+    await wait(900); await p.screenshot({ path: OUT + '/34-haraka-drive.png' });
+    await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
+    await wait(2500); await p.screenshot({ path: OUT + '/35-haraka-card.png' });
+    const h = await p.evaluate(() => { const L = window.__lk, d = L.Store.data; return { star: d.harakat[0], need: L.S.need, numbers: JSON.stringify(d.numbers) }; });
+    console.log('haraka stars', h.star, h.need === 6 ? 'OK' : 'need=' + h.need, h.numbers === before ? 'numbers untouched' : 'NUMBERS CHANGED');
+    // first 5 harakat letters are free, the 6th needs the full game
+    console.log('haraka free', await p.evaluate(() => { const P = window.__lk.Purchase; return [P.isFree('haraka', 4), P.isFree('haraka', 5)].join(','); }));
+  }
   // garage: a level that crosses a star threshold announces the gift; then customise and drive with a co-pilot
-  await p.evaluate(() => { const L = window.__lk, d = L.Store.data; for (const k of ['letters', 'numbers', 'enLetters', 'enNumbers', 'words', 'enWords']) d[k].fill(0); d.letters[0] = 1; d.letters[1] = 1; L.startLevel('letter', 2, 'ar'); }); await auto();
+  await p.evaluate(() => { const L = window.__lk, d = L.Store.data; for (const k of ['letters', 'numbers', 'enLetters', 'enNumbers', 'words', 'enWords', 'harakat']) d[k].fill(0); d.letters[0] = 1; d.letters[1] = 1; L.startLevel('letter', 2, 'ar'); }); await auto();
   await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
   await wait(1500);
   console.log('gift text', await p.evaluate(() => document.getElementById('friend').textContent));

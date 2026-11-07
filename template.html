@@ -132,6 +132,12 @@ svg{display:block}
 #target{position:absolute;top:calc(8px + var(--st));right:calc(10px + var(--sr));display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.92);border-radius:28px;padding:6px 12px 6px 8px;pointer-events:auto;box-shadow:0 6px 0 rgba(43,27,107,.25)}
 #tglyph{width:clamp(56px,16vh,92px);height:clamp(56px,16vh,92px);border-radius:50%;background:var(--pink);color:#fff;font-weight:800;font-size:clamp(38px,11vh,64px);line-height:1;display:flex;align-items:center;justify-content:center;padding-top:.12em;box-shadow:inset 0 -6px 0 rgba(0,0,0,.15)}
 #target.ping #tglyph{animation:ping .5s}
+img.syl{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
+#tglyph img.syl{width:92%;height:92%;margin-top:-.12em}
+.slot img.syl,.flyer img.syl{width:96%;height:96%;margin-top:-.1em}
+.sylrow{display:flex;direction:rtl;gap:.04em;align-items:center;justify-content:center}
+.sylrow img.syl{width:1.05em;height:1.05em}
+#introglyph .sylrow img.syl{width:.95em;height:.95em}
 @keyframes ping{40%{transform:scale(1.25) rotate(-6deg)}}
 #wordhud{height:clamp(46px,13vh,78px);width:auto}
 #wordhud.pop{animation:pop .35s}
@@ -241,7 +247,7 @@ svg{display:block}
 <div id="map" class="screen hidden">
   <header>
     <div class="brand">LearningKart</div>
-    <div class="tabs"><button class="tab on" data-tab="letter">الحروف</button><button class="tab" data-tab="number">الأرقام</button><button class="tab" data-tab="word">كلمات</button><button class="tab en" data-tab="enletter">ABC</button><button class="tab en" data-tab="ennumber">123</button><button class="tab en" data-tab="enword">Words</button></div>
+    <div class="tabs"><button class="tab on" data-tab="letter">الحروف</button><button class="tab" data-tab="haraka">الحركات</button><button class="tab" data-tab="number">الأرقام</button><button class="tab" data-tab="word">كلمات</button><button class="tab en" data-tab="enletter">ABC</button><button class="tab en" data-tab="ennumber">123</button><button class="tab en" data-tab="enword">Words</button></div>
     <div class="coins" data-icon="star"><b id="totstars">0</b></div>
     <button id="gear" aria-label="settings"><svg class="ring" viewBox="0 0 60 60"><circle cx="30" cy="30" r="27"/></svg><span id="gearhint" data-i18n="gearhint">اضغط مطولاً – للوالدين</span></button>
     <button class="langbtn" data-lang aria-label="English">EN</button>

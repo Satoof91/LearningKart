@@ -25,12 +25,12 @@ export const UI = {
     vUnknown: 'اضغط "تجربة الصوت" للتأكد من نطق الحروف.',
     // the numbers are written as words, so a child who knows the digit shapes cannot just match them
     gate: (a, b) => `للوالدين: اضغط ${AR_NUM[a]} ثم ${AR_NUM[b]}`, gateDigit: arDigits,
-    pwTitle: 'افتح اللعبة كاملة', pwBody: n => `${n} كلمة جديدة في البيت والسوق والبحر والطبيعة، وكل الكلمات القادمة.`,
+    pwTitle: 'افتح اللعبة كاملة', pwBody: (n, h) => `${n} كلمة جديدة في البيت والسوق والبحر والطبيعة، و${h} حرفاً بالحركات (بَ بِ بُ)، وكل ما يُضاف لاحقاً.`,
     pwFree: 'الحروف والأرقام مجانية دائماً.', pwBuy: p => `افتح الكل – ${p}`, pwRestore: 'استعادة الشراء', pwParents: 'للوالدين فقط',
     pwOk: 'شكراً! كل شيء مفتوح الآن 🎉', pwCancel: 'لم يتم الشراء.', pwFail: 'تعذّر الاتصال بالمتجر. حاول لاحقاً.', pwNone: 'لا يوجد شراء سابق لهذا الحساب.',
     pwWeb: 'الشراء متاح داخل التطبيق على الهاتف.', pwOwned: 'اللعبة كاملة ✓',
     collect: L => `اجمع حرف ${L.ch}`, apples: d => `اجمع ${d} تفاحات`, zero: 'صفر = لا شيء', friend: 'صديق جديد في حديقتك!',
-    buildWord: W => `ابنِ كلمة ${W.word}`, wordDone: 'كلمة جديدة!', packs: { zoo: 'الحيوانات', home: 'البيت', market: 'السوق', sea: 'البحر', sky: 'الطبيعة' },
+    buildWord: W => `ابنِ كلمة ${W.word}`, wordDone: 'كلمة جديدة!', tabHaraka: 'الحركات', harakaCollect: L => `اقرأ ${L.ch} بالحركات`, harakaDone: 'أحسنت! قرأت الحركات', hnames: ['فتحة', 'كسرة', 'ضمة'], packs: { zoo: 'الحيوانات', home: 'البيت', market: 'السوق', sea: 'البحر', sky: 'الطبيعة' },
     garage: 'المرآب', gTabs: { body: 'السيارة', color: 'اللون', hat: 'القبعة', skin: 'السائق', pilot: 'الرفيق' },
     garageNew: 'هدية جديدة في المرآب!', pilotNone: 'بدون', pilotEmpty: 'أكمل حرفاً ليركب صديق معك!', learnStars: 'نجوم التعلّم'
   },
@@ -52,12 +52,12 @@ export const UI = {
     vNoneWeb: 'This browser has no Arabic voice. Try Edge or Safari, or install Arabic in the device settings.',
     vUnknown: 'Tap "Test voice" to check the letter voice.',
     gate: (a, b) => `For parents: tap ${EN_NUM[a]}, then ${EN_NUM[b]}`, gateDigit: n => String(n),
-    pwTitle: 'Unlock the full game', pwBody: n => `${n} more words for home, market, sea and nature, plus every future word pack.`,
+    pwTitle: 'Unlock the full game', pwBody: (n, h) => `${n} more words for home, market, sea and nature, ${h} more Arabic letters with harakat (بَ بِ بُ), plus everything added later.`,
     pwFree: 'Letters and numbers are always free.', pwBuy: p => `Unlock all – ${p}`, pwRestore: 'Restore purchase', pwParents: 'For parents only',
     pwOk: 'Thank you! Everything is unlocked 🎉', pwCancel: 'No purchase was made.', pwFail: 'Could not reach the store. Please try again later.', pwNone: 'No earlier purchase found for this account.',
     pwWeb: 'Purchases are available in the phone app.', pwOwned: 'Full game ✓',
     collect: L => `Find the letter ${L.ch}`, apples: d => `Collect ${d} apples`, zero: '0 = nothing', friend: 'A new friend in your zoo!',
-    buildWord: W => `Build the word ${W.word}`, wordDone: 'You built a word!', packs: { zoo: 'Animals', home: 'Home', market: 'Market', sea: 'Sea', sky: 'Nature' },
+    buildWord: W => `Build the word ${W.word}`, wordDone: 'You built a word!', tabHaraka: 'بَ بِ بُ', harakaCollect: L => `Read ${L.ch} with its vowel marks`, harakaDone: 'Great reading!', hnames: ['fatha', 'kasra', 'damma'], packs: { zoo: 'Animals', home: 'Home', market: 'Market', sea: 'Sea', sky: 'Nature' },
     garage: 'Garage', gTabs: { body: 'Kart', color: 'Color', hat: 'Hat', skin: 'Driver', pilot: 'Friend' },
     garageNew: 'New in the garage!', pilotNone: 'None', pilotEmpty: 'Finish a letter and a friend can ride with you!', learnStars: 'Learning stars'
   }

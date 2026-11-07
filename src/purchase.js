@@ -1,5 +1,6 @@
 // One-time "full game" unlock (non-consumable in-app purchase on Google Play and the App Store).
-// Free: all letters and numbers in both languages + the first FREE_WORDS animal words per language.
+// Free: all letters and numbers in both languages + the first FREE_WORDS animal words per language
+// + the first FREE_WORDS harakat letters (أ ب ت ث ج).
 // The purchase is always reached through the parent gate (Families policy / Apple Kids category).
 // The entitlement is cached in the save (Store.data.full) so the game works offline; on start the
 // store is asked again on start, so a purchase made on another device (same account) unlocks here too.
@@ -15,7 +16,7 @@ export const Purchase = {
   price: FALLBACK_PRICE, available: false, busy: false, onChange: null,
   isFull() { return !!Store.data.full; },
   // is this level part of the free game?
-  isFree(kind, i) { return kind !== 'word' || i < FREE_WORDS; },
+  isFree(kind, i) { return (kind !== 'word' && kind !== 'haraka') || i < FREE_WORDS; },
   canPlay(kind, i) { return this.isFull() || this.isFree(kind, i); },
   _set(full) {
     const was = !!Store.data.full; Store.data.full = !!full; Store.save();
