@@ -51,7 +51,13 @@ svg{display:block}
 #map{background:linear-gradient(#8fd8ff 0,#c8efff 30%,#8fdc6c 30.1%,#6cc650 100%)}
 #map header{position:absolute;top:0;left:0;right:0;height:calc(15vh + var(--st));min-height:56px;padding:calc(6px + var(--st)) calc(12px + var(--sr)) 6px calc(12px + var(--sl));display:flex;align-items:center;gap:10px;z-index:3}
 .brand{direction:ltr;font-weight:800;font-size:clamp(20px,6vh,36px);color:#fff;text-shadow:0 3px 0 var(--pink),0 5px 8px rgba(0,0,0,.25)}
-.tabs{display:flex;gap:8px;margin-inline-start:auto;margin-inline-end:auto}
+.tabs{display:flex;gap:8px;margin-inline-start:auto;margin-inline-end:auto;min-width:0;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
+.tabs::-webkit-scrollbar{display:none}
+.tabs .tab{flex:none}
+#map header>*:not(.tabs){flex:none}
+/* narrow phones: the buttons on the edge must stay on screen, the logo gives way first */
+@media (max-width:1180px){#map .brand{display:none}}
+@media (max-width:900px){.tab{font-size:clamp(13px,3.6vh,20px);padding:.15em .55em .3em}}
 .tab{font-weight:800;font-size:clamp(15px,4.2vh,26px);padding:.15em .7em .3em;border-radius:999px;background:rgba(255,255,255,.55);color:var(--ink);box-shadow:0 4px 0 rgba(0,0,0,.12)}
 .tab.on{background:#fff;color:var(--pink);box-shadow:0 4px 0 var(--pink)}
 .tab.en{font-family:LKFont,"Trebuchet MS",sans-serif;direction:ltr}

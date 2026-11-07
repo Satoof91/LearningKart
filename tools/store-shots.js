@@ -13,7 +13,8 @@ const DEVICES = [
   { id: 'apple-iphone-6.9in-2868x1320', w: 956, h: 440, s: 3 },
   { id: 'apple-ipad-13in-2752x2064', w: 1376, h: 1032, s: 2 }
 ];
-const only = process.argv[2]; // optional device id filter
+const only = process.argv[2], mapsOnly = process.argv[3] === 'maps'; // 2nd arg 'maps': only redo the map screenshot
+// // optional: a device id part (e.g. ipad), or 'graphics' for the Play icon + feature graphic only
 
 // progress that makes the map and garage look lived-in (first letters and words done, a racer with a lion)
 function seed(lang) {
@@ -27,7 +28,7 @@ function seed(lang) {
 }
 async function shoot(p, dev, lang, n, name) {
   const dir = path.join(OUT, 'screenshots', dev.id); fs.mkdirSync(dir, { recursive: true });
-  await p.screenshot({ path: path.join(dir, `${lang}-${n}-${name}.png`) });
+  await p.screenshot({ path: path.join(dir, `${lang}-${n}-${name}.png`), timeout: 180000 });
 }
 // drive the kart toward the nearest wanted bubble until `cond` holds
 async function autopilot(p, cond, timeout = 240000) {
@@ -45,7 +46,7 @@ async function autopilot(p, cond, timeout = 240000) {
 
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
-  for (const dev of DEVICES.filter(d => !only || d.id.includes(only))) {
+  for (const dev of DEVICES.filter(d => !only || (only !== 'graphics' && (only === 'all' || d.id.includes(only))))) {
     for (const lang of ['en', 'ar']) {
       const ctx = await browser.newContext({ viewport: { width: dev.w, height: dev.h }, deviceScaleFactor: dev.s, hasTouch: true, locale: lang === 'en' ? 'en-US' : 'ar-SA' });
       const p = await ctx.newPage();
@@ -55,6 +56,7 @@ async function autopilot(p, cond, timeout = 240000) {
       await p.waitForFunction('window.__lk && window.__lk.S.mode === "title"', null, { timeout: 120000 });
       const tr = lang; // the learning track follows the interface language in the screenshots
       console.log(dev.id, lang);
+      if (mapsOnly) { await p.evaluate(tr => window.__lk.toMap(tr === 'en' ? 'enword' : 'word'), tr); await wait(2500); await shoot(p, dev, lang, 6, 'word-packs'); await ctx.close(); continue; }
       // 1 title
       await wait(2500); await shoot(p, dev, lang, 1, 'title');
       // 2 letter level: bubbles on the road
@@ -89,7 +91,7 @@ async function autopilot(p, cond, timeout = 240000) {
     }
   }
   // Google Play: 512 icon and the 1024x500 feature graphic (title screen + logo text)
-  if (!only) {
+  if (!only || only === 'graphics') {
     const ctx = await browser.newContext({ viewport: { width: 1024, height: 500 }, deviceScaleFactor: 1 });
     const p = await ctx.newPage();
     const icon = 'data:image/png;base64,' + fs.readFileSync(path.join(ROOT, 'assets/icon-only.png')).toString('base64');
