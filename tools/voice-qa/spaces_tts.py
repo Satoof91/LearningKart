@@ -10,7 +10,6 @@ exact diacritized text so the voice stays the one the owner knows):
   f5ar        IbrahimSalah/Arabic-F5-TTS-v2 via the first community Space that answers (non-commercial licence)
 Writes bench/spaces/<engine>/<id>.wav (+ <id>.txt with the text); resumable."""
 import os, sys, re, json, time, argparse, shutil
-from gradio_client import Client, handle_file
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from judge import kind  # noqa
 
@@ -26,6 +25,7 @@ PROBE = {  # the clips every Microsoft voice got wrong, plus a sentence and a lo
 F5AR_SPACES = ['IbrahimSalah/Arabic-F5-TTS', 'aymenb5/Arabic-F5-TTS', 'hddhdjdi/Arabic-F5-TTS', 'Onolnhuuuk/Arabic-F5-T']
 
 def client(space):
+    from gradio_client import Client
     for attempt in range(3):
         try: return Client(space, verbose=False)
         except Exception as e:
@@ -34,6 +34,7 @@ def client(space):
 
 def mk(engine):
     """returns say(text) -> path of a wav/mp3 produced by the Space"""
+    from gradio_client import handle_file
     if engine in ('habibi', 'habibi-u'):
         c = client('chenxie95/Habibi-TTS'); model = 'Specialized' if engine == 'habibi' else 'Unified'
         def say(text):

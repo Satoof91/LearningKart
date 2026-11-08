@@ -6,7 +6,7 @@ Writes <folder>/judge.json and prints a table; bench_page.py turns several folde
 import os, sys, re, json, difflib
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from evalset_common import load, norm, nomark  # noqa
+from evalset_common import load, norm, nomark, trim  # noqa
 from vowel import analyze, classify  # noqa
 from judge import kind, syl_why, one_why, multi_why  # noqa
 from faster_whisper import WhisperModel
@@ -15,13 +15,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PROMPT = 'بَ بَ بَ. بِ بِ بِ. بُ بُ بُ. جِ جِ جِ. حِ حِ حِ. أَلِف. بَاء. تَاء. جِيم. دَال. لَام. قَاف. فَتْحَة. كَسْرَة. ضَمَّة. بَطَّة. رَنَّة. حِصَان. سُلَحْفَاة. هَيَّا نَجْمَعُ حَرْفَ بَاء.'
 model = WhisperModel('large-v3-turbo', device='cpu', compute_type='int8')
 gap = np.zeros(int(16000 * 0.3), np.float32)
-
-def trim(au, thr=0.01):
-    """strip leading/trailing near-silence (cloning models pad their output)"""
-    idx = np.where(np.abs(au) > thr)[0]
-    if len(idx) == 0: return au
-    a, b = max(0, idx[0] - 800), min(len(au), idx[-1] + 1600)
-    return au[a:b]
 
 def after_gap(au, lo=0.3, hi=0.85):
     """cut at the quietest frame in the middle part of the clip: the pause between the carrier word and the target"""

@@ -21,6 +21,7 @@ def analyze(path, female=False):
     """formants from the loud, voiced core of the clip: the longest stretch that is within 14 dB of the
     peak intensity AND voiced; the middle 60% of it is measured (skips the consonant onset and the tail)"""
     y = load(path); snd = parselmouth.Sound(y, sampling_frequency=16000)
+    if len(y) < 16000 * 0.1: return dict(f1=0, f2=0, dur=round(len(y) / 16000, 3), voiced=0)   # too short for Praat's 70 Hz window
     inten = snd.to_intensity(minimum_pitch=70, time_step=0.005)
     pitch = snd.to_pitch(time_step=0.005, pitch_floor=70, pitch_ceiling=400)
     ts = inten.xs(); vals = inten.values[0]; peak = float(np.max(vals)) if len(vals) else 0
