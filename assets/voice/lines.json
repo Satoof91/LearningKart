@@ -2983,14 +2983,14 @@
     "note": "اسم الحركة"
   },
   {
+    "id": "haraka-find",
+    "text": "أَيْنَ",
+    "note": "سؤال الحركات: «أَيْنَ» + مقطع"
+  },
+  {
     "id": "haraka-01-intro",
     "text": "هَيَّا نَقْرَأُ حَرْفَ أَلِف بِالحَرَكَاتْ",
     "note": "حركات أ"
-  },
-  {
-    "id": "haraka-01-fa-find",
-    "text": "أَيْنَ ءَ؟",
-    "note": "سؤال أَ"
   },
   {
     "id": "haraka-01-ki",
@@ -2998,19 +2998,9 @@
     "note": "مقطع إِ"
   },
   {
-    "id": "haraka-01-ki-find",
-    "text": "أَيْنَ ءِ؟",
-    "note": "سؤال إِ"
-  },
-  {
     "id": "haraka-01-da",
     "text": "ءُ",
     "note": "مقطع أُ"
-  },
-  {
-    "id": "haraka-01-da-find",
-    "text": "أَيْنَ ءُ؟",
-    "note": "سؤال أُ"
   },
   {
     "id": "haraka-02-intro",
@@ -3018,19 +3008,9 @@
     "note": "حركات ب"
   },
   {
-    "id": "haraka-02-fa-find",
-    "text": "أَيْنَ بَ؟",
-    "note": "سؤال بَ"
-  },
-  {
     "id": "haraka-02-ki",
     "text": "بِ",
     "note": "مقطع بِ"
-  },
-  {
-    "id": "haraka-02-ki-find",
-    "text": "أَيْنَ بِ؟",
-    "note": "سؤال بِ"
   },
   {
     "id": "haraka-02-da",
@@ -3038,24 +3018,9 @@
     "note": "مقطع بُ"
   },
   {
-    "id": "haraka-02-da-find",
-    "text": "أَيْنَ بُ؟",
-    "note": "سؤال بُ"
-  },
-  {
     "id": "haraka-03-intro",
     "text": "هَيَّا نَقْرَأُ حَرْفَ تَاء بِالحَرَكَاتْ",
     "note": "حركات ت"
-  },
-  {
-    "id": "haraka-03-fa-find",
-    "text": "أَيْنَ تَ؟",
-    "note": "سؤال تَ"
-  },
-  {
-    "id": "haraka-03-ki-find",
-    "text": "أَيْنَ تِ؟",
-    "note": "سؤال تِ"
   },
   {
     "id": "haraka-03-da",
@@ -3063,19 +3028,9 @@
     "note": "مقطع تُ"
   },
   {
-    "id": "haraka-03-da-find",
-    "text": "أَيْنَ تُ؟",
-    "note": "سؤال تُ"
-  },
-  {
     "id": "haraka-04-intro",
     "text": "هَيَّا نَقْرَأُ حَرْفَ ثَاء بِالحَرَكَاتْ",
     "note": "حركات ث"
-  },
-  {
-    "id": "haraka-04-fa-find",
-    "text": "أَيْنَ ثَ؟",
-    "note": "سؤال ثَ"
   },
   {
     "id": "haraka-04-ki",
@@ -3083,19 +3038,9 @@
     "note": "مقطع ثِ"
   },
   {
-    "id": "haraka-04-ki-find",
-    "text": "أَيْنَ ثِ؟",
-    "note": "سؤال ثِ"
-  },
-  {
     "id": "haraka-04-da",
     "text": "ثُ",
     "note": "مقطع ثُ"
-  },
-  {
-    "id": "haraka-04-da-find",
-    "text": "أَيْنَ ثُ؟",
-    "note": "سؤال ثُ"
   },
   {
     "id": "haraka-05-intro",
@@ -3103,19 +3048,9 @@
     "note": "حركات ج"
   },
   {
-    "id": "haraka-05-fa-find",
-    "text": "أَيْنَ جَ؟",
-    "note": "سؤال جَ"
-  },
-  {
     "id": "haraka-05-ki",
     "text": "جِ",
     "note": "مقطع جِ"
-  },
-  {
-    "id": "haraka-05-ki-find",
-    "text": "أَيْنَ جِ؟",
-    "note": "سؤال جِ"
   },
   {
     "id": "haraka-05-da",
@@ -3123,29 +3058,9 @@
     "note": "مقطع جُ"
   },
   {
-    "id": "haraka-05-da-find",
-    "text": "أَيْنَ جُ؟",
-    "note": "سؤال جُ"
-  },
-  {
     "id": "haraka-06-intro",
     "text": "هَيَّا نَقْرَأُ حَرْفَ حَاء بِالحَرَكَاتْ",
     "note": "حركات ح"
-  },
-  {
-    "id": "haraka-06-fa-find",
-    "text": "أَيْنَ حَ؟",
-    "note": "سؤال حَ"
-  },
-  {
-    "id": "haraka-06-ki-find",
-    "text": "أَيْنَ حِ؟",
-    "note": "سؤال حِ"
-  },
-  {
-    "id": "haraka-06-da-find",
-    "text": "أَيْنَ حُ؟",
-    "note": "سؤال حُ"
   },
   {
     "id": "haraka-07-intro",
@@ -3153,24 +3068,9 @@
     "note": "حركات خ"
   },
   {
-    "id": "haraka-07-fa-find",
-    "text": "أَيْنَ خَ؟",
-    "note": "سؤال خَ"
-  },
-  {
     "id": "haraka-07-ki",
     "text": "خِ",
     "note": "مقطع خِ"
-  },
-  {
-    "id": "haraka-07-ki-find",
-    "text": "أَيْنَ خِ؟",
-    "note": "سؤال خِ"
-  },
-  {
-    "id": "haraka-07-da-find",
-    "text": "أَيْنَ خُ؟",
-    "note": "سؤال خُ"
   },
   {
     "id": "haraka-08-intro",
@@ -3183,24 +3083,9 @@
     "note": "مقطع دَ"
   },
   {
-    "id": "haraka-08-fa-find",
-    "text": "أَيْنَ دَ؟",
-    "note": "سؤال دَ"
-  },
-  {
     "id": "haraka-08-ki",
     "text": "دِ",
     "note": "مقطع دِ"
-  },
-  {
-    "id": "haraka-08-ki-find",
-    "text": "أَيْنَ دِ؟",
-    "note": "سؤال دِ"
-  },
-  {
-    "id": "haraka-08-da-find",
-    "text": "أَيْنَ دُ؟",
-    "note": "سؤال دُ"
   },
   {
     "id": "haraka-09-intro",
@@ -3213,24 +3098,9 @@
     "note": "مقطع ذَ"
   },
   {
-    "id": "haraka-09-fa-find",
-    "text": "أَيْنَ ذَ؟",
-    "note": "سؤال ذَ"
-  },
-  {
-    "id": "haraka-09-ki-find",
-    "text": "أَيْنَ ذِ؟",
-    "note": "سؤال ذِ"
-  },
-  {
     "id": "haraka-09-da",
     "text": "ذُ",
     "note": "مقطع ذُ"
-  },
-  {
-    "id": "haraka-09-da-find",
-    "text": "أَيْنَ ذُ؟",
-    "note": "سؤال ذُ"
   },
   {
     "id": "haraka-10-intro",
@@ -3238,19 +3108,9 @@
     "note": "حركات ر"
   },
   {
-    "id": "haraka-10-fa-find",
-    "text": "أَيْنَ رَ؟",
-    "note": "سؤال رَ"
-  },
-  {
     "id": "haraka-10-ki",
     "text": "رِ",
     "note": "مقطع رِ"
-  },
-  {
-    "id": "haraka-10-ki-find",
-    "text": "أَيْنَ رِ؟",
-    "note": "سؤال رِ"
   },
   {
     "id": "haraka-10-da",
@@ -3258,19 +3118,9 @@
     "note": "مقطع رُ"
   },
   {
-    "id": "haraka-10-da-find",
-    "text": "أَيْنَ رُ؟",
-    "note": "سؤال رُ"
-  },
-  {
     "id": "haraka-11-intro",
     "text": "هَيَّا نَقْرَأُ حَرْفَ زَاي بِالحَرَكَاتْ",
     "note": "حركات ز"
-  },
-  {
-    "id": "haraka-11-fa-find",
-    "text": "أَيْنَ زَ؟",
-    "note": "سؤال زَ"
   },
   {
     "id": "haraka-11-ki",
@@ -3278,19 +3128,9 @@
     "note": "مقطع زِ"
   },
   {
-    "id": "haraka-11-ki-find",
-    "text": "أَيْنَ زِ؟",
-    "note": "سؤال زِ"
-  },
-  {
     "id": "haraka-11-da",
     "text": "زُ",
     "note": "مقطع زُ"
-  },
-  {
-    "id": "haraka-11-da-find",
-    "text": "أَيْنَ زُ؟",
-    "note": "سؤال زُ"
   },
   {
     "id": "haraka-12-intro",
@@ -3298,24 +3138,9 @@
     "note": "حركات س"
   },
   {
-    "id": "haraka-12-fa-find",
-    "text": "أَيْنَ سَ؟",
-    "note": "سؤال سَ"
-  },
-  {
     "id": "haraka-12-ki",
     "text": "سِ",
     "note": "مقطع سِ"
-  },
-  {
-    "id": "haraka-12-ki-find",
-    "text": "أَيْنَ سِ؟",
-    "note": "سؤال سِ"
-  },
-  {
-    "id": "haraka-12-da-find",
-    "text": "أَيْنَ سُ؟",
-    "note": "سؤال سُ"
   },
   {
     "id": "haraka-13-intro",
@@ -3323,24 +3148,9 @@
     "note": "حركات ش"
   },
   {
-    "id": "haraka-13-fa-find",
-    "text": "أَيْنَ شَ؟",
-    "note": "سؤال شَ"
-  },
-  {
-    "id": "haraka-13-ki-find",
-    "text": "أَيْنَ شِ؟",
-    "note": "سؤال شِ"
-  },
-  {
     "id": "haraka-13-da",
     "text": "شُ",
     "note": "مقطع شُ"
-  },
-  {
-    "id": "haraka-13-da-find",
-    "text": "أَيْنَ شُ؟",
-    "note": "سؤال شُ"
   },
   {
     "id": "haraka-14-intro",
@@ -3348,29 +3158,14 @@
     "note": "حركات ص"
   },
   {
-    "id": "haraka-14-fa-find",
-    "text": "أَيْنَ صَ؟",
-    "note": "سؤال صَ"
-  },
-  {
     "id": "haraka-14-ki",
     "text": "صِ",
     "note": "مقطع صِ"
   },
   {
-    "id": "haraka-14-ki-find",
-    "text": "أَيْنَ صِ؟",
-    "note": "سؤال صِ"
-  },
-  {
     "id": "haraka-14-da",
     "text": "صُ",
     "note": "مقطع صُ"
-  },
-  {
-    "id": "haraka-14-da-find",
-    "text": "أَيْنَ صُ؟",
-    "note": "سؤال صُ"
   },
   {
     "id": "haraka-15-intro",
@@ -3383,24 +3178,9 @@
     "note": "مقطع ضَ"
   },
   {
-    "id": "haraka-15-fa-find",
-    "text": "أَيْنَ ضَ؟",
-    "note": "سؤال ضَ"
-  },
-  {
-    "id": "haraka-15-ki-find",
-    "text": "أَيْنَ ضِ؟",
-    "note": "سؤال ضِ"
-  },
-  {
     "id": "haraka-15-da",
     "text": "ضُ",
     "note": "مقطع ضُ"
-  },
-  {
-    "id": "haraka-15-da-find",
-    "text": "أَيْنَ ضُ؟",
-    "note": "سؤال ضُ"
   },
   {
     "id": "haraka-16-intro",
@@ -3408,19 +3188,9 @@
     "note": "حركات ط"
   },
   {
-    "id": "haraka-16-fa-find",
-    "text": "أَيْنَ طَ؟",
-    "note": "سؤال طَ"
-  },
-  {
     "id": "haraka-16-ki",
     "text": "طِ",
     "note": "مقطع طِ"
-  },
-  {
-    "id": "haraka-16-ki-find",
-    "text": "أَيْنَ طِ؟",
-    "note": "سؤال طِ"
   },
   {
     "id": "haraka-16-da",
@@ -3428,19 +3198,9 @@
     "note": "مقطع طُ"
   },
   {
-    "id": "haraka-16-da-find",
-    "text": "أَيْنَ طُ؟",
-    "note": "سؤال طُ"
-  },
-  {
     "id": "haraka-17-intro",
     "text": "هَيَّا نَقْرَأُ حَرْفَ ظَاء بِالحَرَكَاتْ",
     "note": "حركات ظ"
-  },
-  {
-    "id": "haraka-17-fa-find",
-    "text": "أَيْنَ ظَ؟",
-    "note": "سؤال ظَ"
   },
   {
     "id": "haraka-17-ki",
@@ -3448,19 +3208,9 @@
     "note": "مقطع ظِ"
   },
   {
-    "id": "haraka-17-ki-find",
-    "text": "أَيْنَ ظِ؟",
-    "note": "سؤال ظِ"
-  },
-  {
     "id": "haraka-17-da",
     "text": "ظُ",
     "note": "مقطع ظُ"
-  },
-  {
-    "id": "haraka-17-da-find",
-    "text": "أَيْنَ ظُ؟",
-    "note": "سؤال ظُ"
   },
   {
     "id": "haraka-18-intro",
@@ -3473,29 +3223,9 @@
     "note": "مقطع عَ"
   },
   {
-    "id": "haraka-18-fa-find",
-    "text": "أَيْنَ عَ؟",
-    "note": "سؤال عَ"
-  },
-  {
-    "id": "haraka-18-ki-find",
-    "text": "أَيْنَ عِ؟",
-    "note": "سؤال عِ"
-  },
-  {
-    "id": "haraka-18-da-find",
-    "text": "أَيْنَ عُ؟",
-    "note": "سؤال عُ"
-  },
-  {
     "id": "haraka-19-intro",
     "text": "هَيَّا نَقْرَأُ حَرْفَ غَيْن بِالحَرَكَاتْ",
     "note": "حركات غ"
-  },
-  {
-    "id": "haraka-19-fa-find",
-    "text": "أَيْنَ غَ؟",
-    "note": "سؤال غَ"
   },
   {
     "id": "haraka-19-ki",
@@ -3503,19 +3233,9 @@
     "note": "مقطع غِ"
   },
   {
-    "id": "haraka-19-ki-find",
-    "text": "أَيْنَ غِ؟",
-    "note": "سؤال غِ"
-  },
-  {
     "id": "haraka-19-da",
     "text": "غُ",
     "note": "مقطع غُ"
-  },
-  {
-    "id": "haraka-19-da-find",
-    "text": "أَيْنَ غُ؟",
-    "note": "سؤال غُ"
   },
   {
     "id": "haraka-20-intro",
@@ -3528,24 +3248,9 @@
     "note": "مقطع فَ"
   },
   {
-    "id": "haraka-20-fa-find",
-    "text": "أَيْنَ فَ؟",
-    "note": "سؤال فَ"
-  },
-  {
-    "id": "haraka-20-ki-find",
-    "text": "أَيْنَ فِ؟",
-    "note": "سؤال فِ"
-  },
-  {
     "id": "haraka-20-da",
     "text": "فُ",
     "note": "مقطع فُ"
-  },
-  {
-    "id": "haraka-20-da-find",
-    "text": "أَيْنَ فُ؟",
-    "note": "سؤال فُ"
   },
   {
     "id": "haraka-21-intro",
@@ -3553,24 +3258,9 @@
     "note": "حركات ق"
   },
   {
-    "id": "haraka-21-fa-find",
-    "text": "أَيْنَ قَ؟",
-    "note": "سؤال قَ"
-  },
-  {
-    "id": "haraka-21-ki-find",
-    "text": "أَيْنَ قِ؟",
-    "note": "سؤال قِ"
-  },
-  {
     "id": "haraka-21-da",
     "text": "قُ",
     "note": "مقطع قُ"
-  },
-  {
-    "id": "haraka-21-da-find",
-    "text": "أَيْنَ قُ؟",
-    "note": "سؤال قُ"
   },
   {
     "id": "haraka-22-intro",
@@ -3578,24 +3268,9 @@
     "note": "حركات ك"
   },
   {
-    "id": "haraka-22-fa-find",
-    "text": "أَيْنَ كَ؟",
-    "note": "سؤال كَ"
-  },
-  {
     "id": "haraka-22-ki",
     "text": "كِ",
     "note": "مقطع كِ"
-  },
-  {
-    "id": "haraka-22-ki-find",
-    "text": "أَيْنَ كِ؟",
-    "note": "سؤال كِ"
-  },
-  {
-    "id": "haraka-22-da-find",
-    "text": "أَيْنَ كُ؟",
-    "note": "سؤال كُ"
   },
   {
     "id": "haraka-23-intro",
@@ -3603,19 +3278,9 @@
     "note": "حركات ل"
   },
   {
-    "id": "haraka-23-fa-find",
-    "text": "أَيْنَ لَ؟",
-    "note": "سؤال لَ"
-  },
-  {
     "id": "haraka-23-ki",
     "text": "لِ",
     "note": "مقطع لِ"
-  },
-  {
-    "id": "haraka-23-ki-find",
-    "text": "أَيْنَ لِ؟",
-    "note": "سؤال لِ"
   },
   {
     "id": "haraka-23-da",
@@ -3623,19 +3288,9 @@
     "note": "مقطع لُ"
   },
   {
-    "id": "haraka-23-da-find",
-    "text": "أَيْنَ لُ؟",
-    "note": "سؤال لُ"
-  },
-  {
     "id": "haraka-24-intro",
     "text": "هَيَّا نَقْرَأُ حَرْفَ مِيم بِالحَرَكَاتْ",
     "note": "حركات م"
-  },
-  {
-    "id": "haraka-24-fa-find",
-    "text": "أَيْنَ مَ؟",
-    "note": "سؤال مَ"
   },
   {
     "id": "haraka-24-ki",
@@ -3643,24 +3298,9 @@
     "note": "مقطع مِ"
   },
   {
-    "id": "haraka-24-ki-find",
-    "text": "أَيْنَ مِ؟",
-    "note": "سؤال مِ"
-  },
-  {
-    "id": "haraka-24-da-find",
-    "text": "أَيْنَ مُ؟",
-    "note": "سؤال مُ"
-  },
-  {
     "id": "haraka-25-intro",
     "text": "هَيَّا نَقْرَأُ حَرْفَ نُون بِالحَرَكَاتْ",
     "note": "حركات ن"
-  },
-  {
-    "id": "haraka-25-fa-find",
-    "text": "أَيْنَ نَ؟",
-    "note": "سؤال نَ"
   },
   {
     "id": "haraka-25-ki",
@@ -3668,19 +3308,9 @@
     "note": "مقطع نِ"
   },
   {
-    "id": "haraka-25-ki-find",
-    "text": "أَيْنَ نِ؟",
-    "note": "سؤال نِ"
-  },
-  {
     "id": "haraka-25-da",
     "text": "نُ",
     "note": "مقطع نُ"
-  },
-  {
-    "id": "haraka-25-da-find",
-    "text": "أَيْنَ نُ؟",
-    "note": "سؤال نُ"
   },
   {
     "id": "haraka-26-intro",
@@ -3693,24 +3323,9 @@
     "note": "مقطع هَ"
   },
   {
-    "id": "haraka-26-fa-find",
-    "text": "أَيْنَ هَ؟",
-    "note": "سؤال هَ"
-  },
-  {
     "id": "haraka-26-ki",
     "text": "هِ",
     "note": "مقطع هِ"
-  },
-  {
-    "id": "haraka-26-ki-find",
-    "text": "أَيْنَ هِ؟",
-    "note": "سؤال هِ"
-  },
-  {
-    "id": "haraka-26-da-find",
-    "text": "أَيْنَ هُ؟",
-    "note": "سؤال هُ"
   },
   {
     "id": "haraka-27-intro",
@@ -3718,19 +3333,9 @@
     "note": "حركات و"
   },
   {
-    "id": "haraka-27-fa-find",
-    "text": "أَيْنَ وَ؟",
-    "note": "سؤال وَ"
-  },
-  {
     "id": "haraka-27-ki",
     "text": "وِ",
     "note": "مقطع وِ"
-  },
-  {
-    "id": "haraka-27-ki-find",
-    "text": "أَيْنَ وِ؟",
-    "note": "سؤال وِ"
   },
   {
     "id": "haraka-27-da",
@@ -3738,19 +3343,9 @@
     "note": "مقطع وُ"
   },
   {
-    "id": "haraka-27-da-find",
-    "text": "أَيْنَ وُ؟",
-    "note": "سؤال وُ"
-  },
-  {
     "id": "haraka-28-intro",
     "text": "هَيَّا نَقْرَأُ حَرْفَ يَاء بِالحَرَكَاتْ",
     "note": "حركات ي"
-  },
-  {
-    "id": "haraka-28-fa-find",
-    "text": "أَيْنَ يَ؟",
-    "note": "سؤال يَ"
   },
   {
     "id": "haraka-28-ki",
@@ -3758,18 +3353,8 @@
     "note": "مقطع يِ"
   },
   {
-    "id": "haraka-28-ki-find",
-    "text": "أَيْنَ يِ؟",
-    "note": "سؤال يِ"
-  },
-  {
     "id": "haraka-28-da",
     "text": "يُ",
     "note": "مقطع يُ"
-  },
-  {
-    "id": "haraka-28-da-find",
-    "text": "أَيْنَ يُ؟",
-    "note": "سؤال يُ"
   }
 ]

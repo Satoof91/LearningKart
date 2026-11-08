@@ -6,10 +6,23 @@ import json, os, html, argparse, re
 
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(os.path.dirname(HERE))
 VOICE = os.path.join(ROOT, 'assets', 'voice')
-ap = argparse.ArgumentParser(); ap.add_argument('--cand', default=''); ap.add_argument('--only', default=''); a = ap.parse_args()
+ap = argparse.ArgumentParser(); ap.add_argument('--cand', default=''); ap.add_argument('--only', default='')
+ap.add_argument('--short', action='store_true', help='only the lines the owner marked wrong (owner-review.txt) plus the first candidate\'s "check" clips')
+a = ap.parse_args()
 cands = [c for c in a.cand.split(',') if c]
 pref = [p for p in a.only.split(',') if p]
 lines = json.load(open(os.path.join(VOICE, 'lines.json'), encoding='utf-8'))
+if a.short:
+    keep = set()
+    lp = os.path.join(HERE, 'owner-review.txt')
+    if os.path.exists(lp):
+        for ln in open(lp, encoding='utf-8'):
+            m = re.match(r'(\S+) (ok|bad) ?(.*)', ln.strip())
+            if m and (m.group(2) == 'bad' or 'غير' in m.group(3)): keep.add(m.group(1))
+    if cands:
+        p = os.path.join(HERE, 'cand', cands[0], 'report.json')
+        if os.path.exists(p): keep |= {r['id'] for r in json.load(open(p, encoding='utf-8')) if r.get('verdict') == 'check'}
+    lines = [l for l in lines if l['id'] in keep]
 rep = {}
 for c in cands:
     p = os.path.join(HERE, 'cand', c, 'report.json')

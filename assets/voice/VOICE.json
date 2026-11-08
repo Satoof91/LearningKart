@@ -1,5 +1,6 @@
 {
- "arabic": "ar-JO-TaimNeural__slow",
- "atoms": "ar-JO-TaimNeural__slow",
+ "arabic": "ar-QA-AmalNeural",
+ "atoms": "ar-QA-AmalNeural",
+ "fixups": {},
  "english": "en-US-JennyNeural"
 }

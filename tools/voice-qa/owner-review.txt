@@ -1,0 +1,77 @@
+014531.log 76 entries
+letter-05-snd bad غير صحيح النطق , جا وليس غا ؟؟
+letter-08-name bad غير واضح نطق الدال وسريع
+letter-09-intro bad نجمع وليس نقمع , يجب ان يكون النطق للحروف سليم وصحيح
+letter-10-word bad رن غير صحيح , الكتابة رنة بشدة على النون وهو حيوان
+letter-12-intro bad 
+letter-14-intro bad 
+letter-15-name bad سريعة وغير واضحة
+letter-15-word ok 
+letter-14-wrong ok 
+letter-14-word ok 
+letter-15-intro bad 
+letter-15-snd ok 
+letter-16-name ok 
+letter-16-word ok 
+letter-16-intro bad 
+letter-17-name ok 
+letter-17-word ok 
+letter-17-intro ok 
+letter-17-find ok 
+letter-17-wrong ok 
+letter-18-name ok 
+letter-18-word ok 
+letter-18-snd ok 
+letter-19-name ok 
+letter-19-word ok 
+letter-20-name ok 
+letter-20-word ok 
+letter-20-intro bad 
+letter-20-snd bad غير واضح
+letter-21-name bad غير سليم النطق
+letter-21-word ok 
+letter-21-snd bad غير واضح وسريع
+letter-22-name ok 
+letter-22-intro bad 
+letter-23-word ok 
+letter-23-name bad غير صحيح النطق
+letter-23-snd ok 
+letter-24-name ok 
+letter-24-intro bad 
+letter-25-snd ok 
+letter-25-word ok 
+letter-25-name bad غير واضح
+letter-24-wrong ok 
+letter-26-name ok 
+letter-26-intro bad 
+letter-26-wrong ok 
+letter-26-snd ok 
+letter-27-name ok 
+letter-27-snd ok 
+letter-28-name ok 
+letter-28-snd ok 
+letter-01-name ok 
+letter-01-word ok 
+letter-01-intro bad 
+letter-01-wrong ok 
+letter-01-snd ok 
+letter-01-find ok 
+letter-02-intro bad 
+letter-02-word ok غير صحيح النطق
+letter-02-name ok 
+letter-02-wrong ok 
+letter-02-snd ok 
+letter-02-find ok 
+letter-03-intro bad 
+letter-04-intro bad 
+letter-03-find ok 
+letter-03-wrong ok 
+letter-04-wrong ok 
+letter-05-word bad جيم ولا غ
+letter-05-intro bad 
+letter-05-find bad 
+letter-04-find ok 
+letter-04-snd ok 
+letter-06-word bad غير سليم النطق
+letter-06-intro bad 
+letter-06-find ok 

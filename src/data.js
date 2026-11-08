@@ -195,7 +195,8 @@ export const HLINES = {
   // sequences are played from one-syllable clips (engines stretch a chain of syllables into long vowels)
   chant: li => SYLLABLES[li].map(x => x.tts),
   spell: x => [x.name, x.hname, x.tts],
-  find: x => `أَيْنَ ${x.tts}؟`, // «أَيْنَ أَ؟» would be read «أين أنْ؟»
+  // «أَيْنَ» + the syllable's own clip: engines glue «أَيْنَ بِ؟» into «أَيْنَبْ», and the child hears exactly the atom being taught
+  find: x => ['أَيْنَ', x.tts],
   howto: 'الفَتْحَةُ شَرْطَةٌ فَوْقَ الحَرْفِ، وَالكَسْرَةُ شَرْطَةٌ تَحْتَ الحَرْفِ، وَالضَّمَّةُ وَاوٌ صَغِيرَةٌ فَوْقَ الحَرْفْ'
 };
 
@@ -261,13 +262,11 @@ export function voiceLines() {
   });
   out.push({ id: 'haraka-howto', text: HLINES.howto, note: 'شرح الحركات (أول مرحلة)' });
   HARAKAT.forEach(H => out.push({ id: `haraka-name-${H.id}`, text: H.name, note: 'اسم الحركة' }));
+  out.push({ id: 'haraka-find', text: HLINES.find(SYLLABLES[0][0])[0], note: 'سؤال الحركات: «أَيْنَ» + مقطع' });
   LETTERS.forEach((L, i) => {
     const k = `haraka-${p2(i + 1)}`;
     out.push({ id: `${k}-intro`, text: HLINES.intro(L), note: `حركات ${L.ch}` });
-    for (const x of SYLLABLES[i]) {
-      out.push({ id: `${k}-${x.h}`, text: x.tts, note: `مقطع ${x.ch}` });
-      out.push({ id: `${k}-${x.h}-find`, text: HLINES.find(x), note: `سؤال ${x.ch}` });
-    }
+    for (const x of SYLLABLES[i]) out.push({ id: `${k}-${x.h}`, text: x.tts, note: `مقطع ${x.ch}` });
   });
   // a text that is already spoken by another line reuses that clip (e.g. the onset «دُ» = letter-08-snd)
   const seen = new Set();
