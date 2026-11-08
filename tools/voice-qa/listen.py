@@ -58,7 +58,8 @@ for g in order:
             sc = r.get('score'); flag = r.get('why') or ''
             bad = r.get('verdict') == 'check'
             btns.append(f'<button class="play{" low" if bad else ""}" data-src="cand/{folder}/{l["id"]}.mp3" title="{html.escape(folder)}">{"ABCD"[k]}</button>')
-            info.append(f'{"ABCD"[k]}={c.split("-")[2].replace("Neural", "")}: {sc if sc is not None else "—"} {html.escape(flag.strip())} «{html.escape((r.get("heard") or "")[:30])}»')
+            label = c.split("-")[2].replace("Neural", "") if c.count("-") >= 2 else c   # ar-QA-AmalNeural -> Amal; chatterbox -> chatterbox
+            info.append(f'{"ABCD"[k]}={label}:{sc if sc is not None else "—"} {html.escape(flag.strip())} «{html.escape((r.get("heard") or "")[:30])}»')
         if l['id'] in fixed: info.append(f'مُصلَح: {fixed[l["id"]]}')
         inst = os.path.join(VOICE, l['id'] + '.mp3')
         btns.append(f'<button class="play inst" data-src="../../assets/voice/{l["id"]}.mp3" title="installed">▶</button>' if os.path.exists(inst) else '<span class="noinst">—</span>')
