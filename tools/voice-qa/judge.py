@@ -1,4 +1,4 @@
-"""Shared pass/check rules for one clip (used by verdict.py and fixups.py).
+"""Shared pass/check rules for one clip (used by bench_judge.py).
 Calibrated against the owner's ear labels (owner-review.txt): everything the owner marked wrong that the
 measurements can see must come out as a reason string; '' means pass."""
 import re, difflib

@@ -64,18 +64,21 @@ The game speaks in this order of preference:
 - Then run `npm run build` (or `npm run sync`). Parent settings show how many recorded clips are in use.
 
 
-### Free option: Microsoft neural voices (edge-tts)
+### The shipped Arabic voice: Chatterbox (open model, MIT)
 
-On a PC with internet access:
+The Arabic clips in `assets/voice/` come from Resemble Chatterbox Multilingual (voice cloned from one verified sentence,
+`tools/voice-qa/ref/amal-haraka-howto.mp3`). The models need a GPU-less cloud box, not a laptop; the recipe and the
+engine comparison are in `tools/voice-qa/bench/cloud/REPORT.md`. Pipeline (all under `tools/voice-qa/`):
 
 ```
-pip install edge-tts
-python tools/make-voice-edge.py                 # Arabic: Saudi male voice (Hamed); English: en-US-JennyNeural
-python tools/make-voice-edge.py --voice ar-SA-ZariyahNeural --voice-en en-US-AnaNeural --force   # other voices
-npm run build
+local_tts.py --engine chatterbox --ids all --out bench/cloud/chatterbox-all   # generate (cloud venv)
+bench_judge.py bench/cloud/chatterbox-all                                     # Whisper ×3 + formants -> judge.json
+cloud_cand.py chatterbox                                                      # -> cand/chatterbox/<id>.mp3 + report.json
+listen.py --cand chatterbox                                                   # listen.html for the owner's ear
+choose.py --from chatterbox                                                   # install into assets/voice, then npm run build
 ```
 
-The clips land in `assets/voice/` and are bundled into the game on the next build.
+`assets/voice/VOICE.json` names the installed voice and lists the clips kept from the previous set until they are regenerated.
 
 ## What's in the mobile app
 

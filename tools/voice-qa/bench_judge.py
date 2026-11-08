@@ -1,7 +1,7 @@
 """Judge any folder of clips (<id>.wav + <id>.txt) with the same rules as the game's verdict:
 lone syllable -> Whisper ×3 + formants (against the SAME folder's بَا/بِي/بُو refs when present, else the clip's engine
-is asked for them by spaces_tts.py --texts), one word -> Whisper ×3 word-by-word, sentence -> Whisper ×1.
-python tools/voice-qa/bench_judge.py bench/spaces/habibi [bench/spaces/silma ...]
+is asked for them by local_tts.py), one word -> Whisper ×3 word-by-word, sentence -> Whisper ×1.
+python tools/voice-qa/bench_judge.py bench/cloud/chatterbox [bench/cloud/silma ...]
 Writes <folder>/judge.json and prints a table; bench_page.py turns several folders into an A/B listening page."""
 import os, sys, re, json, difflib
 import numpy as np

@@ -1,17 +1,24 @@
 """Generate Arabic clips with open voice-cloning models running LOCALLY on CPU (no Space, no quota): the same
-probe set, carrier rule and file layout as spaces_tts.py, so bench_judge.py judges the folder unchanged.
+probe set, carrier rule and file layout bench_judge.py expects (<id>.wav + <id>.txt [+ <id>.gen.txt]).
   python tools/voice-qa/local_tts.py --engine habibi|silma|chatterbox [--out bench/cloud/<engine>] [--ids all|id1,id2] [--texts ...]
 Each engine pins its own torch, so run it with that engine's venv python (see bench/cloud/REPORT.md for the recipe):
   habibi      SWivid Habibi-TTS, Specialized/MSA checkpoint (Apache-2.0; the Unified/SAU/UAE ones are CC-BY-NC-SA), F5-TTS v1 base
   silma       SILMA TTS v1 (Apache-2.0, 150M, F5 family); tashkeel in the text is kept, the normaliser/CATT are switched off
   chatterbox  Resemble Chatterbox Multilingual (MIT), language_id 'ar'
-Every engine clones the owner's Amal voice from cand/ar-QA-AmalNeural/haraka-howto.mp3 + its exact text (REF_TXT).
+Every engine clones the owner's Amal voice from ref/amal-haraka-howto.mp3 + its exact text (ref/amal-haraka-howto.txt).
 Writes <out>/<id>.wav (+ <id>.txt with the text, <id>.gen.txt with the carrier text when one was used) and times.json
 (seconds per clip, for the report); resumable.  `--ids all` = every Arabic line of assets/voice/lines.json + the three
 long-vowel references the formant check needs."""
 import os, sys, json, time, argparse, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from spaces_tts import PROBE, REF_WAV, REF_TXT  # noqa
+REF_WAV = os.path.join(HERE, 'ref', 'amal-haraka-howto.mp3')   # verified Amal sentence (8.35 s): the voice every engine clones
+REF_TXT = open(os.path.join(HERE, 'ref', 'amal-haraka-howto.txt'), encoding='utf-8').read().strip()
+PROBE = {  # the clips every Microsoft voice got wrong, plus a sentence and a lone name
+    'ja': 'جَ', 'ji': 'جِ', 'ju': 'جُ', 'bi': 'بِ', 'ka': 'كَ', 'tha': 'ثَ', 'du': 'دُ',
+    'dal': 'دَال', 'kaf': 'كَاف', 'dad': 'ضَاد', 'thaa': 'ثَاء', 'ranna': 'رَنَّة', 'jamal': 'جَمَل', 'alif': 'أَلِف',
+    'intro-jim': 'هَيَّا نَجْمَعُ حَرْفَ جِيم', 'ayna': 'أَيْنَ', 'batta': 'بَطَّة',
+    '_ref-a': 'بَا', '_ref-i': 'بِي', '_ref-u': 'بُو',   # formant references for bench_judge.py (same voice/engine)
+}
 from judge import kind  # noqa
 
 SEED = 0
@@ -99,7 +106,7 @@ def main():
     for n, i in enumerate(todo):
         text = items[i]; dst = os.path.join(out, i + '.wav')
         # cloning models size the output by text length: a lone syllable or a 4-letter word comes out as a 0.3 s burst.
-        # Short texts therefore ride in a carrier and bench_judge.py cuts them out at the gap (same rule as spaces_tts.py).
+        # Short texts therefore ride in a carrier and bench_judge.py cuts them out at the gap.
         k = kind(text) if not i.startswith('_ref') else 'ref'
         gen = f'نَعَم، {text}' if k == 'syl' else f'هَذَا: {text}' if k == 'one' else text
         t0 = time.time()

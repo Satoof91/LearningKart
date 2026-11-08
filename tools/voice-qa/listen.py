@@ -1,5 +1,5 @@
 """Build tools/voice-qa/listen.html: a page to check Arabic clips by ear, with A/B candidates.
-python tools/voice-qa/listen.py [--cand ar-EG-ShakirNeural,ar-BH-AliNeural] [--only haraka,letter]
+python tools/voice-qa/listen.py [--cand chatterbox,chatterbox-retry] [--only haraka,letter] [--short]
 Each line shows ▶ per candidate voice (from tools/voice-qa/cand/<voice>/) plus the installed clip, the
 scorer's verdict, and ✅/❌ + a note. "Copy results" gives a JSON the owner can paste back."""
 import json, os, html, argparse, re
@@ -8,12 +8,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(os.pat
 VOICE = os.path.join(ROOT, 'assets', 'voice')
 ap = argparse.ArgumentParser(); ap.add_argument('--cand', default=''); ap.add_argument('--only', default='')
 ap.add_argument('--short', action='store_true', help='only the lines the owner marked wrong (owner-review.txt) plus the first candidate\'s "check" clips')
-ap.add_argument('--fix', default='', help='a fixups.py folder (e.g. ar-QA-AmalNeural__fix): its passing clips leave the short list and are named in the row')
 a = ap.parse_args()
-fixed = {}
-if a.fix:
-    fp = os.path.join(HERE, 'cand', a.fix, 'report.json')
-    if os.path.exists(fp): fixed = {r['id']: r['variant'] for r in json.load(open(fp, encoding='utf-8')) if r.get('verdict') == 'pass'}
 cands = [c for c in a.cand.split(',') if c]
 pref = [p for p in a.only.split(',') if p]
 lines = json.load(open(os.path.join(VOICE, 'lines.json'), encoding='utf-8'))
@@ -27,13 +22,11 @@ if a.short:
     if cands:
         p = os.path.join(HERE, 'cand', cands[0], 'report.json')
         if os.path.exists(p): keep |= {r['id'] for r in json.load(open(p, encoding='utf-8')) if r.get('verdict') == 'check'}
-    keep |= set(fixed)   # replacements the owner has not heard yet
     lines = [l for l in lines if l['id'] in keep]
 rep = {}
 for c in cands:
     p = os.path.join(HERE, 'cand', c, 'report.json')
     if os.path.exists(p): rep[c] = {r['id']: r for r in json.load(open(p, encoding='utf-8'))}
-fixrep = {r['id']: r for r in json.load(open(os.path.join(HERE, 'cand', a.fix, 'report.json'), encoding='utf-8'))} if fixed else {}
 
 def group(i):
     if i.startswith('haraka'): return 'الحركات (بَ بِ بُ)'
@@ -54,13 +47,11 @@ for g in order:
         btns, info = [], []
         for k, c in enumerate(cands):
             r = rep.get(c, {}).get(l['id'], {}); folder = c
-            if k == 0 and l['id'] in fixed: r = fixrep[l['id']]; folder = a.fix   # A plays the replacement, not the rejected base clip
             sc = r.get('score'); flag = r.get('why') or ''
             bad = r.get('verdict') == 'check'
             btns.append(f'<button class="play{" low" if bad else ""}" data-src="cand/{folder}/{l["id"]}.mp3" title="{html.escape(folder)}">{"ABCD"[k]}</button>')
             label = c.split("-")[2].replace("Neural", "") if c.count("-") >= 2 else c   # ar-QA-AmalNeural -> Amal; chatterbox -> chatterbox
             info.append(f'{"ABCD"[k]}={label}:{sc if sc is not None else "—"} {html.escape(flag.strip())} «{html.escape((r.get("heard") or "")[:30])}»')
-        if l['id'] in fixed: info.append(f'مُصلَح: {fixed[l["id"]]}')
         inst = os.path.join(VOICE, l['id'] + '.mp3')
         btns.append(f'<button class="play inst" data-src="../../assets/voice/{l["id"]}.mp3" title="installed">▶</button>' if os.path.exists(inst) else '<span class="noinst">—</span>')
         rows.append(f'<div class="row" data-id="{l["id"]}"><div class="btns">{"".join(btns)}</div>'

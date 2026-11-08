@@ -175,8 +175,8 @@ for (const pk of WORD_PACKS.slice(1)) for (const [word, animal] of EN_PACKS[pk])
 // apart on the SAME letter, so the other bubble is always the same letter with another mark.
 // Spelling («بَاء، فَتْحَة، بَ») and the chant are played from single-syllable clips: one clip per
 // syllable stays short, while a chain in one line gets stretched into long vowels by every engine.
-// The harakat mode stays hidden until every one of its voice clips has been verified by ear.
-export const HARAKA_ENABLED = false;
+// Shown since the owner approved the Chatterbox clip set (assets/voice/VOICE.json lists the clips still to redo).
+export const HARAKA_ENABLED = true;
 export const HARAKAT = [
   { id: 'fa', mark: 'َ', name: 'فَتْحَة', color: '#ff3b3b' },
   { id: 'ki', mark: 'ِ', name: 'كَسْرَة', color: '#1c7ed6' },

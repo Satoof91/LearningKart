@@ -1,12 +1,14 @@
 {
  "arabic": "chatterbox",
  "atoms": "chatterbox",
- "fixups": {},
  "english": "en-US-JennyNeural",
  "stopgap": {
-  "voice": "ar-QA-AmalNeural",
-  "why": "chatterbox clip truncated (<0.25 s) - regenerate",
-  "ids": [
+  "voice": "ar-QA-AmalNeural (+fixups)",
+  "why": {
+   "truncated": "chatterbox clip is a <0.25 s burst",
+   "wrong": "chatterbox syllable has the wrong consonant or reads the letter name"
+  },
+  "truncated": [
    "haraka-02-da",
    "haraka-16-ki",
    "haraka-name-da",
@@ -32,6 +34,37 @@
    "word-22-say",
    "word-27-say",
    "word-31-say"
+  ],
+  "wrong": [
+   "haraka-04-da",
+   "haraka-04-ki",
+   "haraka-08-fa",
+   "haraka-09-da",
+   "haraka-10-ki",
+   "haraka-11-da",
+   "haraka-11-ki",
+   "haraka-12-ki",
+   "haraka-14-da",
+   "haraka-14-ki",
+   "haraka-15-da",
+   "haraka-15-fa",
+   "haraka-16-da",
+   "haraka-18-fa",
+   "haraka-19-da",
+   "letter-04-snd",
+   "letter-09-snd",
+   "letter-15-snd",
+   "letter-16-snd",
+   "letter-17-snd",
+   "letter-19-snd",
+   "letter-22-snd",
+   "letter-26-snd",
+   "word-10-onset",
+   "word-12-onset",
+   "word-16-onset",
+   "word-18-onset",
+   "word-22-onset",
+   "word-27-onset"
   ]
  }
 }

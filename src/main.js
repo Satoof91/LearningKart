@@ -269,7 +269,10 @@ function startLevel(kind, index, lang) {
 }
 function sayIntro() {
   const C = cur(), lvl = S.lvl;
-  const lines = S.kind === 'letter' ? [C.name, TR.lines.sound(C), TR.lines.letterIntro(C)]
+  // letter intro: the sound once with its animal («جَ، جَمَل») and the name once, inside the call to play;
+  // the race itself repeats the name and the chant, so the card does not say the letter three times
+  const snd = TR.lines.sound(C);
+  const lines = S.kind === 'letter' ? [Array.isArray(snd) ? [snd[0], snd[snd.length - 1]] : snd, TR.lines.letterIntro(C)]
     : S.kind === 'word' ? [C.say, TR.lines.wordIntro(C), TR.lines.find(letterOf(C.parts[0]))]
     : S.kind === 'haraka' ? [HLINES.intro(C), HLINES.chant(S.index)].concat(S.index === 0 ? [HLINES.howto] : []).concat([HLINES.find(sylAt(0))])
     : [C.say, TR.lines.numberIntro(C)];
@@ -1221,7 +1224,8 @@ function frame(now) {
     camera.position.lerpVectors(high, tp, e); camPos.copy(camera.position);
     camLook.lerpVectors(p, tl, e); camera.lookAt(camLook);
     syncKart(dt); followSun(p);
-    if (S.modeT > 2.6 && (S.introDone || S.modeT > 6)) {
+    // the kart waits for the whole intro line; the time cap is only for a voice that never reports its end
+    if (S.modeT > 2.6 && (S.introDone || (S.modeT > 6 && !Voice.busy) || S.modeT > 15)) {
       $('intro').classList.add('out'); setTimeout(() => { if (S.mode !== 'intro') $('intro').classList.add('hidden'); }, 500);
       S.mode = 'drive'; S.modeT = 0; Sound.startMusic(); haptic('go');
       if (S.need === 0) spawnGate();

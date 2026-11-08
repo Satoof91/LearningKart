@@ -13,6 +13,10 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await wait(1500); await p.screenshot({ path: OUT + '/1-title.png' });
   await p.click('#play', { force: true }); await wait(800); await p.screenshot({ path: OUT + '/2-map.png' });
   await p.click('.node.current', { force: true }); await wait(1200); await p.screenshot({ path: OUT + '/3-intro.png' });
+  // the kart must not start while the intro line is still being spoken (real time: the time scale is set below)
+  await p.waitForFunction('window.__lk.S.mode === "drive"', null, { timeout: 60000 });
+  const intro = await p.evaluate(() => ({ done: window.__lk.S.introDone, busy: window.__lk.Voice.busy, t: Math.round(window.__lk.S.t * 10) / 10 }));
+  console.log('intro waited for voice', JSON.stringify(intro), intro.done && !intro.busy ? 'OK' : 'KART STARTED EARLY');
   // autopilot: steer toward the nearest target bubble ahead
   const auto = () => p.evaluate(() => {
     const L = window.__lk; L.S.timeScale = 2.5; L.S.noAdapt = true;

@@ -24,7 +24,7 @@ test/shots/
 # store screenshots and graphics (regenerate with node tools/store-shots.js)
 store/
 
-# voice QA output (regenerate: python tools/voice-qa/asr.py && python tools/voice-qa/listen.py)
+# voice QA output (listen.html: python tools/voice-qa/listen.py --cand chatterbox; engines run in the cloud, see tools/voice-qa/bench/cloud/REPORT.md)
 tools/voice-qa/report.*
 tools/voice-qa/listen.html
 tools/voice-qa/bench/*
@@ -32,8 +32,8 @@ tools/voice-qa/bench/*
 tools/voice-qa/bench/cloud/*
 !tools/voice-qa/bench/cloud/REPORT.md
 tools/voice-qa/cand/*
-!tools/voice-qa/cand/chatterbox/
-tools/voice-qa/cand/chatterbox/*
-!tools/voice-qa/cand/chatterbox/*.mp3
-!tools/voice-qa/cand/chatterbox/report.json
+!tools/voice-qa/cand/chatterbox*/
+tools/voice-qa/cand/chatterbox*/*
+!tools/voice-qa/cand/chatterbox*/*.mp3
+!tools/voice-qa/cand/chatterbox*/report.json
 __pycache__/

@@ -1,5 +1,5 @@
 """A/B listening page over several bench folders (one column per engine), for the owner's ear.
-python tools/voice-qa/bench_page.py bench/spaces/habibi bench/spaces/silma ... -> tools/voice-qa/listen-bench.html
+python tools/voice-qa/bench_page.py bench/cloud/habibi bench/cloud/silma ... -> tools/voice-qa/listen-bench.html
 Each row = one text; one play button per engine (red when the machine said 'check'), the machine's reading under
 it; ✅/❌ per engine, saved in the browser (localStorage key lk-bench-review)."""
 import os, sys, json, html
