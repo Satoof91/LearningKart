@@ -98,7 +98,8 @@ async def main():
                 # the ×3 reading: score each heard word against the text, like rescore.py
                 ws = [w for w in re.split('[\\s.،؟!:]+', heard) if w]
                 s3 = round(max([difflib.SequenceMatcher(None, norm(text), norm(w)).ratio() for w in ws] + [0]), 2)
-                why = one_why(text, [heard], max(score, s3), bare)
+                b3 = round(max([difflib.SequenceMatcher(None, nomark(norm(text)), nomark(norm(w))).ratio() for w in ws] + [0]), 2)
+                why = one_why(text, [heard], max(score, s3), max(bare, b3))
             else:
                 why = multi_why(text, heard, bare)
             tried.append(f'{tag}:{why or "OK"}')

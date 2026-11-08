@@ -27,12 +27,10 @@ for r in rows:
     elif k == 'syl':
         v, p = r.get('vow', ''), r.get('rep', '')
         want = {'َ': 'a', 'ِ': 'i', 'ُ': 'u'}[r['text'][1]]
-        if v not in ('vowel-ok', 'vowel-?'): why = f'formants say {v[6:]}'
-        elif p not in ('rep-ok', 'rep-none', '') and p != 'rep-' + want: why = f'reading says {p[4:]}'
-        else:
-            # the ×3 reading is stored in 'heard' for syllables: letter name / wrong consonant checks
-            why2 = syl_why(r['text'], r.get('heard', ''), want if v in ('vowel-ok',) else '?', 0)
-            if why2 and not why2.startswith('reading says'): why = why2
+        # the ×3 reading is stored in 'heard' for syllables; formant class from the evalset's 'vow' field
+        cls = want if v == 'vowel-ok' else '?' if v in ('vowel-?', '') else v[6:]
+        why = syl_why(r['text'], r.get('heard', ''), cls, 0)
+        if not why and p not in ('rep-ok', 'rep-none', '') and p != 'rep-' + want: why = f'reading says {p[4:]}'
     elif k == 'one':
         why = one_why(r['text'], heard_list, max(r.get('score', 0), r.get('score3', 0)), r.get('bare', 0))
     else:

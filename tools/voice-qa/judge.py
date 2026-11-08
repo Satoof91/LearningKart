@@ -35,11 +35,30 @@ def long_lost(text, heard_list):
         if tw.endswith('ة') and not nomark(hw).endswith(('ة', 'ه', 'ا')): return f'{tw}→{hw} (ة)'
     return ''
 
+MADD = {'ا': 'a', 'ي': 'i', 'و': 'u'}
+def reading_vowel(text, heard3):
+    """the vowel the ×3 reading spells out after the consonant when every repetition agrees and is nothing
+    but consonant + vowel (an explicit mark, or the matching madd letter ا ي و): 'a'/'i'/'u', else ''"""
+    cons = 'ا' if text[0] in 'ءأإ' else text[0]
+    ws = words_of(heard3)
+    if len(ws) < 2: return ''
+    seen = set()
+    for w in ws:
+        w = re.sub('[إأآٱ]', 'ا', w); bare = nomark(w)
+        if bare[:1] != cons or len(bare) > 2 or (len(bare) == 2 and bare[1] not in MADD): return ''
+        marks = {VOW[m] for m in re.findall('[َ-ِ]', w)}
+        if len(marks) > 1: return ''
+        v = next(iter(marks)) if marks else MADD.get(bare[1:2], '')
+        if not v: return ''
+        seen.add(v)
+    return seen.pop() if len(seen) == 1 else ''
+
 def syl_why(text, heard3, vow_class, voiced):
-    """lone syllable: formant vowel matches (or undecidable), the ×3 reading names no other vowel and no
-    letter name, the consonant is heard, and the clip is short (0.05–0.35 s voiced)"""
+    """lone syllable: formant vowel matches (or undecidable, or the ×3 reading spells the wanted vowel out in
+    every repetition: the long بَا/بِي/بُو references drift for a short damma), the reading names no other
+    vowel and no letter name, the consonant is heard, and the clip is short (0.05–0.35 s voiced)"""
     want = VOW[text[1]]; cons = 'ا' if text[0] in 'ءأإ' else text[0]
-    if vow_class not in (want, '?'): return f'formants say {vow_class}'
+    if vow_class not in (want, '?') and reading_vowel(text, heard3) != want: return f'formants say {vow_class}'
     marks = {VOW[m] for m in re.findall('[َ-ِ]', heard3)}
     if marks and marks != {want}: return 'reading says ' + ''.join(sorted(marks))
     bare = nomark(norm(heard3))
