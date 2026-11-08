@@ -27,13 +27,15 @@ rows = []
 for g in order:
     items = [l for l in ar if group(l['id']) == g]
     if not items: continue
+    # lines any candidate flagged come first
+    items.sort(key=lambda l: 0 if any(rep.get(c, {}).get(l['id'], {}).get('verdict') == 'check' for c in cands) else 1)
     rows.append(f'<h2>{g} <small>({len(items)})</small></h2>')
     for l in items:
         btns, info = [], []
         for k, c in enumerate(cands):
             r = rep.get(c, {}).get(l['id'], {})
-            sc = r.get('score'); flag = (r.get('stretch') or '') + ' ' + (r.get('vow') or '') + ' ' + (r.get('rep') or '')
-            bad = sc is not None and sc < 0.85 or 'STRETCH' in flag
+            sc = r.get('score'); flag = r.get('why') or ''
+            bad = r.get('verdict') == 'check'
             btns.append(f'<button class="play{" low" if bad else ""}" data-src="cand/{c}/{l["id"]}.mp3" title="{html.escape(c)}">{"ABCD"[k]}</button>')
             info.append(f'{"ABCD"[k]}={c.split("-")[2].replace("Neural", "")}: {sc if sc is not None else "—"} {html.escape(flag.strip())} «{html.escape((r.get("heard") or "")[:30])}»')
         inst = os.path.join(VOICE, l['id'] + '.mp3')
@@ -59,7 +61,7 @@ button{{font-size:18px;border:0;border-radius:10px;padding:6px 10px;cursor:point
 </style></head><body>
 <h1>مراجعة أصوات LearningKart</h1>
 <p>{legend}</p>
-<p>اضغط الحرف لسماع المرشّح (البرتقالي = جهاز الفحص شكّ فيه). ✅ إذا النطق صحيح 100%، ❌ إذا فيه خطأ، واكتب أي ملاحظة (مثلاً: A صحيح، B يقول «بي»). في النهاية اضغط «نسخ النتائج» وأرسلها.</p>
+<p>اضغط الحرف لسماع المرشّح (البرتقالي = جهاز الفحص شكّ فيه، وهذه تأتي أولاً في كل قسم). ✅ إذا النطق صحيح 100%، ❌ إذا فيه خطأ، واكتب أي ملاحظة (مثلاً: A صحيح، B يقول «بي»). في النهاية اضغط «نسخ النتائج» وأرسلها.</p>
 <div class="bar"><button id="next">▶ التالي غير المُراجَع</button><span id="count"></span><button id="copy">نسخ النتائج</button></div>
 {''.join(rows)}
 <h2>النتائج</h2><textarea id="out" readonly></textarea>
