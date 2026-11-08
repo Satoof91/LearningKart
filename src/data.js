@@ -4,7 +4,7 @@
 // `word` is what is shown on screen (no harakat, easier to read for small children).
 
 export const LETTERS = [
-  { ch: 'أ', snd: 'أَ', name: 'أَلِف', word: 'أسد', say: 'أَسَد', animal: 'lion', biome: 'savanna' },
+  { ch: 'أ', snd: 'ءَ', name: 'أَلِف', word: 'أسد', say: 'أَسَد', animal: 'lion', biome: 'savanna' },
   { ch: 'ب', snd: 'بَ', name: 'بَاء', word: 'بطة', say: 'بَطَّة', animal: 'duck', biome: 'pond' },
   { ch: 'ت', snd: 'تِ', name: 'تَاء', word: 'تمساح', say: 'تِمْسَاح', animal: 'crocodile', biome: 'pond' },
   { ch: 'ث', snd: 'ثَ', name: 'ثَاء', word: 'ثعلب', say: 'ثَعْلَب', animal: 'fox', biome: 'forest' },
@@ -141,7 +141,7 @@ export const enDistractorPool = makeDistractors(EN_LETTERS, EN_LOOK, 'AOSXHMTZ')
 // two-word names). `onset` is the first syllable, used in the blend «دُ، دُ، دُبّ».
 // A word unlocks once every one of its letters has been learned in that track.
 export const WORDS = [
-  ['دب', 'دُبّ', 'دُ', 'bear', 'forest'], ['أسد', 'أَسَد', 'أَ', 'lion', 'savanna'], ['قرد', 'قِرْد', 'قِ', 'monkey', 'jungle'],
+  ['دب', 'دُبّ', 'دُ', 'bear', 'forest'], ['أسد', 'أَسَد', 'ءَ', 'lion', 'savanna'], ['قرد', 'قِرْد', 'قِ', 'monkey', 'jungle'],
   ['صقر', 'صَقْر', 'صَ', 'falcon', 'desert'], ['جمل', 'جَمَل', 'جَ', 'camel', 'desert'], ['نمر', 'نَمِر', 'نَ', 'tiger', 'jungle'],
   ['نسر', 'نَسْر', 'نَ', 'vulture', 'desert'], ['فيل', 'فِيل', 'فِ', 'elephant', 'savanna']
 ].map(([word, say, onset, animal, biome]) => ({ word, say, onset, animal, biome, pack: 'zoo', parts: [...word] }));
@@ -185,14 +185,17 @@ export const HARAKAT = [
 // alef carries its hamza under the letter with kasra: أَ إِ أُ
 export const SYLLABLES = LETTERS.map((L, li) => HARAKAT.map((H, hi) => {
   const base = L.ch === 'أ' && H.id === 'ki' ? 'إ' : L.ch;
-  return { ch: base + H.mark, base, mark: H.mark, h: H.id, hi, li, color: H.color, hname: H.name, name: L.name, letter: L, animal: L.animal, biome: L.biome, word: L.word, say: L.say };
+  // spoken form: a lone «أَ» is read as the word «أَنْ» by every engine, so alef syllables are voiced
+  // with the hamza on the line (ءَ ءِ ءُ: same sound, clean); the screen keeps أَ إِ أُ
+  const tts = L.ch === 'أ' ? 'ء' + H.mark : base + H.mark;
+  return { ch: base + H.mark, tts, base, mark: H.mark, h: H.id, hi, li, color: H.color, hname: H.name, name: L.name, letter: L, animal: L.animal, biome: L.biome, word: L.word, say: L.say };
 }));
 export const HLINES = {
   intro: L => `هَيَّا نَقْرَأُ حَرْفَ ${L.name} بِالحَرَكَاتْ`,
   // sequences are played from one-syllable clips (engines stretch a chain of syllables into long vowels)
-  chant: li => SYLLABLES[li].map(x => x.ch),
-  spell: x => [x.name, x.hname, x.ch],
-  find: x => `أَيْنَ ${x.ch}؟`,
+  chant: li => SYLLABLES[li].map(x => x.tts),
+  spell: x => [x.name, x.hname, x.tts],
+  find: x => `أَيْنَ ${x.tts}؟`, // «أَيْنَ أَ؟» would be read «أين أنْ؟»
   howto: 'الفَتْحَةُ شَرْطَةٌ فَوْقَ الحَرْفِ، وَالكَسْرَةُ شَرْطَةٌ تَحْتَ الحَرْفِ، وَالضَّمَّةُ وَاوٌ صَغِيرَةٌ فَوْقَ الحَرْفْ'
 };
 
@@ -262,7 +265,7 @@ export function voiceLines() {
     const k = `haraka-${p2(i + 1)}`;
     out.push({ id: `${k}-intro`, text: HLINES.intro(L), note: `حركات ${L.ch}` });
     for (const x of SYLLABLES[i]) {
-      out.push({ id: `${k}-${x.h}`, text: x.ch, note: `مقطع ${x.ch}` });
+      out.push({ id: `${k}-${x.h}`, text: x.tts, note: `مقطع ${x.ch}` });
       out.push({ id: `${k}-${x.h}-find`, text: HLINES.find(x), note: `سؤال ${x.ch}` });
     }
   });
