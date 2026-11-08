@@ -31,5 +31,9 @@ tools/voice-qa/bench/*
 !tools/voice-qa/bench/cloud/
 tools/voice-qa/bench/cloud/*
 !tools/voice-qa/bench/cloud/REPORT.md
-tools/voice-qa/cand/
+tools/voice-qa/cand/*
+!tools/voice-qa/cand/chatterbox/
+tools/voice-qa/cand/chatterbox/*
+!tools/voice-qa/cand/chatterbox/*.mp3
+!tools/voice-qa/cand/chatterbox/report.json
 __pycache__/

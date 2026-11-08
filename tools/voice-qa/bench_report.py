@@ -34,6 +34,21 @@ NOTES = """## Findings
 Step B (all 344 Arabic lines) runs with **chatterbox**: `local_tts.py --engine chatterbox --ids all --out bench/cloud/chatterbox-all`,
 then `bench_judge.py bench/cloud/chatterbox-all` and `cloud_cand.py chatterbox` -> `cand/chatterbox/<id>.mp3` + `report.json`.
 
+## Step B result (chatterbox, all 344 Arabic lines)
+
+`cand/chatterbox/<id>.mp3` + `cand/chatterbox/report.json` (rows id,text,heard,score,bare,vow,verdict,why,kind + dur,voiced,secs),
+judged by `bench_judge.py` on `bench/cloud/chatterbox-all`: **189/344 pass** = syllables 39/84, single words 26/101,
+sentences 124/159. Generation 5307 s for 344 clips (median 11.2 s, max 281 s while silma-s08 shared the CPU).
+
+- syllables (45 to check): 32 «consonant heard as X» (ث→س, خ→ه, ذ→د, ظ→ض, غ→ح, emphatics ض/ط/ع and ر heard as
+  ا/ب), 5 read the letter name instead of the syllable (قِ …), the rest vowel/length slips.
+- single words (75 to check): 72 «word not recognised» in the carrier cut, mostly 2–3 letter words that Whisper does not
+  recognise as bare words; listen before rejecting.
+- sentences (35 to check): 16 a dropped word, 9 a shortened long vowel, 10 not recognised; chatterbox does not read every
+  haraka (it ignores shadda often), and the Whisper judge is harsh on vocalised text it does not expect.
+
+The judge rows with «check» are the owner's listening list; `choose.py` installs the clips picked from `cand/chatterbox`.
+
 ## Recipe (one venv per engine; CPU torch from download.pytorch.org/whl/cpu)
 
     uv venv -p 3.11 venvs/habibi     && uv pip install --python venvs/habibi/bin/python     --extra-index-url https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match habibi-tts "torchaudio==2.8.0"
