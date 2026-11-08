@@ -26,12 +26,14 @@ if a.short:
             if m and (m.group(2) == 'bad' or 'غير' in m.group(3)): keep.add(m.group(1))
     if cands:
         p = os.path.join(HERE, 'cand', cands[0], 'report.json')
-        if os.path.exists(p): keep |= {r['id'] for r in json.load(open(p, encoding='utf-8')) if r.get('verdict') == 'check' and r['id'] not in fixed}
+        if os.path.exists(p): keep |= {r['id'] for r in json.load(open(p, encoding='utf-8')) if r.get('verdict') == 'check'}
+    keep |= set(fixed)   # replacements the owner has not heard yet
     lines = [l for l in lines if l['id'] in keep]
 rep = {}
 for c in cands:
     p = os.path.join(HERE, 'cand', c, 'report.json')
     if os.path.exists(p): rep[c] = {r['id']: r for r in json.load(open(p, encoding='utf-8'))}
+fixrep = {r['id']: r for r in json.load(open(os.path.join(HERE, 'cand', a.fix, 'report.json'), encoding='utf-8'))} if fixed else {}
 
 def group(i):
     if i.startswith('haraka'): return 'الحركات (بَ بِ بُ)'
@@ -51,10 +53,11 @@ for g in order:
     for l in items:
         btns, info = [], []
         for k, c in enumerate(cands):
-            r = rep.get(c, {}).get(l['id'], {})
+            r = rep.get(c, {}).get(l['id'], {}); folder = c
+            if k == 0 and l['id'] in fixed: r = fixrep[l['id']]; folder = a.fix   # A plays the replacement, not the rejected base clip
             sc = r.get('score'); flag = r.get('why') or ''
             bad = r.get('verdict') == 'check'
-            btns.append(f'<button class="play{" low" if bad else ""}" data-src="cand/{c}/{l["id"]}.mp3" title="{html.escape(c)}">{"ABCD"[k]}</button>')
+            btns.append(f'<button class="play{" low" if bad else ""}" data-src="cand/{folder}/{l["id"]}.mp3" title="{html.escape(folder)}">{"ABCD"[k]}</button>')
             info.append(f'{"ABCD"[k]}={c.split("-")[2].replace("Neural", "")}: {sc if sc is not None else "—"} {html.escape(flag.strip())} «{html.escape((r.get("heard") or "")[:30])}»')
         if l['id'] in fixed: info.append(f'مُصلَح: {fixed[l["id"]]}')
         inst = os.path.join(VOICE, l['id'] + '.mp3')
