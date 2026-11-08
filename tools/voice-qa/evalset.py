@@ -103,7 +103,12 @@ async def main():
             score = 1.0 if (vow == 'vowel-ok' and rep == 'rep-ok') else 0.6 if (vow == 'vowel-ok' or rep == 'rep-ok') else 0.2
         rows.append(dict(id=l['id'], text=l['text'], heard=heard, score=score, bare=bare, stretch=stretch, last=longest, vow=vow, rep=rep))
         print(f"{i+1}/{len(todo)} {l['id']} {score} {stretch} {vow} {rep} | {l['text']} -> {heard}", flush=True)
-    json.dump(rows, open(os.path.join(OUT, 'report.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    # a partial run (--only) updates the matching rows of the existing report instead of replacing it
+    rp = os.path.join(OUT, 'report.json')
+    if pref and os.path.exists(rp):
+        old = {r['id']: r for r in json.load(open(rp, encoding='utf-8'))}
+        old.update({r['id']: r for r in rows}); rows = list(old.values())
+    json.dump(rows, open(rp, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     with open(os.path.join(OUT, 'report.csv'), 'w', encoding='utf-8-sig', newline='') as fh:
         w = csv.DictWriter(fh, fieldnames=['id', 'score', 'bare', 'stretch', 'last', 'vow', 'rep', 'text', 'heard']); w.writeheader()
         for r in sorted(rows, key=lambda r: (r['score'], -r['last'])): w.writerow({k: r.get(k, '') for k in w.fieldnames})
