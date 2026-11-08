@@ -32,3 +32,4 @@ tools/voice-qa/bench/*
 tools/voice-qa/bench/cloud/*
 !tools/voice-qa/bench/cloud/REPORT.md
 tools/voice-qa/cand/
+__pycache__/
