@@ -11,7 +11,6 @@ let TR = TRACKS.ar;
 //  - correct pick: the letter SOUND with its word («بَ، بَ، بَطَّة») or its name + praise
 //  - wrong pick: name the letter that was picked, then ask again for the right one («أَيْنَ حَرْفُ بَاء؟»)
 //  - from the 3rd letter on, the HUD hides the glyph: the child hears the name and has to find the shape (recall)
-//  - one "review pair" per level brings back an earlier letter the child found hard (spaced review)
 //  - help (glow, then the letter straight ahead) only appears after mistakes; stars count every miss
 import { makeAnimal } from './animals.js';
 import { makeFriend, isAnimal } from './friends.js';
@@ -208,7 +207,7 @@ function addMissNow() { if (isHaraka()) Store.addHMiss(S.index); else Store.addM
 const isWord = () => S.kind === 'word';
 const letterOf = ch => TR.letters.find(x => x.ch === ch);
 const nextLetter = (k = 0) => { const W = cur(); return letterOf(W.parts[Math.min(W.parts.length - 1, S.collected + k)]); };
-// which letter a miss / wrong pick is about (saved per letter, drives the review pairs)
+// which letter a miss / wrong pick is about (saved per letter, for the parents' progress view)
 const missIdx = () => (isWord() ? TR.letters.indexOf(nextLetter()) : S.index);
 function drawWordHud() {
   const cv = $('wordhud'), g = cv.getContext('2d'), W = cur();
@@ -237,7 +236,7 @@ function startLevel(kind, index, lang) {
   S.collected = 0; S.wrong = 0; S.coins = 0; S.spawned = 0; S.need = kind === 'letter' ? 5 : kind === 'word' ? C.parts.length : kind === 'haraka' ? 6 : C.n;
   S.seq = [0, 1, 2].concat([0, 1, 2].sort(() => Math.random() - 0.5));
   S.nextU = S.u + 85; S.missStreak = 0; S.countQ = null;
-  S.misses = 0; S.assisted = 0; S.reviewDone = false; S.recentWrong = false; S.recall = false; S.lastPraise = -1;
+  S.misses = 0; S.assisted = 0; S.recentWrong = false; S.recall = false; S.lastPraise = -1;
   S.chipBusy = false; clearTimeout(S.chipT);
   S.lvl = (S.lvl || 0) + 1;
   // HUD
@@ -317,28 +316,16 @@ function bubble(u, d, L, isTarget, color) {
   sh.rotation.x = -Math.PI / 2; sh.position.y = 0.13; g.add(sh);
   return { mc, drawn: L, obj: g, spr, glow, mat, glowMat, col: color, u, d, kind: isTarget ? 'target' : 'wrong', letter: L, ph: Math.random() * 6, alive: true, r: 2.9, base: 4.6 };
 }
-// the earlier letter the child found hardest (most misses, fewest stars), for the review pair
-function weakestLearned() {
-  let best = -1, score = -Infinity;
-  for (let i = 0; i < S.index; i++) {
-    if (!Store.prog('letter', TR.lang)[i]) continue;
-    const sc = (Store.missArr(TR.lang)[i] || 0) * 2 - Store.prog('letter', TR.lang)[i] + Math.random();
-    if (sc > score) { score = sc; best = i; }
-  }
-  return best < 0 ? null : TR.letters[best];
-}
 function spawnAhead() {
   const C = cur();
   if (S.kind !== 'number') {
     const side = Math.random() < 0.5 ? 1 : -1;
     const colA = pick(BUBBLE_COLORS); let colB = pick(BUBBLE_COLORS); if (colB === colA) colB = BUBBLE_COLORS[(BUBBLE_COLORS.indexOf(colA) + 2) % BUBBLE_COLORS.length];
-    // spaced review: the 3rd pair of a level asks for an earlier letter (bonus, does not count toward the 5)
-    const R = S.kind === 'letter' && S.index >= 2 && S.spawned === 2 && !S.reviewDone ? weakestLearned() : null;
     const pending = S.pickups.filter(q => q.kind === 'target' && q.alive && !q.missed).length;
     // word mode: the letter after the ones already waiting on the road
-    const target = R || (isWord() ? nextLetter(pending) : isHaraka() ? sylAt(pending) : C);
+    const target = isWord() ? nextLetter(pending) : isHaraka() ? sylAt(pending) : C;
     // difficulty ladder: a clearly different shape first; a dotted look-alike only once the child is doing well
-    const hard = !R && !isWord() && S.collected >= 2 && S.missStreak === 0 && !S.recentWrong;
+    const hard = !isWord() && S.collected >= 2 && S.missStreak === 0 && !S.recentWrong;
     const ok = L => L !== C && L !== target && !(isWord() && C.parts.includes(L.ch)); // never a letter of the word itself
     let pool = [];
     if (!isHaraka()) {
@@ -350,7 +337,7 @@ function spawnAhead() {
     const W = isHaraka() ? pick(SYLLABLES[S.index].filter(x => x.h !== target.h)) : pick(pool);
     const tp = addPickup(bubble(S.nextU, side * 4.4, target, true, colA));
     const wp = addPickup(bubble(S.nextU, -side * 4.4, W, false, colB));
-    tp.pair = wp; wp.pair = tp; tp.review = !!R; if (R) S.reviewDone = true;
+    tp.pair = wp; wp.pair = tp;
     if ((isWord() || isHaraka()) && S.spawned === 0) tp.asked = true; // the intro already asked for the first one
     S.spawned++;
     if (S.spawned % 3 === 0 && !isWord() && !isHaraka()) { const pad = makeBoostPad(); const at = S.nextU + 34; pad.position.copy(T.pos(at, 0)); pad.position.y = 0.1; pad.rotation.y = T.heading(at); addPickup({ obj: pad, u: at, d: 0, kind: 'boost', alive: true, r: 2.6 }); }
@@ -392,14 +379,7 @@ function hitPickup(p) {
   p.alive = false;
   const wp = p.obj.position.clone(); wp.y += 2.5;
   const C = cur();
-  if (p.kind === 'target' && p.review) {
-    // review pair: an earlier letter found again, bonus stars, no slot
-    S.coins += 3; $('hstars').textContent = S.coins; Sound.collect(4); Sound.star(); haptic('tick');
-    confetti.burst(wp, 26, 7, [0x3da5ff, 0xffd60a, 0xffffff], 0.45);
-    chipShowsTarget();
-    Voice.say([p.letter.name, praise(), askNext(p)], { gap: 300 });
-    p.pop = 0;
-  } else if (p.kind === 'target') {
+  if (p.kind === 'target') {
     const n = S.collected++; S.missStreak = 0; S.recentWrong = false; kart.cheerT = 1.4;
     Sound.collect(n); haptic('tick'); confetti.burst(wp, 22, 6, null, 0.45);
     if (isWord()) {
@@ -424,7 +404,7 @@ function hitPickup(p) {
     flyToSlot(wp, C.ch, n);
     pingChip();
     // after 2 letters: recall rounds, the chip hides the glyph and the voice asks for it
-    if (S.kind === 'letter' && S.collected === 2 && S.need > 3) { S.recall = true; setTimeout(() => { if (S.mode === 'drive' && S.recall && !S.chipBusy && !S.pickups.some(q => q.review && q.alive && q.asked)) chipShowsTarget(); }, 900); }
+    if (S.kind === 'letter' && S.collected === 2 && S.need > 3) { S.recall = true; setTimeout(() => { if (S.mode === 'drive' && S.recall && !S.chipBusy) chipShowsTarget(); }, 900); }
     if (S.collected >= S.need) Voice.say([praise(), TR.lines.gate], { gap: 350 });
     // odd pickups: the letter's SOUND with its word; even ones: the letter's name + praise; then the next question
     else if (S.collected % 2 === 1) Voice.say([TR.lines.sound(C), askNext(p)], { gap: 400 });
@@ -434,7 +414,7 @@ function hitPickup(p) {
     S.wrong++; S.wobble = 0.6; S.recentWrong = true;
     if (p.pair) p.pair.handled = true; // its target will pass behind the kart: already counted as this mistake
     const T0 = p.pair && p.pair.letter ? p.pair.letter : C;
-    if (!(p.pair && p.pair.review)) addMissNow();
+    addMissNow();
     Sound.wrong(); haptic('bump');
     p.mat.color.setHex(0x9aa5b1);
     // name what was picked, then ask again for the right one, and show it on the chip for a moment
@@ -446,7 +426,7 @@ function hitPickup(p) {
     if (isHaraka()) retarget(); // the marks on the road get their colours back straight away
     // harakat: spell what was picked («بَاءْ، كَسْرَة، بِ»), then ask for the wanted one
     Voice.say([isHaraka() ? HLINES.spell(p.letter) : TR.lines.wrong(p.letter), findLine(want)], { gap: 300 });
-    setChip(want.ch, isHaraka() ? want.color : nx && nx.review ? 'var(--blue)' : 'var(--pink)'); pingChip(); S.chipBusy = true;
+    setChip(want.ch, isHaraka() ? want.color : 'var(--pink)'); pingChip(); S.chipBusy = true;
     clearTimeout(S.chipT); S.chipT = setTimeout(() => { S.chipBusy = false; if (S.mode === 'drive') chipShowsTarget(); }, 2600);
     p.pop = 0;
   } else if (p.kind === 'apple') {
@@ -471,29 +451,27 @@ function nextTarget(not) {
   return best;
 }
 // the question for the next pair, said right after the feedback for this one (never cut off by it):
-// in recall rounds, after a mistake, and always for the review pair
+// in recall rounds and after a mistake
 function askNext(cur0) {
   const nx = nextTarget(cur0);
   if (!nx || nx.asked) return null;
-  if (!(nx.review || isWord() || isHaraka() || S.recall || S.missStreak >= 1 || S.recentWrong)) return null;
+  if (!(isWord() || isHaraka() || S.recall || S.missStreak >= 1 || S.recentWrong)) return null;
   nx.asked = true;
-  if (nx.review) { setChip(nx.letter.ch, 'var(--blue)'); pingChip(); }
   return findLine(nx.letter);
 }
 // the child is not steering at all: bring the letter straight ahead (counted as helped)
 function assistPair(p) {
-  if (!p || p.assist || p.review) return;
+  if (!p || p.assist) return;
   p.d = 0; p.obj.position.copy(T.pos(p.u, 0)); p.assist = true;
   if (p.pair) { p.pair.used = true; p.pair.mat.color.setHex(0x9aa5b1); p.pair.mat.opacity = 0.5; p.pair.mat.transparent = true; }
 }
-// a pair comes into view: chip for the review letter, help after mistakes; speaks only if nothing asked yet
+// a pair comes into view: help after mistakes; speaks only if nothing asked yet
 function announcePair(p) {
   p.announced = true;
-  if (p.review && nextTarget(null) === p) { setChip(p.letter.ch, 'var(--blue)'); pingChip(); }
-  if (!p.review && S.missStreak >= 3) assistPair(p);
-  if (!p.review && p.glow && set().hint && (S.missStreak >= 1 || S.recentWrong)) p.glow.visible = true;
+  if (S.missStreak >= 3) assistPair(p);
+  if (p.glow && set().hint && (S.missStreak >= 1 || S.recentWrong)) p.glow.visible = true;
   // fallback only for the nearest pair: a pair further back would be cut off by the feedback of the one in front
-  if (!p.asked && !Voice.busy && nextTarget(null) === p && (p.review || isWord() || isHaraka() || S.recall || S.missStreak >= 1 || S.recentWrong)) { p.asked = true; Voice.say(findLine(p.letter)); }
+  if (!p.asked && !Voice.busy && nextTarget(null) === p && (isWord() || isHaraka() || S.recall || S.missStreak >= 1 || S.recentWrong)) { p.asked = true; Voice.say(findLine(p.letter)); }
 }
 // word mode: bubbles already on the road ask for the letters still missing, in order
 function retarget() {
@@ -563,11 +541,10 @@ function updatePickups(dt) {
     if (p.alive && !p.used && du < 1.8 && du > -1.8 - S.speed * dt && Math.abs(S.d - p.d) < p.r) { if (p.assist) S.assisted++; hitPickup(p); }
     if (p.kind === 'target' && p.alive && !p.missed && du < -3) {
       p.missed = true;
-      if (p.review) chipShowsTarget();
-      else if (!p.handled) { S.missStreak++; S.misses++; addMissNow(); }
+      if (!p.handled) { S.missStreak++; S.misses++; addMissNow(); }
       if (isWord() || isHaraka()) retarget();
       const nx = nextTarget(p);
-      if (nx && !nx.review) {
+      if (nx) {
         if (S.missStreak >= 3) assistPair(nx);
         if (nx.glow && set().hint) nx.glow.visible = true;
       }

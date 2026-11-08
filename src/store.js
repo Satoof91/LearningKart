@@ -7,7 +7,7 @@ import { WORDS, EN_WORDS } from './data.js';
 const KEY = 'learningkart_v1';
 const DEFAULT = () => ({
   v: 2, look: DEFAULT_LOOK(), letters: Array(28).fill(0), numbers: Array(11).fill(0), totalStars: 0, kart: 1,
-  // per letter: how often the child picked a wrong letter or missed it (drives the review pairs)
+  // per letter: how often the child picked a wrong letter or missed it
   miss: Array(28).fill(0),
   // English track (A-Z, 0-10)
   enLetters: Array(26).fill(0), enNumbers: Array(11).fill(0), enMiss: Array(26).fill(0),

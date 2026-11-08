@@ -21,7 +21,6 @@ Built with Three.js and packaged for **Android** and **iOS** with [Capacitor 8](
    - A wrong pick names that letter and asks again: «هَذَا حَرْفُ تَاء… أَيْنَ حَرْفُ بَاء؟».
    - The first pairs use a clearly different shape; dotted look-alikes come once the child is doing well.
    - After 2 pickups the chip shows «؟» and the child finds the letter by ear (recall).
-   - From letter 3 on, one pair brings back an earlier letter the child found hard (review, bonus stars).
    - Help only comes after mistakes: a glow, then (after 3 misses) the letter straight ahead.
    - Stars count wrong picks *and* misses.
 
