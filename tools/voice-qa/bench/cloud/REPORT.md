@@ -140,6 +140,8 @@ engine's بَا/بِي/بُو; one word: Whisper ×3 word-by-word; sentence: Whi
 - The judge's Whisper ×3 reading hallucinates a fixed phrase («اشتركوا في القناة», «ترجمة نانسي قنقر») on very short or
   non-speech cuts: read those rows as "nothing usable was heard", not as the engine saying that.
 - Formant references (_ref-a/i/u) come from the same engine folder, so the syllable vowel class is per engine.
+- Timings: silma-s08 (and habibi's 241 s outlier) ran while another engine was generating on the same 4 cores;
+  alone, silma takes ~15 s and habibi ~65 s per clip.
 
 ## Decision
 
