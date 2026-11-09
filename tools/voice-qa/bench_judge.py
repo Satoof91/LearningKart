@@ -31,45 +31,57 @@ def hear(au, n):
     segs, _ = model.transcribe(x, language='ar', beam_size=5, condition_on_previous_text=False, initial_prompt=PROMPT)
     return ''.join(s.text for s in segs).strip()
 
-def judge_folder(d):
-    female = True   # the reference voice is Amal (female) for every engine here
+def judge_clip(d, i, text, au, refs, female=True):
+    """one judged row for a clip already loaded and cut (au = 16 kHz float array of what the child will hear);
+    the rules of judge.py by kind; the syllable's trimmed audio is saved as <d>/<i>.trim.wav for the formant check"""
+    k = kind(text)
+    dur = round(len(au) / 16000, 2)
+    heard = hear(au, 3 if k != 'multi' else 1)
+    score = round(difflib.SequenceMatcher(None, norm(text), norm(heard)).ratio(), 2)
+    bare = round(difflib.SequenceMatcher(None, nomark(norm(text)), nomark(norm(heard))).ratio(), 2)
+    vow = ''; voiced = 0
+    if k == 'syl':
+        import parselmouth
+        wav = os.path.join(d, i + '.trim.wav'); parselmouth.Sound(au, sampling_frequency=16000).save(wav, 'WAV')
+        an = analyze(wav, female); voiced = an['voiced']
+        vow = classify(an['f1'], an['f2'], refs)[0] if refs else '?'
+        why = syl_why(text, heard, vow, voiced)
+    elif k == 'one':
+        ws = [w for w in re.split('[\\s.،؟!:]+', heard) if w]
+        s3 = round(max([difflib.SequenceMatcher(None, norm(text), norm(w)).ratio() for w in ws] + [0]), 2)
+        b3 = round(max([difflib.SequenceMatcher(None, nomark(norm(text)), nomark(norm(w))).ratio() for w in ws] + [0]), 2)
+        why = one_why(text, [heard], max(score, s3), max(bare, b3))
+    else:
+        why = multi_why(text, heard, bare)
+    return dict(id=i, text=text, kind=k, dur=dur, heard=heard[:80], score=score, bare=bare, vow=vow, voiced=round(voiced, 2), verdict='check' if why else 'pass', why=why)
+
+def formant_refs(d, female=True):
+    """F1/F2 of the folder's own long-vowel references بَا/بِي/بُو (_ref-a/i/u.wav), when present"""
     refs = {}
-    for v, t in [('a', 'بَا'), ('i', 'بِي'), ('u', 'بُو')]:
+    for v in 'aiu':
         rp = os.path.join(d, f'_ref-{v}.wav')
         if os.path.exists(rp):
             r = analyze(rp, female); refs[v] = (r['f1'], r['f2'])
+    return refs
+
+def judge_folder(d):
+    female = True   # the reference voice is Amal (female) for every engine here
+    refs = formant_refs(d, female)
     rows = []
     for f in sorted(os.listdir(d)):
-        if not f.endswith('.wav') or f.startswith('_ref'): continue
+        if not f.endswith('.wav') or f.startswith('_ref') or f.endswith(('.cut.wav', '.trim.wav')): continue
         i = f[:-4]; tp = os.path.join(d, i + '.txt')
         if not os.path.exists(tp): continue
-        text = open(tp, encoding='utf-8').read().strip(); k = kind(text)
+        text = open(tp, encoding='utf-8').read().strip()
         au = trim(load(os.path.join(d, f)))
         if os.path.exists(os.path.join(d, i + '.gen.txt')):   # carrier «نَعَم، X» / «هَذَا: X»: keep what follows the gap
             au = after_gap(au); import parselmouth
             parselmouth.Sound(au, sampling_frequency=16000).save(os.path.join(d, i + '.cut.wav'), 'WAV')
-        dur = round(len(au) / 16000, 2)
-        heard = hear(au, 3 if k != 'multi' else 1)
-        score = round(difflib.SequenceMatcher(None, norm(text), norm(heard)).ratio(), 2)
-        bare = round(difflib.SequenceMatcher(None, nomark(norm(text)), nomark(norm(heard))).ratio(), 2)
-        vow = ''; voiced = 0
-        if k == 'syl':
-            import parselmouth
-            wav = os.path.join(d, i + '.trim.wav'); parselmouth.Sound(au, sampling_frequency=16000).save(wav, 'WAV')
-            an = analyze(wav, female); voiced = an['voiced']
-            vow = classify(an['f1'], an['f2'], refs)[0] if refs else '?'
-            why = syl_why(text, heard, vow, voiced)
-        elif k == 'one':
-            ws = [w for w in re.split('[\\s.،؟!:]+', heard) if w]
-            s3 = round(max([difflib.SequenceMatcher(None, norm(text), norm(w)).ratio() for w in ws] + [0]), 2)
-            b3 = round(max([difflib.SequenceMatcher(None, nomark(norm(text)), nomark(norm(w))).ratio() for w in ws] + [0]), 2)
-            why = one_why(text, [heard], max(score, s3), max(bare, b3))
-        else:
-            why = multi_why(text, heard, bare)
-        rows.append(dict(id=i, text=text, kind=k, dur=dur, heard=heard[:80], score=score, bare=bare, vow=vow, voiced=round(voiced, 2), verdict='check' if why else 'pass', why=why))
-        print(f"{os.path.basename(d):10s} {i:10s} {text:28s} {dur:5.2f}s {'PASS ' if not why else 'check'} {why[:40]:40s} «{heard[:40]}»", flush=True)
+        r = judge_clip(d, i, text, au, refs, female); rows.append(r)
+        print(f"{os.path.basename(d):10s} {i:10s} {text:28s} {r['dur']:5.2f}s {'PASS ' if not r['why'] else 'check'} {r['why'][:40]:40s} «{r['heard'][:40]}»", flush=True)
     json.dump(rows, open(os.path.join(d, 'judge.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     ok = sum(1 for r in rows if r['verdict'] == 'pass')
     print(f'{d}: {ok}/{len(rows)} pass', flush=True)
 
-for d in sys.argv[1:]: judge_folder(os.path.join(HERE, d) if not os.path.isabs(d) else d)
+if __name__ == '__main__':
+    for d in sys.argv[1:]: judge_folder(os.path.join(HERE, d) if not os.path.isabs(d) else d)
