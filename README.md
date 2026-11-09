@@ -81,6 +81,9 @@ choose.py --from chatterbox                                                   # 
 regenerated: `truncated` (Chatterbox burst under 0.25 s), `wrong` (wrong consonant or the letter name), `word` (word cut
 short or misread; the owner hears Chatterbox words as too fast). Those Amal clips had ~1.2 s of trailing silence each and
 were trimmed with ffmpeg `silenceremove`, so the voice chain after a pick fits the road before the next pair.
+A second Chatterbox pass (`tools/voice-qa/retry_*.py`, several takes per id with a padded cut; see
+`tools/voice-qa/bench/cloud/RETRY.md`) regenerated the 172 weak ids: every take the judge passed is installed (`retry` in
+VOICE.json), a stopgap is replaced only when Whisper heard the target text itself, the rest stay on the Amal clip.
 
 ## What's in the mobile app
 
