@@ -24,10 +24,10 @@ CARRIERS = {   # name -> format; retry_judge.py knows how to cut each (see CUT t
 PLAN = {
     'syl': [('naam', 0.5), ('naam', 0.3), ('hatha', 0.5), ('hatha', 0.3), ('naam', 0.3), ('naam', 0.5), ('twice', 0.5), ('twice', 0.3)],
     'one': [('hatha', 0.3), ('hatha', 0.5), ('kalima', 0.3), ('twice', 0.3), ('kalima', 0.5), ('twice', 0.5), ('hatha', 0.3), ('kalima', 0.3)],
-    'multi': [('bare', 0.5), ('bare', 0.3), ('bare', 0.5), ('bare', 0.3), ('bare', 0.3), ('bare', 0.5)],
+    'multi': [('bare', 0.5), ('bare', 0.3), ('bare', 0.5), ('bare', 0.3)],
 }
-MIN_TAKES = {'syl': 3, 'one': 4, 'multi': 2}   # takes an id gets even after a pass (words: pick the slowest pass later)
-EXTRA = {'haraka-02-da': 8}                     # extra rounds for بُ
+MIN_TAKES = {'syl': 3, 'one': 3, 'multi': 2}   # takes an id gets even after a pass (words: pick the slowest pass later)
+EXTRA = {'haraka-02-da': 6}                     # extra rounds for بُ (12 takes in all)
 
 def retry_ids():
     """the ids the task names, read from the repo (VOICE.json stopgap lists + word clips + previous 'check' verdicts)"""
@@ -56,7 +56,7 @@ def passed(tdir, i):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--out', default=os.path.join('bench', 'cloud', 'chatterbox-retry'))
     ap.add_argument('--ids', default=''); ap.add_argument('--ids-file', default='')
-    ap.add_argument('--max-rounds', type=int, default=8); ap.add_argument('--no-adaptive', action='store_true')
+    ap.add_argument('--max-rounds', type=int, default=6); ap.add_argument('--no-adaptive', action='store_true')
     a = ap.parse_args()
     out = a.out if os.path.isabs(a.out) else os.path.join(HERE, a.out); tdir = os.path.join(out, 'takes'); os.makedirs(tdir, exist_ok=True)
     lines = all_lines()

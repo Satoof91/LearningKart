@@ -77,9 +77,10 @@ def cut(au, carrier, k):
         g = max(mid, key=lambda g: g[1] - g[0])
         return [padded(au, 0, g[0] * HOP + HOP, k) + ('twice:1st',), padded(au, g[1] * HOP - HOP, len(au), k) + ('twice:2nd',)]
     lead = int(MIN_LEAD[carrier] / 0.01)
-    cands = [g for g in gaps if g[0] >= lead]
-    if cands:
-        g = cands[0]; return [padded(au, g[1] * HOP - HOP, len(au), k) + (f'{carrier}:gap@{g[0] / 100:.2f}-{g[1] / 100:.2f}s',)]
+    low = float(r.max()) * 10 ** (-36 / 20)
+    for g in gaps:   # the first pause after the carrier that still has sound after it (else the target was before the pause)
+        if g[0] >= lead and int(np.sum(r[g[1]:] > low)) >= 8:
+            return [padded(au, g[1] * HOP - HOP, len(au), k) + (f'{carrier}:gap@{g[0] / 100:.2f}-{g[1] / 100:.2f}s',)]
     # no clear pause: fall back to the quietest frame in the middle part, like bench_judge.after_gap
     lo, hi = int(0.3 * len(r)), int(0.85 * len(r))
     q = lo + int(np.argmin(r[lo:hi])) if hi > lo else 0
