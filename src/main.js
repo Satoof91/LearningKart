@@ -8,7 +8,8 @@ let TR = TRACKS.ar;
 // How a letter level teaches (ages 3-6):
 //  - every pair: the right letter on one side, a different letter on the other; the first pairs use a
 //    clearly different shape, later pairs a look-alike that differs only by its dots
-//  - correct pick: the letter SOUND with its word («بَ، بَ، بَطَّة») or its name + praise
+//  - correct pick: the letter's name («بَاء»), praise on every other one, then «أَيْنَ حَرْفُ …» for the next one
+//    (the sound with its word «بَ، بَ، بَطَّة» is only in the intro and the chip tap)
 //  - wrong pick: name the letter that was picked, then ask again for the right one («أَيْنَ حَرْفُ بَاء؟»)
 //  - from the 3rd letter on, the HUD hides the glyph: the child hears the name and has to find the shape (recall)
 //  - help (glow, then the letter straight ahead) only appears after mistakes; stars count every miss
@@ -410,8 +411,8 @@ function hitPickup(p) {
     // after 2 letters: recall rounds, the chip hides the glyph and the voice asks for it
     if (S.kind === 'letter' && S.collected === 2 && S.need > 3) { S.recall = true; setTimeout(() => { if (S.mode === 'drive' && S.recall && !S.chipBusy) chipShowsTarget(); }, 900); }
     if (S.collected >= S.need) Voice.say([praise(), TR.lines.gate], { gap: 350 });
-    // odd pickups: the letter's SOUND with its word; even ones: the letter's name + praise; then the next question
-    else if (S.collected % 2 === 1) Voice.say([TR.lines.sound(C), askNext(p)], { gap: 400 });
+    // the letter's NAME only (the owner: no «أَ، أَسَد» after a pick), praise on every other one, then the next question
+    else if (S.collected % 2 === 1) Voice.say([C.name, askNext(p)], { gap: 350 });
     else Voice.say([C.name, praise(), askNext(p)], { gap: 300 });
     p.pop = 0;
   } else if (p.kind === 'wrong') {

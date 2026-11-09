@@ -17,7 +17,7 @@ Built with Three.js and packaged for **Android** and **iOS** with [Capacitor 8](
 1. **Zoo map**: a winding path of letters (or numbers). Finished letters show their animal and 1–3 stars. The next letter has the kart on it; later ones are locked.
 2. **Level intro**: the letter appears big and is spoken: «أَلِف ... هَيَّا نَجْمَعُ حَرْفَ أَلِف».
 3. **Drive**: the kart drives itself (no gas or brake). The child only steers left or right. Letter bubbles come in pairs: the right letter on one side, another letter on the other. Collect the right letter **5 times**.
-   - A correct pick says the letter's **sound** with its word («بَ، بَ، بَطَّة») or its name plus praise.
+   - A correct pick says the letter's **name** («بَاء»), praise on every other one, then asks for the next letter; the sound with its word («بَ، بَ، بَطَّة») is heard in the intro and on a chip tap.
    - A wrong pick shows a big red ✕ (in every mode), names that letter and asks again: «هَذَا حَرْفُ تَاء… أَيْنَ حَرْفُ بَاء؟».
    - The first pairs use a clearly different shape; dotted look-alikes come once the child is doing well.
    - After 2 pickups the chip shows «؟» and the child finds the letter by ear (recall).
