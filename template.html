@@ -157,6 +157,12 @@ img.syl{width:100%;height:100%;object-fit:contain;display:block;pointer-events:n
   text-shadow:0 .06em 0 var(--pink),0 .12em 0 #a3153a,0 .2em .3em rgba(0,0,0,.3);opacity:0;transform:scale(.4)}
 #praise.show{animation:praise 1.2s ease-out}
 @keyframes praise{0%{opacity:0;transform:scale(.4) rotate(-8deg)}20%{opacity:1;transform:scale(1.15) rotate(3deg)}35%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-30px)}}
+/* wrong pick: a red ✕ drawn from two bars, shakes once and fades */
+#xmark{position:fixed;top:26vh;left:50%;width:clamp(90px,22vh,170px);height:clamp(90px,22vh,170px);margin-left:calc(clamp(90px,22vh,170px) / -2);pointer-events:none;opacity:0;transform:scale(.4)}
+#xmark::before,#xmark::after{content:"";position:absolute;left:50%;top:0;width:22%;height:100%;margin-left:-11%;border-radius:999px;background:#ff3b3b;border:4px solid #fff;box-shadow:0 .08em 0 #a3153a,0 .2em .3em rgba(0,0,0,.3)}
+#xmark::before{transform:rotate(45deg)} #xmark::after{transform:rotate(-45deg)}
+#xmark.show{animation:xmark 1s ease-out}
+@keyframes xmark{0%{opacity:0;transform:scale(.4)}15%{opacity:1;transform:scale(1.15)}25%{transform:scale(1) translateX(-6%)}35%{transform:translateX(6%)}45%{transform:translateX(-4%)}55%{transform:translateX(0)}80%{opacity:1}100%{opacity:0;transform:scale(.9)}}
 
 /* intro card */
 #intro{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
@@ -264,7 +270,7 @@ img.syl{width:100%;height:100%;object-fit:contain;display:block;pointer-events:n
   <div id="starchip" data-icon="star"><b id="hstars">0</b></div>
   <button id="pausebtn" class="cbtn round" data-icon="pause" aria-label="pause"></button>
 </div>
-<div id="praise"></div>
+<div id="praise"></div><div id="xmark"></div>
 <div id="intro" class="hidden"><div class="card"><div class="irow"><div id="introglyph"></div><img id="introimg" class="hidden" alt=""></div><div id="introtext"></div></div></div>
 
 <div id="celebrate" class="hidden">

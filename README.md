@@ -18,7 +18,7 @@ Built with Three.js and packaged for **Android** and **iOS** with [Capacitor 8](
 2. **Level intro**: the letter appears big and is spoken: «أَلِف ... هَيَّا نَجْمَعُ حَرْفَ أَلِف».
 3. **Drive**: the kart drives itself (no gas or brake). The child only steers left or right. Letter bubbles come in pairs: the right letter on one side, another letter on the other. Collect the right letter **5 times**.
    - A correct pick says the letter's **sound** with its word («بَ، بَ، بَطَّة») or its name plus praise.
-   - A wrong pick names that letter and asks again: «هَذَا حَرْفُ تَاء… أَيْنَ حَرْفُ بَاء؟».
+   - A wrong pick shows a big red ✕ (in every mode), names that letter and asks again: «هَذَا حَرْفُ تَاء… أَيْنَ حَرْفُ بَاء؟».
    - The first pairs use a clearly different shape; dotted look-alikes come once the child is doing well.
    - After 2 pickups the chip shows «؟» and the child finds the letter by ear (recall).
    - Help only comes after mistakes: a glow, then (after 3 misses) the letter straight ahead.
@@ -77,7 +77,10 @@ listen.py --cand chatterbox                                                   # 
 choose.py --from chatterbox                                                   # install into assets/voice, then npm run build
 ```
 
-`assets/voice/VOICE.json` names the installed voice and lists the clips kept from the previous set until they are regenerated.
+`assets/voice/VOICE.json` names the installed voice and lists the clips kept from the previous (Amal) set until they are
+regenerated: `truncated` (Chatterbox burst under 0.25 s), `wrong` (wrong consonant or the letter name), `word` (word cut
+short or misread; the owner hears Chatterbox words as too fast). Those Amal clips had ~1.2 s of trailing silence each and
+were trimmed with ffmpeg `silenceremove`, so the voice chain after a pick fits the road before the next pair.
 
 ## What's in the mobile app
 

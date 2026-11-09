@@ -6,7 +6,8 @@
   "voice": "ar-QA-AmalNeural (+fixups)",
   "why": {
    "truncated": "chatterbox clip is a <0.25 s burst",
-   "wrong": "chatterbox syllable has the wrong consonant or reads the letter name"
+   "wrong": "chatterbox syllable has the wrong consonant or reads the letter name",
+   "word": "chatterbox word clip is cut short or misread (owner: words come out fast and unclear)"
   },
   "truncated": [
    "haraka-02-da",
@@ -65,6 +66,36 @@
    "word-18-onset",
    "word-22-onset",
    "word-27-onset"
-  ]
+  ],
+  "word": [
+   "letter-01-word",
+   "letter-02-word",
+   "letter-09-word",
+   "letter-11-word",
+   "letter-13-word",
+   "letter-14-word",
+   "letter-15-word",
+   "letter-16-word",
+   "letter-17-word",
+   "letter-18-word",
+   "letter-19-word",
+   "letter-21-word",
+   "letter-22-word",
+   "letter-23-word",
+   "letter-24-word",
+   "letter-26-word",
+   "letter-28-word",
+   "word-07-say",
+   "word-10-say",
+   "word-12-say",
+   "word-16-say",
+   "word-17-say",
+   "word-18-say",
+   "word-20-say",
+   "word-25-say",
+   "word-28-say",
+   "word-30-say"
+  ],
+  "trimmed": "Amal clips carry ~0.2 s lead and ~1.2 s trailing silence; all stopgap clips were trimmed with ffmpeg silenceremove"
  }
 }

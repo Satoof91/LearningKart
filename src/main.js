@@ -342,8 +342,9 @@ function spawnAhead() {
     S.spawned++;
     if (S.spawned % 3 === 0 && !isWord() && !isHaraka()) { const pad = makeBoostPad(); const at = S.nextU + 34; pad.position.copy(T.pos(at, 0)); pad.position.y = 0.1; pad.rotation.y = T.heading(at); addPickup({ obj: pad, u: at, d: 0, kind: 'boost', alive: true, r: 2.6 }); }
     for (let k = 1; k <= 3; k++) spawnCoin(S.nextU + 14 + k * 9, (S.spawned % 2 ? 1 : -1) * (k - 2) * 2.4);
-    // word mode: more road between letters so the letter name and the next question finish first
-    S.nextU += isWord() ? 170 : isHaraka() ? 150 : 78;
+    // word / harakat mode: more road between pairs so the feedback and the next question finish first
+    // (harakat: a wrong pick spells the syllable and asks again, up to ~6.3 s of voice; 170 u is 6.8 s at normal speed)
+    S.nextU += isWord() || isHaraka() ? 170 : 78;
   } else {
     const d = pick([-4.4, 0, 4.4]);
     const g = makeApple(); g.scale.setScalar(1.35);
@@ -375,6 +376,8 @@ function praise() {
   const el = $('praise'); el.textContent = TR.praiseShow[i]; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
   return TR.praise[i];
 }
+// a big red ✕ for a wrong pick, in every mode (the voice still names what was picked)
+function showX() { const el = $('xmark'); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
 function hitPickup(p) {
   p.alive = false;
   const wp = p.obj.position.clone(); wp.y += 2.5;
@@ -397,7 +400,8 @@ function hitPickup(p) {
       if (S.collected === 3) S.recall = true; // second half: white marks, the voice asks, the chip shows ؟
       retarget(); chipShowsTarget(); pingChip();
       if (S.collected >= S.need) { praise(); Voice.say([HLINES.chant(S.index), TR.lines.gate], { gap: 450 }); }
-      else Voice.say([HLINES.spell(x), askNext(p)], { gap: 350 });
+      // the syllable once («بَ»), then the next question: the spelling is kept for wrong picks and the chip tap
+      else Voice.say([x.tts, askNext(p)], { gap: 350 });
       p.pop = 0;
       return;
     }
@@ -415,7 +419,7 @@ function hitPickup(p) {
     if (p.pair) p.pair.handled = true; // its target will pass behind the kart: already counted as this mistake
     const T0 = p.pair && p.pair.letter ? p.pair.letter : C;
     addMissNow();
-    Sound.wrong(); haptic('bump');
+    Sound.wrong(); haptic('bump'); showX();
     p.mat.color.setHex(0x9aa5b1);
     // name what was picked, then ask again for the right one, and show it on the chip for a moment
     const nx = nextTarget(p.pair) || p.pair;
