@@ -4,7 +4,8 @@ For every <out>/takes/<id>__<n>.wav without a .judge.json: the target is cut out
 the game's rules (bench_judge.judge_clip: Whisper ×3 word-by-word + formants for a syllable, Whisper ×1 for a sentence),
 and <id>__<n>.judge.json is written: a list of rows (one per cut; the «X. X.» carrier yields two) with the judge's keys
 plus take, carrier, cfg, seed, secs and cut (the padded cut wav the owner would hear).
-Cut rule: the carrier ends at the first pause (>= 60-80 ms under -28 dB of the peak) after the carrier's own length;
+Cut rule: the carrier ends at the first pause (>= 80 ms under -28 dB of the peak) after the carrier's own length
+(0.33 s for نَعَم/هَذَا, 0.7 s for هَذِهِ الكَلِمَة) that still has sound after it, else at the quietest frame of the middle part;
 the clip is the target's sound (first to last frame above -36 dB of the peak) between 0.15 s of digital silence before
 and 0.2 s after (5 ms fades), so no consonant is lost and no murmur or carrier remnant rides along; a pause inside the
 target (0.1 s syllable / 0.15 s word / 0.5 s sentence) means stray babble follows and the clip stops there (stray = s cut).
@@ -22,8 +23,8 @@ import parselmouth
 
 SR = 16000; HOP = 160   # 10 ms frames
 PAD_BEFORE, PAD_AFTER = 0.15, 0.20
-MIN_LEAD = {'naam': 0.25, 'hatha': 0.25, 'kalima': 0.70}   # seconds of carrier speech before the pause we look for
-MIN_GAP = {'naam': 0.06, 'hatha': 0.06, 'kalima': 0.08, 'twice': 0.12}
+MIN_LEAD = {'naam': 0.33, 'hatha': 0.33, 'kalima': 0.70}   # seconds of carrier speech before the pause we look for (هَذَا has a dip inside it before 0.3 s)
+MIN_GAP = {'naam': 0.08, 'hatha': 0.08, 'kalima': 0.08, 'twice': 0.12}
 
 def rms_frames(au):
     n = len(au) // HOP
@@ -82,7 +83,7 @@ def cut(au, carrier, k):
         if g[0] >= lead and int(np.sum(r[g[1]:] > low)) >= 8:
             return [padded(au, g[1] * HOP - HOP, len(au), k) + (f'{carrier}:gap@{g[0] / 100:.2f}-{g[1] / 100:.2f}s',)]
     # no clear pause: fall back to the quietest frame in the middle part, like bench_judge.after_gap
-    lo, hi = int(0.3 * len(r)), int(0.85 * len(r))
+    lo, hi = max(lead, int(0.3 * len(r))), int(0.85 * len(r))
     q = lo + int(np.argmin(r[lo:hi])) if hi > lo else 0
     return [padded(au, q * HOP, len(au), k) + (f'{carrier}:quietest@{q / 100:.2f}s',)]
 
