@@ -5,7 +5,8 @@ it), the folder's _ref-a/i/u.wav, times.json (generation seconds), judge.json (t
 bench_judge.py writes) and takes.json (every judged take, for the report), then prints a Markdown summary
 (<out>-best/SUMMARY.md: pass counts per group, the settings that passed, the ids still failing with what was heard).
 Choice: a pass beats a check; among passes a word takes the longest (slowest) take, a syllable the one whose formants
-agree with the reading and then the longest, a sentence the best score; among checks the best bare/vowelled score, then
+agree with the reading and then the one nearest 0.45 s (a «X. X.» take said without a pause holds two syllables and is
+demoted to check), a sentence the best score; among checks the best bare/vowelled score, then
 the longest clip (so the owner hears the most complete attempt, marked check)."""
 import os, sys, re, json, shutil, argparse, collections
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -18,7 +19,7 @@ def rank(r):
     k = r['kind']; p = r['verdict'] == 'pass'
     if p:
         if k == 'one': return (1, r['dur'], r['score'])
-        if k == 'syl': return (1, r['vow'] == {'َ': 'a', 'ِ': 'i', 'ُ': 'u'}[r['text'][1]], r['dur'], r['score'])
+        if k == 'syl': return (1, r['vow'] == {'َ': 'a', 'ِ': 'i', 'ُ': 'u'}[r['text'][1]], -abs(r['dur'] - 0.45), r['score'])   # one syllable: ~0.45 s with its pads
         return (1, r['score'], r['bare'], r['dur'])
     hallu = any(h in r['heard'] for h in HALLU)
     return (0, not hallu, max(r['bare'], r['score']), r['score'], r['dur'])
@@ -32,7 +33,10 @@ def main():
     takes = collections.defaultdict(list)
     for f in sorted(os.listdir(tdir)):
         if f.endswith('.judge.json'):
-            for r in json.load(open(os.path.join(tdir, f), encoding='utf-8')): takes[r['id']].append(r)
+            for r in json.load(open(os.path.join(tdir, f), encoding='utf-8')):
+                if r['kind'] == 'syl' and r.get('cutnote') == 'twice:no-gap' and r['verdict'] == 'pass':   # «X. X.» said without a pause: two syllables in one clip
+                    r['verdict'] = 'check'; r['why'] = 'two repetitions in the cut'
+                takes[r['id']].append(r)
     chosen, rows, times = {}, [], {}
     for i in ids:
         if not takes[i]: print('no judged take for', i); continue
