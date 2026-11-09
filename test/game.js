@@ -33,8 +33,10 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await wait(1500); await p.screenshot({ path: OUT + '/4-drive.png' });
   // also hit one wrong letter on purpose to see the feedback
   await p.evaluate(() => { const L = window.__lk; const w = L.S.pickups.find(q => q.kind === 'wrong' && q.alive); if (w) L.hitPickup(w); });
-  await wait(300); await p.screenshot({ path: OUT + '/5-wrong.png' });
-  console.log('wrong pick shows ✕', await p.evaluate(() => document.getElementById('xmark').classList.contains('show')) ? 'OK' : 'NO X MARK');
+  // the ✕ must actually appear (its class stays on after the 1 s animation, so watch the opacity; headless WebGL frames can lag)
+  const xSeen = await p.waitForFunction(() => parseFloat(getComputedStyle(document.getElementById('xmark')).opacity) > 0.5, null, { timeout: 3000, polling: 50 }).then(() => true, () => false);
+  console.log('wrong pick shows ✕', xSeen ? 'OK' : 'NO X MARK');
+  await p.screenshot({ path: OUT + '/5-wrong.png' });
   await p.waitForFunction('window.__lk.S.arch', null, { timeout: 600000 });
   await wait(1200); await p.screenshot({ path: OUT + '/6-gate.png' });
   await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
