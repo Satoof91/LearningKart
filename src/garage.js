@@ -1,6 +1,6 @@
-// Garage: kart and driver customisation. Items unlock with LEARNING stars (the 1-3 stars of every
-// finished level, in every track), never with purchases or ads, and nothing is ever spent or lost:
-// reaching a threshold opens the item for good. The co-pilot is any animal friend the child has met.
+// Garage: kart and driver customisation, bought with the stars the child collects on the road (the same
+// count the title screen and the race show). Buying spends the stars and the item stays the child's for
+// good; never real money or ads. Items that cost 0 are always owned. The co-pilot is any animal friend met.
 export const KART_COLORS = ['#ff4d6d', '#3da5ff', '#ffd23f', '#4cd964', '#c77dff', '#20c997', '#ff922b', '#343a40'];
 export const GARAGE = {
   body: [
@@ -17,9 +17,11 @@ export const GARAGE = {
 export const GARAGE_TABS = ['body', 'color', 'hat', 'skin', 'pilot'];
 export const DEFAULT_LOOK = () => ({ body: 'classic', hat: 'helmet', skin: 0, pilot: '' });
 
-// every item whose threshold lies in (before, after]: shown as "new in the garage" after a level
-export function newlyUnlocked(before, after) {
+export const BUY_KINDS = ['body', 'color', 'hat'];
+export const isOwned = (owned, kind, it) => !it.cost || !!(owned && owned[kind] && owned[kind].includes(it.id));
+// items not owned yet that the stars of this level made affordable: shown as a hint after a level
+export function newlyAffordable(before, after, owned) {
   const out = [];
-  for (const k of ['body', 'color', 'hat']) for (const it of GARAGE[k]) if (it.cost > before && it.cost <= after) out.push(it);
+  for (const k of BUY_KINDS) for (const it of GARAGE[k]) if (!isOwned(owned, k, it) && it.cost > before && it.cost <= after) out.push(it);
   return out;
 }

@@ -33,7 +33,7 @@ Built with Three.js and packaged for **Android** and **iOS** with [Capacitor 8](
 Hear the word, collect its letters in order, hear it blended: «دُ، دُ، دُبّ» / "F, O, X. Fox!". The word fills in at the top (Arabic stays joined). A word opens once all its letters are learned. Words: دب أسد قرد صقر جمل نمر نسر فيل · HEN DOG PIG CAT FOX OX YAK.
 
 ### Garage (🛠️ on the title screen and the map)
-Kart body, colour, hat, skin tone and an **animal co-pilot** (any animal friend the child has met). Items unlock with *learning stars*, the stars of finished levels. Nothing is bought or spent. A level that unlocks something shows "🎁 New in the garage!". Items and thresholds are in `src/garage.js`.
+Kart body, colour, hat, skin tone and an **animal co-pilot** (any animal friend the child has met). Items are bought with the **stars collected on the road**: the same count the map header, the race and the garage show. Buying spends the stars and the item stays owned (no real money, no ads); free items are always owned. A level whose stars reach a new item shows "🎁 Enough stars for a garage prize!". Items and prices are in `src/garage.js`.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the team's evaluation and the next modes.
 

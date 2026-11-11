@@ -1,12 +1,14 @@
 // Progress + settings, saved on the device (localStorage, mirrored to native Preferences in the app).
 import { Preferences } from '@capacitor/preferences';
 import { isNative } from './platform.js';
-import { DEFAULT_LOOK, GARAGE } from './garage.js';
+import { DEFAULT_LOOK, GARAGE, BUY_KINDS } from './garage.js';
 import { WORDS, EN_WORDS } from './data.js';
 
 const KEY = 'learningkart_v1';
 const DEFAULT = () => ({
-  v: 2, look: DEFAULT_LOOK(), letters: Array(28).fill(0), numbers: Array(11).fill(0), totalStars: 0, kart: 1,
+  v: 3, look: DEFAULT_LOOK(), letters: Array(28).fill(0), numbers: Array(11).fill(0), totalStars: 0, kart: 1,
+  // garage items bought with stars (ids per kind; items that cost 0 are always owned)
+  owned: { body: [], color: [], hat: [] },
   // per letter: how often the child picked a wrong letter or missed it
   miss: Array(28).fill(0),
   // English track (A-Z, 0-10)
@@ -32,9 +34,26 @@ function sanitize(d) {
   out.look = {
     body: GARAGE.body.some(x => x.id === lk.body) ? lk.body : L.body, hat: GARAGE.hat.some(x => x.id === lk.hat) ? lk.hat : L.hat,
     skin: int(lk.skin, 0, 3, 0), pilot: typeof lk.pilot === 'string' ? lk.pilot.slice(0, 20) : ''
-  }; out.unlockAll = !!d.unlockAll; out.full = !!d.full; out.v = 2;
+  }; out.unlockAll = !!d.unlockAll; out.full = !!d.full;
+  const own = (d.owned && typeof d.owned === 'object') ? d.owned : {};
+  out.owned = {};
+  for (const k of BUY_KINDS) out.owned[k] = GARAGE[k].filter(it => it.cost && Array.isArray(own[k]) && own[k].includes(it.id)).map(it => it.id);
+  // saves from before stars were spent (v2): keep what the learning stars had opened, and what is in use
+  if (!(d.v >= 3)) {
+    const learned = learnStarsOf(out);
+    for (const k of BUY_KINDS) for (const it of GARAGE[k]) if (it.cost && it.cost <= learned && !out.owned[k].includes(it.id)) out.owned[k].push(it.id);
+  }
+  keepInUse(out);
+  out.v = 3;
   return out;
 }
+// what the kart wears now is always owned (old saves, a reset that keeps the colour)
+function keepInUse(d) {
+  const use = { body: d.look.body, hat: d.look.hat, color: d.kart };
+  for (const k of BUY_KINDS) { const it = GARAGE[k].find(x => x.id === use[k]); if (it && it.cost && !d.owned[k].includes(it.id)) d.owned[k].push(it.id); }
+}
+const sum = a => a.reduce((x, y) => x + y, 0);
+const learnStarsOf = d => sum(d.letters) + sum(d.numbers) + sum(d.enLetters) + sum(d.enNumbers) + sum(d.words) + sum(d.enWords) + sum(d.harakat);
 export const Store = {
   data: DEFAULT(),
   async load() {
@@ -55,9 +74,17 @@ export const Store = {
     try { localStorage.setItem(KEY, s); } catch (e) { /* ignore */ }
     if (isNative) { try { Preferences.set({ key: KEY, value: s }).catch(() => {}); } catch (e) { /* ignore */ } }
   },
-  reset() { const k = this.data.kart, st = this.data.settings; this.data = DEFAULT(); this.data.kart = k; this.data.settings = st; this.save(); },
-  // learning stars: the sum of the 1-3 stars of every finished level in every track (unlocks garage items)
-  learnStars() { const d = this.data, sum = a => a.reduce((x, y) => x + y, 0); return sum(d.letters) + sum(d.numbers) + sum(d.enLetters) + sum(d.enNumbers) + sum(d.words) + sum(d.enWords) + sum(d.harakat); },
+  reset() { const k = this.data.kart, st = this.data.settings; this.data = DEFAULT(); this.data.kart = k; this.data.settings = st; keepInUse(this.data); this.save(); },
+  // learning stars: the sum of the 1-3 stars of every finished level in every track (the map's progress)
+  learnStars() { return learnStarsOf(this.data); },
+  // spend stars on a garage item: false when it is not affordable; owning it again costs nothing
+  buy(kind, it) {
+    const d = this.data;
+    if (!it.cost || d.owned[kind].includes(it.id)) return true;
+    if (d.totalStars < it.cost) return false;
+    d.totalStars -= it.cost; d.owned[kind].push(it.id); this.save();
+    return true;
+  },
   // progress array for a track: kind 'letter' | 'number', lang 'ar' | 'en'
   prog(kind, lang = 'ar') {
     const d = this.data;

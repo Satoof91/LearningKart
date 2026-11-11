@@ -21,7 +21,7 @@ import { loadFonts, bubbleTexture, drawWord, drawWordProgress, drawSyllable, syl
 import { Voice } from './voice.js';
 import { Sound } from './audio.js';
 import { Store } from './store.js';
-import { GARAGE, GARAGE_TABS, KART_COLORS, newlyUnlocked } from './garage.js';
+import { GARAGE, GARAGE_TABS, KART_COLORS, newlyAffordable, isOwned } from './garage.js';
 
 const $ = id => document.getElementById(id);
 const TAU = Math.PI * 2;
@@ -696,10 +696,11 @@ function celebrate() {
   const errs = S.wrong + S.misses;
   let stars = S.kind !== 'number' ? (errs <= 1 ? 3 : errs <= 3 ? 2 : 1) : 3;
   if (S.assisted > 0) stars = Math.min(stars, S.assisted > 2 ? 1 : 2);
-  const starsBefore = Store.learnStars();
   const first = Store.complete(S.kind, S.index, stars, TR.lang);
-  const gifts = newlyUnlocked(starsBefore, Store.learnStars());
+  // the road stars go into the wallet the garage spends; say so when they now reach a new item
+  const walletBefore = Store.data.totalStars;
   Store.data.totalStars += S.coins; Store.save();
+  const gifts = newlyAffordable(walletBefore, Store.data.totalStars, Store.data.owned);
   drawCard();
   const cs = $('cstars'); cs.innerHTML = '';
   for (let i = 0; i < 3; i++) { cs.insertAdjacentHTML('beforeend', ICON.star); }
@@ -942,7 +943,7 @@ function closeGarage() {
   if (gFrom === 'map') toMap(); else toTitle();
 }
 function renderGarage() {
-  const u = ui(), have = Store.learnStars(), look = Store.data.look;
+  const u = ui(), have = Store.data.totalStars, look = Store.data.look;
   $('gstars').textContent = have;
   const tabs = $('gtabs'); tabs.innerHTML = '';
   for (const t of GARAGE_TABS) {
@@ -951,19 +952,22 @@ function renderGarage() {
     tabs.appendChild(b);
   }
   const box = $('gitems'); box.innerHTML = '';
-  const cell = (inner, selected, cost, onPick) => {
-    const el = document.createElement('button'); const locked = cost > have;
-    el.className = 'gitem' + (selected ? ' sel' : '') + (locked ? ' locked' : '');
-    el.innerHTML = inner + (locked ? `<span class="need">★ ${cost}</span>` : '');
+  // an item not owned yet shows its price; tapping it buys it when the stars are enough (they are spent)
+  const cell = (inner, selected, cost, onPick, kind, it) => {
+    const el = document.createElement('button');
+    const owned = !kind || isOwned(Store.data.owned, kind, it), locked = !owned && cost > have;
+    el.className = 'gitem' + (selected ? ' sel' : '') + (locked ? ' locked' : !owned ? ' buy' : '');
+    el.innerHTML = inner + (!owned ? `<span class="need">★ ${cost}</span>` : '');
     el.addEventListener('click', () => {
       if (locked) { Sound.lock(); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); return; }
-      Sound.pop(); haptic('tick'); onPick(); Store.save(); setKart(); renderGarage();
+      if (!owned) { if (!Store.buy(kind, it)) return; Sound.star(); haptic('win'); } else { Sound.pop(); haptic('tick'); }
+      onPick(); Store.save(); setKart(); renderGarage();
     });
     box.appendChild(el);
   };
-  if (gTab === 'body') for (const it of GARAGE.body) cell(it.icon, look.body === it.id, it.cost, () => { look.body = it.id; });
-  if (gTab === 'hat') for (const it of GARAGE.hat) cell(it.icon, look.hat === it.id, it.cost, () => { look.hat = it.id; });
-  if (gTab === 'color') for (const it of GARAGE.color) cell(`<span class="dot" style="background:${it.color}"></span>`, Store.data.kart === it.id, it.cost, () => { Store.data.kart = it.id; });
+  if (gTab === 'body') for (const it of GARAGE.body) cell(it.icon, look.body === it.id, it.cost, () => { look.body = it.id; }, 'body', it);
+  if (gTab === 'hat') for (const it of GARAGE.hat) cell(it.icon, look.hat === it.id, it.cost, () => { look.hat = it.id; }, 'hat', it);
+  if (gTab === 'color') for (const it of GARAGE.color) cell(`<span class="dot" style="background:${it.color}"></span>`, Store.data.kart === it.id, it.cost, () => { Store.data.kart = it.id; }, 'color', it);
   if (gTab === 'skin') for (const it of GARAGE.skin) cell(`<span class="dot" style="background:${it.color}"></span>`, look.skin === it.id, it.cost, () => { look.skin = it.id; });
   if (gTab === 'pilot') {
     const met = metAnimals();

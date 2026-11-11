@@ -32,7 +32,7 @@ export const UI = {
     collect: L => `اجمع حرف ${L.ch}`, apples: d => `اجمع ${d} تفاحات`, zero: 'صفر = لا شيء', friend: 'صديق جديد في حديقتك!',
     buildWord: W => `ابنِ كلمة ${W.word}`, wordDone: 'كلمة جديدة!', tabHaraka: 'الحركات', harakaCollect: L => `اقرأ ${L.ch} بالحركات`, harakaDone: 'أحسنت! قرأت الحركات', hnames: ['فتحة', 'كسرة', 'ضمة'], packs: { zoo: 'الحيوانات', home: 'البيت', market: 'السوق', sea: 'البحر', sky: 'الطبيعة' },
     garage: 'المرآب', gTabs: { body: 'السيارة', color: 'اللون', hat: 'القبعة', skin: 'السائق', pilot: 'الرفيق' },
-    garageNew: 'هدية جديدة في المرآب!', pilotNone: 'بدون', pilotEmpty: 'أكمل حرفاً ليركب صديق معك!', learnStars: 'نجوم التعلّم'
+    garageNew: 'نجومك تكفي لهدية في المرآب!', pilotNone: 'بدون', pilotEmpty: 'أكمل حرفاً ليركب صديق معك!', learnStars: 'نجوم التعلّم'
   },
   en: {
     dir: 'ltr', switchTo: 'ع', switchLabel: 'العربية',
@@ -59,6 +59,6 @@ export const UI = {
     collect: L => `Find the letter ${L.ch}`, apples: d => `Collect ${d} apples`, zero: '0 = nothing', friend: 'A new friend in your zoo!',
     buildWord: W => `Build the word ${W.word}`, wordDone: 'You built a word!', tabHaraka: 'بَ بِ بُ', harakaCollect: L => `Read ${L.ch} with its vowel marks`, harakaDone: 'Great reading!', hnames: ['fatha', 'kasra', 'damma'], packs: { zoo: 'Animals', home: 'Home', market: 'Market', sea: 'Sea', sky: 'Nature' },
     garage: 'Garage', gTabs: { body: 'Kart', color: 'Color', hat: 'Hat', skin: 'Driver', pilot: 'Friend' },
-    garageNew: 'New in the garage!', pilotNone: 'None', pilotEmpty: 'Finish a letter and a friend can ride with you!', learnStars: 'Learning stars'
+    garageNew: 'Enough stars for a garage prize!', pilotNone: 'None', pilotEmpty: 'Finish a letter and a friend can ride with you!', learnStars: 'Learning stars'
   }
 };

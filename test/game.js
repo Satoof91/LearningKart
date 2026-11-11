@@ -115,14 +115,17 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await p.waitForFunction('window.__lk.S.mode === "celebrate"', null, { timeout: 600000 });
   await wait(1500);
   console.log('gift text', await p.evaluate(() => document.getElementById('friend').textContent));
-  await p.evaluate(() => { clearInterval(window.__ap); const d = window.__lk.Store.data; d.letters.fill(1, 0, 12); d.enLetters.fill(1, 0, 6); window.__lk.toTitle(); });
+  // the garage spends the road stars: 100 in the wallet, then racer 6 + bunny hat 20 + colour 4 = 30 spent
+  await p.evaluate(() => { clearInterval(window.__ap); const d = window.__lk.Store.data; d.letters.fill(1, 0, 12); d.enLetters.fill(1, 0, 6); d.totalStars = 100; d.owned = { body: [], color: [], hat: [] }; window.__lk.toTitle(); });
+  // the map header shows the same wallet the garage spends
+  const titleStars = await p.evaluate(() => { const L = window.__lk; L.toMap(); const t = document.getElementById('totstars').textContent; L.toTitle(); return t; });
   await wait(800); await p.click('#garagebtn', { force: true }); await wait(1500);
   const pickItem = async (tab, n) => { await p.click(`.gtab:nth-child(${tab})`, { force: true }); await wait(200); await p.click(`.gitem:nth-child(${n})`, { force: true }); await wait(250); };
   await pickItem(1, 2); await pickItem(3, 4); await pickItem(2, 6); await pickItem(5, 2);
   await wait(1500); await p.screenshot({ path: OUT + '/30-garage.png' });
   await p.click('.gtab:nth-child(3)', { force: true }); await wait(1500); await p.screenshot({ path: OUT + '/31-garage-hats.png' });
-  const look = await p.evaluate(() => ({ look: window.__lk.Store.data.look, color: window.__lk.Store.data.kart, stars: window.__lk.Store.learnStars() }));
-  console.log('garage look', JSON.stringify(look));
+  const look = await p.evaluate(() => ({ look: window.__lk.Store.data.look, color: window.__lk.Store.data.kart, wallet: window.__lk.Store.data.totalStars, shown: document.getElementById('gstars').textContent }));
+  console.log('garage look', JSON.stringify(look), 'map showed', titleStars, look.wallet === 70 && look.shown === '70' && titleStars === '100' ? 'OK stars spent' : 'STARS NOT SPENT / COUNTS DIFFER');
   await p.click('#gclose', { force: true }); await wait(500);
   await p.evaluate(() => window.__lk.startLevel('letter', 3, 'ar')); await auto();
   await p.waitForFunction('window.__lk.S.mode === "drive" && window.__lk.S.collected >= 1', null, { timeout: 600000 });
