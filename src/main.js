@@ -996,7 +996,8 @@ $('play').addEventListener('click', async () => {
 // ---------- HUD buttons ----------
 $('target').addEventListener('pointerdown', e => {
   e.stopPropagation(); const C = cur();
-  Voice.say(S.kind === 'letter' ? [C.name, TR.lines.sound(C)] : S.kind === 'word' ? [C.say, nextLetter().name] : isHaraka() ? HLINES.spell(sylAt(0)) : C.say);
+  // letter race: the letter's name only (the owner: no animal word during the race; intro and celebration keep it)
+  Voice.say(S.kind === 'letter' ? C.name : S.kind === 'word' ? [C.say, nextLetter().name] : isHaraka() ? HLINES.spell(sylAt(0)) : C.say);
   if (isHaraka() && S.recall && !S.chipBusy) { const x = sylAt(0); setChip(x.ch, x.color); clearTimeout(S.chipT); S.chipT = setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }
   // in recall rounds a tap shows the letter again for a moment
   if (S.kind === 'letter' && S.recall && !S.chipBusy) { setChip(C.ch, 'var(--pink)'); clearTimeout(S.chipT); S.chipT = setTimeout(() => { if (S.mode === 'drive') chipShowsTarget(); }, 2200); }

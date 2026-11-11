@@ -6,7 +6,7 @@
   "voice": "ar-QA-AmalNeural (+fixups)",
   "why": {
    "truncated": "chatterbox clip is a <0.25 s burst",
-   "wrong": "chatterbox syllable has the wrong consonant or reads the letter name",
+   "wrong": "chatterbox clip has the wrong consonant, reads another letter, or carries part of another line",
    "word": "chatterbox word clip is cut short or misread (owner: words come out fast and unclear)"
   },
   "truncated": [
@@ -38,7 +38,28 @@
    "letter-19-snd",
    "word-10-onset",
    "word-12-onset",
-   "word-16-onset"
+   "word-16-onset",
+   "letter-03-intro",
+   "letter-04-name",
+   "letter-06-name",
+   "letter-06-snd",
+   "letter-07-name",
+   "letter-10-name",
+   "letter-11-wrong",
+   "letter-15-name",
+   "letter-15-find",
+   "letter-16-name",
+   "letter-17-name",
+   "letter-17-intro",
+   "letter-17-wrong",
+   "letter-17-find",
+   "letter-18-name",
+   "letter-20-name",
+   "letter-22-name",
+   "letter-26-name",
+   "letter-28-name",
+   "praise-2",
+   "praise-5"
   ],
   "word": [
    "letter-11-word",
@@ -79,6 +100,11 @@
    "haraka-15-fa",
    "haraka-16-da",
    "haraka-19-da"
+  ],
+  "short_but_right": [
+   "letter-21-name",
+   "number-08",
+   "haraka-name-fa"
   ]
  }
 }
