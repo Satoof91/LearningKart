@@ -15,7 +15,9 @@ export const GARAGE = {
   skin: ['#ffd6a5', '#f1c27d', '#c68642', '#8d5524'].map((c, i) => ({ id: i, color: c, cost: 0 }))
 };
 export const GARAGE_TABS = ['body', 'color', 'hat', 'skin', 'pilot'];
-export const DEFAULT_LOOK = () => ({ body: 'classic', hat: 'helmet', skin: 0, pilot: '' });
+// driver: 'boy' | 'girl' | an animal id (any animal of the game, free); skin tone only for boy and girl
+export const DRIVERS = ['boy', 'girl'];
+export const DEFAULT_LOOK = () => ({ body: 'classic', hat: 'helmet', skin: 0, pilot: '', driver: 'boy' });
 
 export const BUY_KINDS = ['body', 'color', 'hat'];
 export const isOwned = (owned, kind, it) => !it.cost || !!(owned && owned[kind] && owned[kind].includes(it.id));

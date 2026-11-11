@@ -348,8 +348,10 @@ export function makeHabitat(biomeName, animalIds, sign, opts = {}) {
 }
 
 // ---------- kart ----------
-// look: { body: 'classic' | 'racer' | 'jeep' | 'rocket', hat: 'helmet' | 'cap' | 'safari' | 'bunny' | 'crown', skin: 0-3 }
-// The returned `pilot` group is the co-pilot seat (an animal friend rides there).
+// look: { body: 'classic' | 'racer' | 'jeep' | 'rocket', hat: 'helmet' | 'cap' | 'safari' | 'bunny' | 'crown', skin: 0-3,
+//         driver: 'boy' | 'girl' | <animal id> }
+// The returned `pilot` group is the co-pilot seat (an animal friend rides there); `driver` is the driver's
+// seat, filled by the caller with the animal when the driver is an animal (the child figure is not built then).
 export const SKINS = [0xffd6a5, 0xf1c27d, 0xc68642, 0x8d5524];
 export function makeKart(colorHex, look = {}) {
   const body = look.body || 'classic', hat = look.hat || 'helmet', skin = SKINS[look.skin | 0] ?? SKINS[0];
@@ -401,10 +403,23 @@ export function makeKart(colorHex, look = {}) {
     for (const s of [-1, 1]) add(new THREE.SphereGeometry(0.28, 10, 8), 0xfff3bf, s * 0.75, 1.0, 2.6);
     pilot.position.set(0, 2.2, -2.05);
   }
-  // child driver (skin tone + hat)
+  // child driver (skin tone + hat), or an empty seat for an animal driver
   const drv = new THREE.Group(); drv.position.y = driverY; tilt.add(drv);
+  const who = look.driver || 'boy', human = who === 'boy' || who === 'girl';
+  const seat = new THREE.Group(); seat.position.set(0, 1.3, -0.45); drv.add(seat);
+  const wheelOnly = () => add(new THREE.TorusGeometry(0.38, 0.08, 6, 14), dark, 0, 1.95, 0.55, -0.7, 0, 0, drv);
+  if (!human) return finishKart(wheelOnly());
   add(new THREE.CylinderGeometry(0.6, 0.7, 1.1, 12), 0xffffff, 0, 1.85, -0.5, 0, 0, 0, drv);
   add(new THREE.SphereGeometry(0.78, 16, 12), skin, 0, 2.85, -0.35, 0, 0, 0, drv);
+  if (who === 'girl') {
+    // hair at the back, two pigtails with pink ties, longer lashes: shows under every hat
+    const hair = 0x5a3825;
+    add(new THREE.SphereGeometry(0.84, 16, 12, 0, TAU, 0, Math.PI * 0.62), hair, 0, 2.9, -0.47, -0.55, 0, 0, drv);
+    for (const s of [-1, 1]) {
+      add(new THREE.SphereGeometry(0.3, 10, 8), hair, s * 0.86, 2.55, -0.55, 0, 0, 0, drv).scale.set(0.9, 1.35, 0.9);
+      add(new THREE.SphereGeometry(0.13, 8, 6), 0xff5c8a, s * 0.8, 2.92, -0.55, 0, 0, 0, drv);
+    }
+  }
   if (hat === 'helmet') {
     add(new THREE.SphereGeometry(0.86, 16, 12, 0, TAU, 0, Math.PI * 0.55), col, 0, 2.95, -0.42, -0.2, 0, 0, drv);
     add(new THREE.BoxGeometry(1.2, 0.18, 0.5), 0xffffff, 0, 3.25, 0.15, -0.3, 0, 0, drv);
@@ -430,8 +445,11 @@ export function makeKart(colorHex, look = {}) {
   for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), eyeM); e.position.set(s * 0.28, 2.85, 0.38); e.scale.y = 1.3; drv.add(e); }
   for (const s of [-1, 1]) { const c = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff9eb5 })); c.position.set(s * 0.48, 2.65, 0.3); c.scale.set(1, 0.6, 0.4); drv.add(c); }
   const smileM = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.04, 6, 12, Math.PI), new THREE.MeshBasicMaterial({ color: 0x7a2e2e })); smileM.rotation.z = Math.PI; smileM.position.set(0, 2.62, 0.42); drv.add(smileM);
-  const wheel = add(new THREE.TorusGeometry(0.38, 0.08, 6, 14), dark, 0, 1.95, 0.55, -0.7, 0, 0, drv);
+  if (who === 'girl') for (const s of [-1, 1]) { const l = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.04, 0.02), eyeM); l.position.set(s * 0.36, 3.0, 0.42); l.rotation.z = s * 0.5; drv.add(l); }
+  const wheel = wheelOnly();
   for (const s of [-1, 1]) { const arm = add(new THREE.CylinderGeometry(0.14, 0.14, 0.9, 6), 0xffffff, s * 0.45, 2.05, 0.15, 1.1, 0, -s * 0.3, drv); arm.castShadow = false; }
+  return finishKart(wheel);
+  function finishKart(wheel) {
   const flag = new THREE.Group(); flag.position.set(...flagAt); tilt.add(flag);
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.6, 5), toon(0xdee2e6)); pole.position.y = 1.3; flag.add(pole);
   const fl = new THREE.Mesh(new THREE.ConeGeometry(0.45, 1.1, 3), toon(0xffd60a)); fl.rotation.z = -Math.PI / 2; fl.position.set(0.55, 2.3, 0); flag.add(fl);
@@ -448,7 +466,8 @@ export function makeKart(colorHex, look = {}) {
   }
   const shadow = new THREE.Mesh(new THREE.PlaneGeometry(5, 6.2), new THREE.MeshBasicMaterial({ map: blobTex(), transparent: true, depthWrite: false }));
   shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.12; root.add(shadow);
-  return { root, tilt, wheels, wheel, flag: fl, pilot };
+  return { root, tilt, wheels, wheel, flag: fl, pilot, driver: seat, driverId: human ? '' : who };
+  }
 }
 let BLOB = null;
 export function blobTex() { if (!BLOB) BLOB = canvasTexture(64, 64, (g) => { const r = g.createRadialGradient(32, 32, 4, 32, 32, 30); r.addColorStop(0, 'rgba(0,0,0,.35)'); r.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = r; g.fillRect(0, 0, 64, 64); }); return BLOB; }

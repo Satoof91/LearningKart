@@ -13,7 +13,7 @@ let TR = TRACKS.ar;
 //  - wrong pick: name the letter that was picked, then ask again for the right one («أَيْنَ حَرْفُ بَاء؟»)
 //  - from the 3rd letter on, the HUD hides the glyph: the child hears the name and has to find the shape (recall)
 //  - help (glow, then the letter straight ahead) only appears after mistakes; stars count every miss
-import { makeAnimal } from './animals.js';
+import { makeAnimal, ANIMAL_IDS } from './animals.js';
 import { makeFriend, isAnimal } from './friends.js';
 import { Purchase, FREE_WORDS } from './purchase.js';
 import { buildTrack, buildZoo, makeHabitat, makeAppleTable, makeKart, makeArch, makeApple, makeStar, makeBoostPad, glowTex, blobTex, Confetti, FENCE, LANE } from './world.js';
@@ -21,7 +21,7 @@ import { loadFonts, bubbleTexture, drawWord, drawWordProgress, drawSyllable, syl
 import { Voice } from './voice.js';
 import { Sound } from './audio.js';
 import { Store } from './store.js';
-import { GARAGE, GARAGE_TABS, KART_COLORS, newlyAffordable, isOwned } from './garage.js';
+import { GARAGE, GARAGE_TABS, KART_COLORS, DRIVERS, newlyAffordable, isOwned } from './garage.js';
 
 const $ = id => document.getElementById(id);
 const TAU = Math.PI * 2;
@@ -906,7 +906,15 @@ function setKart() {
   if (kart) { scene.remove(kart.root); disposeOwned(kart.root); }
   const look = Store.data.look;
   kart = makeKart(KART_COLORS[Store.data.kart] || KART_COLORS[1], look);
-  kart.pilotAnimal = null;
+  kart.pilotAnimal = null; kart.driverAnimal = null;
+  // an animal at the wheel (the garage's driver tab): same scaling as the co-pilot, a little bigger
+  if (kart.driverId) {
+    try {
+      const a = makeAnimal(kart.driverId);
+      a.root.scale.multiplyScalar(2.1 / Math.max(0.5, a.height)); a.root.rotation.y = 0;
+      kart.driver.add(a.root); kart.driverAnimal = a;
+    } catch (e) { look.driver = 'boy'; return setKart(); } // unknown id in an old save: back to the child
+  }
   if (look.pilot && metAnimals().includes(look.pilot)) {
     try {
       const a = makeAnimal(look.pilot);
@@ -968,7 +976,14 @@ function renderGarage() {
   if (gTab === 'body') for (const it of GARAGE.body) cell(it.icon, look.body === it.id, it.cost, () => { look.body = it.id; }, 'body', it);
   if (gTab === 'hat') for (const it of GARAGE.hat) cell(it.icon, look.hat === it.id, it.cost, () => { look.hat = it.id; }, 'hat', it);
   if (gTab === 'color') for (const it of GARAGE.color) cell(`<span class="dot" style="background:${it.color}"></span>`, Store.data.kart === it.id, it.cost, () => { Store.data.kart = it.id; }, 'color', it);
-  if (gTab === 'skin') for (const it of GARAGE.skin) cell(`<span class="dot" style="background:${it.color}"></span>`, look.skin === it.id, it.cost, () => { look.skin = it.id; });
+  if (gTab === 'skin') {
+    // who drives: a boy or a girl (with a skin tone), or any animal of the game
+    const human = DRIVERS.includes(look.driver);
+    cell('👦', look.driver === 'boy', 0, () => { look.driver = 'boy'; });
+    cell('👧', look.driver === 'girl', 0, () => { look.driver = 'girl'; });
+    if (human) for (const it of GARAGE.skin) cell(`<span class="dot" style="background:${it.color}"></span>`, look.skin === it.id, it.cost, () => { look.skin = it.id; });
+    for (const id of ANIMAL_IDS) cell(`<img alt="" src="${thumb(id)}">`, look.driver === id, 0, () => { look.driver = id; });
+  }
   if (gTab === 'pilot') {
     const met = metAnimals();
     cell(`<span style="font-size:.5em;font-weight:800">${u.pilotNone}</span>`, !look.pilot, 0, () => { look.pilot = ''; });
@@ -1257,7 +1272,10 @@ function frame(now) {
     for (const a of S.stage.animals) a.update(S.t, S.happyT > 0 ? 'happy' : 'idle', dt);
     for (const it of S.stage.items) if (it.apple && it.root.visible) { it.apple.rotation.y += dt * (S.happyT > 0 ? 4 : 0.8); it.apple.position.y = S.happyT > 0 ? Math.abs(Math.sin(S.t * 6 + it.ph)) * 0.8 : 0; }
   }
-  if (kart.pilotAnimal) { if (kart.cheerT > 0) kart.cheerT -= dt; kart.pilotAnimal.update(S.t, kart.cheerT > 0 || S.mode === 'garage' && Math.sin(S.t * 0.8) > 0.6 ? 'happy' : 'idle', dt); }
+  if (kart.cheerT > 0 && (kart.pilotAnimal || kart.driverAnimal)) kart.cheerT -= dt;
+  const mood = kart.cheerT > 0 || S.mode === 'garage' && Math.sin(S.t * 0.8) > 0.6 ? 'happy' : 'idle';
+  if (kart.pilotAnimal) kart.pilotAnimal.update(S.t, mood, dt);
+  if (kart.driverAnimal) kart.driverAnimal.update(S.t, mood, dt);
   if (S.arch) S.arch.sign.rotation.y = Math.sin(S.t * 2) * 0.12;
   ZOO.clouds.rotation.y += dt * 0.004;
   confetti.update(dt);

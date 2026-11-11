@@ -33,7 +33,8 @@ function sanitize(d) {
   const lk = (d.look && typeof d.look === 'object') ? d.look : {}, L = DEFAULT_LOOK();
   out.look = {
     body: GARAGE.body.some(x => x.id === lk.body) ? lk.body : L.body, hat: GARAGE.hat.some(x => x.id === lk.hat) ? lk.hat : L.hat,
-    skin: int(lk.skin, 0, 3, 0), pilot: typeof lk.pilot === 'string' ? lk.pilot.slice(0, 20) : ''
+    skin: int(lk.skin, 0, 3, 0), pilot: typeof lk.pilot === 'string' ? lk.pilot.slice(0, 20) : '',
+    driver: typeof lk.driver === 'string' && lk.driver ? lk.driver.slice(0, 20) : L.driver
   }; out.unlockAll = !!d.unlockAll; out.full = !!d.full;
   const own = (d.owned && typeof d.owned === 'object') ? d.owned : {};
   out.owned = {};

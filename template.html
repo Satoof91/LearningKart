@@ -187,7 +187,8 @@ img.syl{width:100%;height:100%;object-fit:contain;display:block;pointer-events:n
 .gtabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
 .gtab{font-weight:800;font-size:clamp(13px,3.6vh,19px);padding:.2em .8em .3em;border-radius:999px;background:#f1edff;color:var(--ink)}
 .gtab.on{background:var(--purple);color:#fff}
-.gitems{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(62px,17vh,92px),1fr));gap:1.2vh;overflow-y:auto;touch-action:pan-y;padding:4px}
+/* fixed square cells: with many items (the character tab) auto rows would shrink, since .gitem clips its overflow */
+.gitems{--cell:clamp(62px,17vh,92px);display:grid;grid-template-columns:repeat(auto-fill,var(--cell));grid-auto-rows:var(--cell);justify-content:center;align-content:start;gap:1.2vh;overflow-y:auto;touch-action:pan-y;padding:4px}
 .gitems *{touch-action:pan-y}
 .gitem{position:relative;aspect-ratio:1;border-radius:22px;background:#f1edff;font-size:clamp(28px,9vh,50px);display:flex;align-items:center;justify-content:center;border:4px solid transparent;box-shadow:0 4px 0 rgba(43,27,107,.15);overflow:hidden}
 .gitem img{width:90%;height:90%;object-fit:contain;pointer-events:none}
