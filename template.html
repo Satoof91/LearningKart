@@ -257,9 +257,9 @@ img.syl{width:100%;height:100%;object-fit:contain;display:block;pointer-events:n
     <div class="brand">LearningKart</div>
     <div class="tabs"><button class="tab on" data-tab="letter">الحروف</button><button class="tab" data-tab="haraka">الحركات</button><button class="tab" data-tab="number">الأرقام</button><button class="tab" data-tab="word">كلمات</button><button class="tab en" data-tab="enletter">ABC</button><button class="tab en" data-tab="ennumber">123</button><button class="tab en" data-tab="enword">Words</button></div>
     <div class="coins" data-icon="star"><b id="totstars">0</b></div>
-    <button id="gear" aria-label="settings"><svg class="ring" viewBox="0 0 60 60"><circle cx="30" cy="30" r="27"/></svg><span id="gearhint" data-i18n="gearhint">اضغط مطولاً – للوالدين</span></button>
+    <button id="gear" data-aria="settings" aria-label="settings"><svg class="ring" viewBox="0 0 60 60"><circle cx="30" cy="30" r="27"/></svg><span id="gearhint" data-i18n="gearhint">اضغط مطولاً – للوالدين</span></button>
     <button class="langbtn" data-lang aria-label="English">EN</button>
-    <button id="mgarage" class="langbtn" aria-label="garage">🛠️</button>
+    <button id="mgarage" class="langbtn" data-aria="garage" aria-label="garage">🛠️</button>
   </header>
   <div id="path"><div id="world"><svg id="trail"></svg></div></div>
   <div id="packs" class="hidden"></div>
@@ -270,7 +270,7 @@ img.syl{width:100%;height:100%;object-fit:contain;display:block;pointer-events:n
   <div class="zone" id="zr"><div class="arrow" data-icon="right"></div></div>
   <div id="target"><div id="tglyph"></div><div id="slots"></div><canvas id="wordhud" class="hidden" width="520" height="150"></canvas></div>
   <div id="starchip" data-icon="star"><b id="hstars">0</b></div>
-  <button id="pausebtn" class="cbtn round" data-icon="pause" aria-label="pause"></button>
+  <button id="pausebtn" class="cbtn round" data-icon="pause" data-aria="pause" aria-label="pause"></button>
 </div>
 <div id="praise"></div><div id="xmark"></div>
 <div id="intro" class="hidden"><div class="card"><div class="irow"><div id="introglyph"></div><img id="introimg" class="hidden" alt=""></div><div id="introtext"></div></div></div>
@@ -281,10 +281,10 @@ img.syl{width:100%;height:100%;object-fit:contain;display:block;pointer-events:n
     <div id="cstars"></div>
     <div id="friend"></div>
     <div class="row">
-      <button id="chome" class="cbtn blue round" data-icon="home" aria-label="map"></button>
-      <button id="chear" class="cbtn pink round" data-icon="speaker" aria-label="hear"></button>
-      <button id="cagain" class="cbtn blue round" data-icon="replay" aria-label="again"></button>
-      <button id="cnext" class="cbtn green round" data-icon="next" aria-label="next"></button>
+      <button id="chome" class="cbtn blue round" data-icon="home" data-aria="map" aria-label="map"></button>
+      <button id="chear" class="cbtn pink round" data-icon="speaker" data-aria="hear" aria-label="hear"></button>
+      <button id="cagain" class="cbtn blue round" data-icon="replay" data-aria="again" aria-label="again"></button>
+      <button id="cnext" class="cbtn green round" data-icon="next" data-aria="next" aria-label="next"></button>
     </div>
   </div>
 </div>
@@ -293,23 +293,23 @@ img.syl{width:100%;height:100%;object-fit:contain;display:block;pointer-events:n
   <div class="box">
     <h2 data-i18n="pause">استراحة</h2>
     <div class="row">
-      <button id="presume" class="cbtn green round" data-icon="play" aria-label="resume"></button>
-      <button id="prestart" class="cbtn blue round" data-icon="replay" aria-label="restart"></button>
-      <button id="pmap" class="cbtn blue round" data-icon="home" aria-label="map"></button>
+      <button id="presume" class="cbtn green round" data-icon="play" data-aria="resume" aria-label="resume"></button>
+      <button id="prestart" class="cbtn blue round" data-icon="replay" data-aria="restart" aria-label="restart"></button>
+      <button id="pmap" class="cbtn blue round" data-icon="home" data-aria="map" aria-label="map"></button>
     </div>
   </div>
 </div>
 
 <div id="garage" class="hidden">
   <div class="gpanel">
-    <div class="ghead"><button id="gclose" class="cbtn pink round" data-icon="close" aria-label="close"></button><h2 data-i18n="garage">المرآب</h2><div class="coins" data-icon="star"><b id="gstars">0</b></div></div>
+    <div class="ghead"><button id="gclose" class="cbtn pink round" data-icon="close" data-aria="close" aria-label="close"></button><h2 data-i18n="garage">المرآب</h2><div class="coins" data-icon="star"><b id="gstars">0</b></div></div>
     <div class="gtabs" id="gtabs"></div>
     <div class="gitems" id="gitems"></div>
   </div>
 </div>
 
 <div id="pgate" class="overlay hidden">
-  <button id="pgclose" class="cbtn pink round" data-icon="close" aria-label="close"></button>
+  <button id="pgclose" class="cbtn pink round" data-icon="close" data-aria="close" aria-label="close"></button>
   <div class="box">
     <h2 id="pgq"></h2>
     <div id="pgpad"></div>
@@ -317,7 +317,7 @@ img.syl{width:100%;height:100%;object-fit:contain;display:block;pointer-events:n
 </div>
 
 <div id="paywall" class="overlay hidden">
-  <button id="pwclose" class="cbtn pink round" data-icon="close" aria-label="close"></button>
+  <button id="pwclose" class="cbtn pink round" data-icon="close" data-aria="close" aria-label="close"></button>
   <div class="box">
     <div class="pwart">🏠 🛒 🌊 🌤️</div>
     <h2 id="pwtitle"></h2>
@@ -330,7 +330,7 @@ img.syl{width:100%;height:100%;object-fit:contain;display:block;pointer-events:n
 </div>
 
 <div id="settings" class="overlay hidden">
-  <button id="sclose" class="cbtn pink round" data-icon="close" aria-label="close"></button>
+  <button id="sclose" class="cbtn pink round" data-icon="close" data-aria="close" aria-label="close"></button>
   <div class="box">
     <h2 data-i18n="settingsTitle">إعدادات الوالدين</h2>
     <div class="grid" id="sgrid"></div>

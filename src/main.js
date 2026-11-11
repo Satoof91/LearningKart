@@ -125,6 +125,10 @@ function applyUiLang() {
   document.querySelector('.tab[data-tab="letter"]').textContent = u.tabLetter;
   document.querySelector('.tab[data-tab="number"]').textContent = u.tabNumber;
   document.querySelector('.tab[data-tab="haraka"]').textContent = u.tabHaraka;
+  document.querySelector('.tab[data-tab="word"]').textContent = u.tabWord;
+  document.querySelector('.tab[data-tab="enword"]').textContent = u.tabEnWord;
+  // the word tabs are written in the interface language (the glyph tabs show the letters themselves)
+  document.querySelectorAll('[data-aria]').forEach(el => el.setAttribute('aria-label', u.aria[el.dataset.aria] || el.dataset.aria));
   document.querySelector('.tab[data-tab="haraka"]').classList.toggle('hidden', !HARAKA_ENABLED);
   document.querySelectorAll('[data-lang]').forEach(b => { b.textContent = u.switchTo; b.setAttribute('aria-label', u.switchLabel); });
   if (ZOO) ZOO.setBanner(u.banner);

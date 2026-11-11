@@ -9,7 +9,9 @@ export const UI = {
   ar: {
     dir: 'rtl', switchTo: 'EN', switchLabel: 'English',
     sub: 'حديقة الحروف والأرقام', play: 'العب', gearhint: 'اضغط مطولاً – للوالدين', banner: 'حديقة الحروف',
-    tabLetter: 'الحروف', tabNumber: 'الأرقام', tabWord: 'كلمات', tabEnWord: 'Words',
+    // the English-track tabs keep their glyphs (ABC, 123), as the Arabic-track tabs do in the English interface
+    tabLetter: 'الحروف', tabNumber: 'الأرقام', tabWord: 'كلمات', tabEnWord: 'كلمات إنجليزية',
+    aria: { settings: 'الإعدادات', garage: 'المرآب', pause: 'استراحة', map: 'الخريطة', hear: 'استمع', again: 'مرة أخرى', next: 'التالي', resume: 'تابع', restart: 'من البداية', close: 'إغلاق' },
     pause: 'استراحة', settingsTitle: 'إعدادات الوالدين',
     vtest: 'تجربة الصوت', vinstall: 'تثبيت الصوت العربي',
     unlock: 'فتح كل المراحل', lock: 'إغلاق المراحل', reset: 'مسح التقدم', resetConfirm: 'اضغط مرة أخرى للتأكيد', resetDone: 'تم المسح ✓',
@@ -37,7 +39,8 @@ export const UI = {
   en: {
     dir: 'ltr', switchTo: 'ع', switchLabel: 'العربية',
     sub: 'Letters & Numbers Zoo', play: 'Play', gearhint: 'Hold – for parents', banner: 'Letter Zoo',
-    tabLetter: 'أ ب ت', tabNumber: '١٢٣', tabWord: 'كلمات', tabEnWord: 'Words',
+    tabLetter: 'أ ب ت', tabNumber: '١٢٣', tabWord: 'Arabic words', tabEnWord: 'Words',
+    aria: { settings: 'Settings', garage: 'Garage', pause: 'Pause', map: 'Map', hear: 'Listen', again: 'Again', next: 'Next', resume: 'Resume', restart: 'Restart', close: 'Close' },
     pause: 'Paused', settingsTitle: 'Parent settings',
     vtest: 'Test voice', vinstall: 'Install Arabic voice',
     unlock: 'Unlock all levels', lock: 'Lock levels', reset: 'Reset progress', resetConfirm: 'Tap again to confirm', resetDone: 'Progress reset ✓',
@@ -52,7 +55,7 @@ export const UI = {
     vNoneWeb: 'This browser has no Arabic voice. Try Edge or Safari, or install Arabic in the device settings.',
     vUnknown: 'Tap "Test voice" to check the letter voice.',
     gate: (a, b) => `For parents: tap ${EN_NUM[a]}, then ${EN_NUM[b]}`, gateDigit: n => String(n),
-    pwTitle: 'Unlock the full game', pwBody: (n, h) => `${n} more words for home, market, sea and nature${h ? `, ${h} more Arabic letters with harakat (بَ بِ بُ)` : ''}, plus everything added later.`,
+    pwTitle: 'Unlock the full game', pwBody: (n, h) => `${n} more words for home, market, sea and nature${h ? `, ${h} more Arabic letters with vowel marks` : ''}, plus everything added later.`,
     pwFree: 'Letters and numbers are always free.', pwBuy: p => `Unlock all – ${p}`, pwRestore: 'Restore purchase', pwParents: 'For parents only',
     pwOk: 'Thank you! Everything is unlocked 🎉', pwCancel: 'No purchase was made.', pwFail: 'Could not reach the store. Please try again later.', pwNone: 'No earlier purchase found for this account.',
     pwWeb: 'Purchases are available in the phone app.', pwOwned: 'Full game ✓',
