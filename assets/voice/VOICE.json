@@ -7,7 +7,8 @@
   "why": {
    "truncated": "chatterbox clip is a <0.25 s burst",
    "wrong": "chatterbox clip has the wrong consonant, reads another letter, or carries part of another line",
-   "word": "chatterbox word clip is cut short or misread (owner: words come out fast and unclear)"
+   "word": "chatterbox word clip is cut short or misread (owner: words come out fast and unclear)",
+   "reem": "edge-tts ar-TN-ReemNeural (rate -15%, name -30%): the only voice whose ث is voiceless (owner: ث sounded like ذ, بطة like «بتطتة»); syllables spelled ثَا ثِي ثُو, بَطَّهْ"
   },
   "truncated": [
    "haraka-16-ki",
@@ -23,14 +24,11 @@
    "word-19-onset"
   ],
   "wrong": [
-   "haraka-04-da",
-   "haraka-04-ki",
    "haraka-14-ki",
    "haraka-15-fa",
    "haraka-16-da",
    "haraka-18-fa",
    "haraka-19-da",
-   "letter-04-snd",
    "letter-09-snd",
    "letter-15-snd",
    "letter-16-snd",
@@ -40,7 +38,6 @@
    "word-12-onset",
    "word-16-onset",
    "letter-03-intro",
-   "letter-04-name",
    "letter-06-name",
    "letter-06-snd",
    "letter-07-name",
@@ -82,7 +79,16 @@
    "word-25-say",
    "word-28-say"
   ],
-  "trimmed": "Amal clips carry ~0.2 s lead and ~1.2 s trailing silence; all stopgap clips were trimmed with ffmpeg silenceremove"
+  "trimmed": "Amal clips carry ~0.2 s lead and ~1.2 s trailing silence; all stopgap clips were trimmed with ffmpeg silenceremove",
+  "reem": [
+   "letter-04-name",
+   "letter-04-snd",
+   "haraka-04-ki",
+   "haraka-04-da",
+   "letter-04-find",
+   "haraka-04-intro",
+   "letter-02-word"
+  ]
  },
  "retry": {
   "from": "chatterbox-retry",
